@@ -1,0 +1,17 @@
+{
+  :devices {
+    :macbook [{:vendor_id 1452 :product_id 834}]
+    :moonlander [{:vendor_id 12951 :product_id 6505}]
+  }
+  :applications {:chrome ["^com\\.google\\.Chrome$"] :iterm ["^com\\.googlecode\\.iterm2$"] :vscode ["^com\\.microsoft\\.VSCode$"]}
+  :main [
+  {:des "Change right_command to command+control+option+shift"
+   :rules [
+     [:right_command :!QWEright_shift :macbook]
+   ]}
+
+  {:des "Change caps_lock to control+option+shift"
+   :rules [
+     [:caps_lock :!TOleft_shift :macbook]
+   ]}
+]}
