@@ -152,16 +152,16 @@ function git-stash-selected-files() {
       return 1
   fi
 
-  # Prompt for a stash message
+  ## Prompt for a stash message
   echo "Enter a stash message:"
   local stash_message
   read stash_message
 
-  # Stash the selected files
+  ## Stash the selected files
   git stash push -m "$stash_message" -- `paste - <<< $selected_files`
 }
 
-# fzf-search
+## fzf-search
 alias search="ag-and-code"
 function ag-and-code() {
     if [ -z "$1" ]; then
@@ -176,5 +176,5 @@ function ag-and-code() {
     fi
 }
 
-# fzf-switch
+## fzf-switch
 alias gsw='git switch $(git branch -a | tr -d " " |fzf-tmux -p 80% --height 100% --prompt "CHECKOUT BRANCH>" --preview "git log --color=always {}" | head -n 1 | sed -e "s/^\*\s*//g" | perl -pe "s/remotes\/origin\///g")'
