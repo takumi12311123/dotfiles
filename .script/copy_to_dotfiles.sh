@@ -1,4 +1,5 @@
 cp ~/.config/karabiner.edn ~/Git-Project/github.com/takumi12311123/dotfiles/.config/
+cp ~/.config/starship.toml ~/Git-Project/github.com/takumi12311123/dotfiles/.config/
 
 cp ~/.script/ide.sh ~/Git-Project/github.com/takumi12311123/dotfiles/.script/
 cp ~/.script/copy_to_dotfiles.sh ~/Git-Project/github.com/takumi12311123/dotfiles/.script/
