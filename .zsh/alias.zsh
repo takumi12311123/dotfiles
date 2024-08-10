@@ -1,5 +1,6 @@
 ## shell script alias
 alias ide="source ~/.script/ide.sh"
+alias copy_to_dotfiles="source ~/.script/copy_to_dotfiles.sh"
 
 ## git alias
 alias gs='git status --short --branch'
