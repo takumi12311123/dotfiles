@@ -62,5 +62,3 @@ alt + shift + ctrl - e : yabai -m window --toggle split
 # float / unfloat window and restore position
 # alt - t : yabai -m window --toggle float && /tmp/yabai-restore/$(yabai -m query --windows --window | jq -re '.id').restore 2>/dev/null || true
 alt + shift + ctrl - t : yabai -m window --toggle float && yabai -m window --grid 4:4:1:1:2:2
-
-
