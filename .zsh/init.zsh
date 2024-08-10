@@ -4,8 +4,8 @@ plugins=(
 )
 
 export ZSH="$HOME/.oh-my-zsh"
-export GOPATH=$HOME
-export PATH=$PATH:$GOPATH/bin
+export GOPATH="$HOME"
+export PATH="$HOME/.local/bin:$GOPATH/bin:$HOME/.asdf/shims:$PATH"
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ff00'
 
@@ -21,12 +21,8 @@ source /Users/takumiakasaka/.docker/init-zsh.sh || true
 ## starship
 eval "$(starship init zsh)"
 
-## lunarvim
-export PATH=$PATH:~/.local/bin
-
 ## tmux setting
 export FZF_TMUX=1
 
 ## asdf setting
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
-export PATH="$HOME/.asdf/shims:$PATH"
