@@ -4,7 +4,8 @@
 .
 └── root/
     ├── .config/
-    │   └── karabiner.edn
+    │   ├── karabiner.edn
+    │   └── starship.toml
     ├── .script/
     │   ├── ide.sh
     │   └── copy_to_dotfiles.sh
@@ -20,3 +21,5 @@
     ├── .zsh_history
     └── .zshrc
 ```
+
+I made this by [https://tree.nathanfriend.io/](https://tree.nathanfriend.io/?s=(%27options!(%27fancy2~fullPath!false~trailingSla52~rootDot2)~3(%273%27root6config-karabiner.edn-star5ip.toml6script-ide.5-copy_to_dotfiles.5*7alias7fzf_function7init7secrets7setopt06skhdrc6tmux.conf6yabairc*0_history*0rc%27)~version!%271%27)*%5Cn4-*40.z52!true3source!4%20%205sh6*.70-%017654320-*)
