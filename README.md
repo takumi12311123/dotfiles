@@ -6,7 +6,8 @@
     ├── .config/
     │   └── karabiner.edn
     ├── .script/
-    │   └── ide.sh
+    │   ├── ide.sh
+    │   └── copy_to_dotfiles.sh
     ├── .zsh/
     │   ├── alias.zsh
     │   ├── fzf_function.zsh
