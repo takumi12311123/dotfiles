@@ -152,12 +152,12 @@ function git-stash-selected-files() {
       return 1
   fi
 
-  ## Prompt for a stash message
+  # Prompt for a stash message
   echo "Enter a stash message:"
   local stash_message
   read stash_message
 
-  ## Stash the selected files
+  # Stash the selected files
   git stash push -m "$stash_message" -- `paste - <<< $selected_files`
 }
 
