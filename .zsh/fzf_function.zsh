@@ -177,4 +177,4 @@ function ag-and-code() {
 }
 
 ## fzf-switch
-alias gsw='git switch $(git branch -a | tr -d " " |fzf-tmux -p 80% --height 100% --prompt "CHECKOUT BRANCH>" --preview "git log --color=always {}" | head -n 1 | sed -e "s/^\*\s*//g" | perl -pe "s/remotes\/origin\///g")'
+alias gsw='git switch $(git branch -a | tr -d " " | fzf-tmux -p 80% --height 100% --prompt "CHECKOUT BRANCH>" --preview "git log --color=always {}" | head -n 1 | sed -e "s/^\*\s*//g" | perl -pe "s/remotes\/origin\///g")'
