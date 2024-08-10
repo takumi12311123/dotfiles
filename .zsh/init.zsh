@@ -26,3 +26,8 @@ export FZF_TMUX=1
 
 ## asdf setting
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
+
+## zsh history setting
+export HISTFILE=${HOME}/.zsh_history
+export HISTSIZE=100000
+export SAVEHIST=100000
