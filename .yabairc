@@ -28,6 +28,7 @@ yabai -m config bottom_padding               8
 yabai -m config left_padding                 8
 yabai -m config right_padding                8
 yabai -m config window_gap                   06
+yabai -m config external_bar all:32:0
 
 # ignore iterm2
 yabai -m rule --add app="iTerm2" manage=off
