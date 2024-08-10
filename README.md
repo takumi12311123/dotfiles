@@ -6,6 +6,8 @@
     ├── .config/
     │   ├── karabiner.edn
     │   └── starship.toml
+    ├── .homebrew/
+    │   └── Brewfile
     ├── .script/
     │   ├── ide.sh
     │   └── copy_to_dotfiles.sh
