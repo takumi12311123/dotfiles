@@ -29,7 +29,7 @@ I made this by [https://tree.nathanfriend.io/](https://tree.nathanfriend.io/?s=(
 
 I'm Using
 
-### Karabiner Element
+### Karabiner-Element
 https://github.com/pqrs-org/Karabiner-Elements
 
 ### GokuRakuJoudo
