@@ -7,6 +7,7 @@ cp $CONFIG_PATH/starship.toml $GIT_PATH/.config/
 
 cp $SCRIPT_PATH/ide.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/copy_to_dotfiles.sh $GIT_PATH/.script/
+cp $SCRIPT_PATH/back_to_exec_environment.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/variables.sh $GIT_PATH/.script/
 
 cp $ZSH_PATH/alias.zsh $GIT_PATH/.zsh/
