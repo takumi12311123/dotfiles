@@ -1,9 +1,26 @@
+;; !  | means mandatory
+;; #  | means optional
+;; C  | left_command
+;; T  | left_control
+;; O  | left_option
+;; S  | left_shift
+;; F  | fn
+;; Q  | right_command
+;; W  | right_control
+;; E  | right_option
+;; R  | right_shift
+;; P  | caps_lock
+;; !! | mandatory command + control + optional + shift (hyper)
+;; ## | optional any
+
 {
   :devices {
     :macbook [{:vendor_id 1452 :product_id 834}]
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
+
   :applications {:chrome ["^com\\.google\\.Chrome$"] :iterm ["^com\\.googlecode\\.iterm2$"] :vscode ["^com\\.microsoft\\.VSCode$"]}
+
   :main [
   {:des "Change right_command to command+control+option+shift"
    :rules [
@@ -14,4 +31,30 @@
    :rules [
      [:caps_lock :!TOleft_shift :macbook]
    ]}
+
+  {:des "Chrome tab move"
+   :rules [
+     [:!TOSright_arrow :!Ttab :chrome]
+     [:!TOSleft_arrow :!TStab :chrome]
+   ]}
+
+   {:des "Visual Studio Code file move"
+   :rules [
+     [:!TOSup_arrow :!Ttab :vscode]
+     [:!TOSdown_arrow :!TStab :vscode]
+   ]}
+
+
+   {:des "Visual Studio Code tab move"
+   :rules [
+     [:!TOSleft_arrow :!C1 :vscode]
+     [:!TOSright_arrow :!C2 :vscode]
+   ]}
+
+   {:des "Visual Studio Code file to another tab"
+   :rules [
+     [:!!left_arrow :!TCleft_arrow :vscode]
+     [:!!right_arrow :!TCright_arrow :vscode]
+   ]}
+
 ]}
