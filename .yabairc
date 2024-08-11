@@ -32,7 +32,6 @@ yabai -m config external_bar all:32:0
 
 # ignore iterm2
 yabai -m rule --add app="iTerm2" manage=off
-yabai -m rule --add app="mpv" manage=off
 
 # restore position of floating windows when they are manually unfloated
 # ~/Scripts/yabai_restore.sh
