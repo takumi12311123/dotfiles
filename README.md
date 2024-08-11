@@ -64,3 +64,6 @@ https://github.com/koekeishiya/skhd
 
 ### lazy.nvim
 https://github.com/folke/lazy.nvim
+
+### SketchyBar
+https://github.com/FelixKratz/SketchyBar
