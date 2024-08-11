@@ -1,18 +1,23 @@
-cp ~/.config/karabiner.edn ~/Git-Project/github.com/takumi12311123/dotfiles/.config/
-cp ~/.config/starship.toml ~/Git-Project/github.com/takumi12311123/dotfiles/.config/
+#!/bin/zsh
 
-cp ~/.script/ide.sh ~/Git-Project/github.com/takumi12311123/dotfiles/.script/
-cp ~/.script/copy_to_dotfiles.sh ~/Git-Project/github.com/takumi12311123/dotfiles/.script/
+source ~/.script/variables.sh
 
-cp ~/.zsh/alias.zsh ~/Git-Project/github.com/takumi12311123/dotfiles/.zsh/
-cp ~/.zsh/fzf_function.zsh ~/Git-Project/github.com/takumi12311123/dotfiles/.zsh/
-cp ~/.zsh/init.zsh ~/Git-Project/github.com/takumi12311123/dotfiles/.zsh/
-cp ~/.zsh/secrets.zsh ~/Git-Project/github.com/takumi12311123/dotfiles/.zsh/
-cp ~/.zsh/setopt.zsh ~/Git-Project/github.com/takumi12311123/dotfiles/.zsh/
+cp $CONFIG_PATH/karabiner.edn $GIT_PATH/.config/
+cp $CONFIG_PATH/starship.toml $GIT_PATH/.config/
 
-cp ~/.skhdrc ~/Git-Project/github.com/takumi12311123/dotfiles/
-cp ~/.yabairc ~/Git-Project/github.com/takumi12311123/dotfiles/
-cp ~/.zprofile ~/Git-Project/github.com/takumi12311123/dotfiles/
-cp ~/.zsh_history ~/Git-Project/github.com/takumi12311123/dotfiles/
-cp ~/.zshrc ~/Git-Project/github.com/takumi12311123/dotfiles/
-cp ~/.tmux.conf ~/Git-Project/github.com/takumi12311123/dotfiles/
+cp $SCRIPT_PATH/ide.sh $GIT_PATH/.script/
+cp $SCRIPT_PATH/copy_to_dotfiles.sh $GIT_PATH/.script/
+cp $SCRIPT_PATH/variables.sh $GIT_PATH/.script/
+
+cp $ZSH_PATH/alias.zsh $GIT_PATH/.zsh/
+cp $ZSH_PATH/fzf_function.zsh $GIT_PATH/.zsh/
+cp $ZSH_PATH/init.zsh $GIT_PATH/.zsh/
+cp $ZSH_PATH/secrets.zsh $GIT_PATH/.zsh/
+cp $ZSH_PATH/setopt.zsh $GIT_PATH/.zsh/
+
+cp ~/.skhdrc $GIT_PATH/
+cp ~/.yabairc $GIT_PATH/
+cp ~/.zprofile $GIT_PATH/
+cp ~/.zsh_history $GIT_PATH/
+cp ~/.zshrc $GIT_PATH/
+cp ~/.tmux.conf $GIT_PATH/
