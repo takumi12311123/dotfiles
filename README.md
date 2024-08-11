@@ -62,3 +62,5 @@ https://github.com/koekeishiya/yabai
 ### skhd
 https://github.com/koekeishiya/skhd
 
+### lazy.nvim
+https://github.com/folke/lazy.nvim
