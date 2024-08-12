@@ -15,3 +15,36 @@ show_always = true
 [cmd_duration]
 min_time = 0
 show_milliseconds = true
+
+[battery]
+full_symbol = '🔋 '
+charging_symbol = '⚡️ '
+discharging_symbol = '💀 '
+
+[[battery.display]]
+threshold = 30
+style = 'bold yellow'
+discharging_symbol = '💦 '
+
+[git_state]
+format = '[\($state( $progress_current of $progress_total)\)]($style) '
+
+[git_status]
+conflicted = '🏳'
+ahead = '🏎💨'
+behind = '😰'
+diverged = '😵'
+up_to_date = '✓'
+untracked = '🤷'
+stashed = '📦'
+modified = '📝'
+staged = '[++\($count\)](green)'
+renamed = '👅'
+deleted = '🗑'
+
+[git_commit]
+commit_hash_length = 4
+tag_symbol = '🔖 '
+
+[gcloud]
+format = 'on [$symbol$account(@$domain)(\($project\))]($style) '
