@@ -32,20 +32,24 @@
      [:caps_lock :!TOleft_shift :macbook]
    ]}
 
-  {:des "Chrome tab move"
+  {:des "Chrome move tab key bind"
    :rules [
      [:!TOSright_arrow :!Ttab :chrome]
      [:!TOSleft_arrow :!TStab :chrome]
    ]}
 
-   {:des "Visual Studio Code file move"
+  {:des "Chrome delete tab key bind"
    :rules [
-     [:!TOSup_arrow :!Ttab :vscode]
-     [:!TOSdown_arrow :!TStab :vscode]
+     [:!TOSw :!Cw :chrome]
    ]}
 
+   {:des "Visual Studio Code file move key bind"
+   :rules [
+     [:!TOSup_arrow :!TStab :vscode]
+     [:!TOSdown_arrow :!Ttab :vscode]
+   ]}
 
-   {:des "Visual Studio Code tab move"
+   {:des "Visual Studio Code tab move key bind"
    :rules [
      [:!TOSleft_arrow :!C1 :vscode]
      [:!TOSright_arrow :!C2 :vscode]
@@ -56,5 +60,5 @@
      [:!!left_arrow :!TCleft_arrow :vscode]
      [:!!right_arrow :!TCright_arrow :vscode]
    ]}
-
+   
 ]}
