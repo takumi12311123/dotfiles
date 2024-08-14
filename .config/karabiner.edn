@@ -60,5 +60,10 @@
      [:!!left_arrow :!TCleft_arrow :vscode]
      [:!!right_arrow :!TCright_arrow :vscode]
    ]}
-   
+
+   {:des "Visual Studio Code view Denifition"
+    :rules [
+     [:!TOSspacebar :f12 :vscode]
+    ]}
+
 ]}
