@@ -4,8 +4,6 @@ alt + shift + ctrl + cmd - h : yabai -m window --focus west || yabai -m display 
 alt + shift + ctrl + cmd - j : yabai -m window --focus south || yabai -m display --focus south
 alt + shift + ctrl + cmd - k : yabai -m window --focus north || yabai -m display --focus north
 alt + shift + ctrl + cmd - l : yabai -m window --focus east || yabai -m display --focus east
-alt + shift + ctrl + cmd - z : yabai -m window --focus stack.prev || yabai -m display --focus stack.prev
-alt + shift + ctrl + cmd - c : yabai -m window --focus stack.next || yabai -m display --focus stack.next
 
 # swap window
 alt + shift + ctrl + cmd - p : yabai -m window --swap recent
