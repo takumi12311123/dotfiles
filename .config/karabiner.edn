@@ -22,52 +22,52 @@
   :applications {:chrome ["^com\\.google\\.Chrome$"] :iterm ["^com\\.googlecode\\.iterm2$"] :vscode ["^com\\.microsoft\\.VSCode$"]}
 
   :main [
-  {:des "Change right_command to command+control+option+shift"
-   :rules [
-     [:right_command :!QWEright_shift :macbook]
-   ]}
-
-  {:des "Change caps_lock to control+option+shift"
-   :rules [
-     [:caps_lock :!TOleft_shift :macbook]
-   ]}
-
-  {:des "Chrome move tab key bind"
-   :rules [
-     [:!TOSright_arrow :!Ttab :chrome]
-     [:!TOSleft_arrow :!TStab :chrome]
-   ]}
-
-  {:des "Chrome, Visual Studio Code delete tab key bind"
-   :rules [
-     [:!TOSw :!Cw :chrome]
-     [:!TOSw :!Cw :vscode]
-   ]}
-
-   {:des "Visual Studio Code file move key bind"
-   :rules [
-     [:!TOSup_arrow :!TStab :vscode]
-     [:!TOSdown_arrow :!Ttab :vscode]
-   ]}
-
-   {:des "Visual Studio Code tab move key bind"
-   :rules [
-     [:!TOSleft_arrow :!C1 :vscode]
-     [:!TOSright_arrow :!C2 :vscode]
-   ]}
-
-   {:des "Visual Studio Code file to another tab"
-   :rules [
-     [:!!left_arrow :!TCleft_arrow :vscode]
-     [:!!right_arrow :!TCright_arrow :vscode]
-   ]}
-
-   {:des "Visual Studio Code view Denifition"
+    {:des "Change right_command to command+control+option+shift"
     :rules [
-     [:!!f :f12 :vscode]
-     [:!!r :!Rf12 :vscode]
-     [:!!d :!Whyphen :vscode]
+      [:right_command :!QWEright_shift :macbook]
     ]}
+
+    {:des "Change caps_lock to control+option+shift"
+    :rules [
+      [:caps_lock :!TOleft_shift :macbook]
+    ]}
+
+    {:des "Chrome move tab key bind"
+    :rules [
+      [:!TOSright_arrow :!Ttab :chrome]
+      [:!TOSleft_arrow :!TStab :chrome]
+    ]}
+
+    {:des "Chrome, Visual Studio Code delete tab key bind"
+    :rules [
+      [:!TOSw :!Cw :chrome]
+      [:!TOSw :!Cw :vscode]
+    ]}
+
+    {:des "Visual Studio Code file move key bind"
+    :rules [
+      [:!TOSup_arrow :!TStab :vscode]
+      [:!TOSdown_arrow :!Ttab :vscode]
+    ]}
+
+    {:des "Visual Studio Code tab move key bind"
+    :rules [
+      [:!TOSleft_arrow :!C1 :vscode]
+      [:!TOSright_arrow :!C2 :vscode]
+    ]}
+
+    {:des "Visual Studio Code file to another tab"
+    :rules [
+      [:!!left_arrow :!TCleft_arrow :vscode]
+      [:!!right_arrow :!TCright_arrow :vscode]
+    ]}
+
+    {:des "Visual Studio Code view Denifition"
+      :rules [
+      [:!!f :f12 :vscode]
+      [:!!r :!Rf12 :vscode]
+      [:!!d :!Whyphen :vscode]
+      ]}
 
     {:des "Iterm2 move tab key bind"
     :rules [
