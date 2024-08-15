@@ -69,4 +69,10 @@
      [:!!d :!Whyphen :vscode]
     ]}
 
+    {:des "Iterm2 move tab key bind"
+    :rules [
+      [:!TOSright_arrow :!Qright_arrow :iterm]
+      [:!TOSleft_arrow :!Qleft_arrow :iterm]
+    ]}
+
 ]}
