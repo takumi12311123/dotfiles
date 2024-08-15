@@ -64,9 +64,9 @@
 
    {:des "Visual Studio Code view Denifition"
     :rules [
-    ;;  [:!Tright_arrow :f12 :vscode]
-    ;;  [:!Tup_arrow :!Rf12 :vscode]
-    ;;  [:!Tleft_arrow :!Whyphen :vscode]
+     [:!!f :f12 :vscode]
+     [:!!r :!Rf12 :vscode]
+     [:!!d :!Whyphen :vscode]
     ]}
 
 ]}
