@@ -38,9 +38,10 @@
      [:!TOSleft_arrow :!TStab :chrome]
    ]}
 
-  {:des "Chrome delete tab key bind"
+  {:des "Chrome, Visual Studio Code delete tab key bind"
    :rules [
      [:!TOSw :!Cw :chrome]
+     [:!TOSw :!Cw :vscode]
    ]}
 
    {:des "Visual Studio Code file move key bind"
@@ -63,7 +64,9 @@
 
    {:des "Visual Studio Code view Denifition"
     :rules [
-     [:!TOSspacebar :f12 :vscode]
+    ;;  [:!Tright_arrow :f12 :vscode]
+    ;;  [:!Tup_arrow :!Rf12 :vscode]
+    ;;  [:!Tleft_arrow :!Whyphen :vscode]
     ]}
 
 ]}
