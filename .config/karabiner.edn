@@ -38,10 +38,11 @@
       [:!TOSleft_arrow :!TStab :chrome]
     ]}
 
-    {:des "Chrome, Visual Studio Code delete tab key bind"
+    {:des "Chrome, Visual Studio Code, iterm delete tab key bind"
     :rules [
       [:!TOSw :!Cw :chrome]
       [:!TOSw :!Cw :vscode]
+      [:!TOSw :!Cw :iterm]
     ]}
 
     {:des "Visual Studio Code file move key bind"
