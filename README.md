@@ -11,6 +11,9 @@
     ├── .script/
     │   ├── ide.sh
     │   └── copy_to_dotfiles.sh
+    ├── .vscode/
+    │   ├── settings.json
+    │   └── keybindings.json
     ├── .zsh/
     │   ├── alias.zsh
     │   ├── fzf_function.zsh
@@ -25,7 +28,7 @@
     └── .zshrc
 ```
 
-I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27options!(%27fancy2~fullPath!false~trailingSla72~rootDot2)~5(%275%27root4config-karabiner.edn-star7ip.toml4homebrew-Brew34script-ide.7-copy_to_dot3s.7*8alias8fzf_function8init8secrets8setopt04skhdrc4tmux.conf4yabairc4zpro3*0_history*0rc%27)~version!%271%27)*%5Cn6-*60.z72!true3file4*.5source!6%20%207sh80-%0187654320-*>)
+I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27opti7s!(%27fancy2~fullPath!false~trailingSla92~rootDot2)~6(%276%27root4c7fig-karabiner.edn-star9ip.toml4homebrew-Brew54script-ide.9-copy_to_dot5s.94vscodeAtt3-keybind3*0-alias0-fzf_functi70-init0Acrets0Atopt04skhdrc4tmux.c7f4yabairc4zpro5*0_history*0rc%27)~versi7!%271%27)*%5Cn8-*80.z92!true3ings.js74*.5file6source!7on8%20%209shA-se%01A987654320-*>)
 
 I'm Using
 
