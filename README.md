@@ -8,6 +8,10 @@
     │   └── starship.toml
     ├── .homebrew/
     │   └── Brewfile
+    ├── .image/
+    │   └── my_screen_images
+    ├── .iterm2/
+    │   └── iterm2.setting.itermexport
     ├── .script/
     │   ├── ide.sh
     │   └── copy_to_dotfiles.sh
@@ -28,7 +32,7 @@
     └── .zshrc
 ```
 
-I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27opti7s!(%27fancy2~fullPath!false~trailingSla92~rootDot2)~6(%276%27root4c7fig-karabiner.edn-star9ip.toml4homebrew-Brew54script-ide.9-copy_to_dot5s.94vscodeAtt3-keybind3*0-alias0-fzf_functi70-init0Acrets0Atopt04skhdrc4tmux.c7f4yabairc4zpro5*0_history*0rc%27)~versi7!%271%27)*%5Cn8-*80.z92!true3ings.js74*.5file6source!7on8%20%209shA-se%01A987654320-*>)
+I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27opti9s!(%27fancy4~fullPath!false~trailAgSlaE4~rootDot4)~8(%278%27root3c9fig-karabAer.edn-starEip.toml3homebrew-Brew73image-my_screen_images352-52.settAg.5export3script-ide.E-copy_to_dot7s.E3vscodeFtt6-keybAd6*0-alias0-fzf_functi90-Ait0Fcrets0Ftopt03skhdrc3tmux.c9f3yabairc3zpro7*0_history*0rc%27)~versi9!%271%27)*%5CnC-*C0.zE3*.4!true5iterm6Ags.js97file8source!9onAinC%20%20EshF-se%01FECA98765430-*>)
 
 I'm Using
 
