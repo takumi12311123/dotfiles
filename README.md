@@ -80,3 +80,7 @@ https://github.com/folke/lazy.nvim
 ### SketchyBar
 
 https://github.com/FelixKratz/SketchyBar
+
+### Raycast
+
+https://www.raycast.com/
