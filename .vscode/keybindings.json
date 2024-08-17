@@ -58,6 +58,31 @@
   {
     "key": "shift+cmd+n",
     "command": "explorer.newFile"
+  },
+  {
+    "key": "ctrl+shift+alt+left",
+    "command": "-cursorWordPartLeftSelect",
+    "when": "textInputFocus"
+  },
+  {
+    "key": "ctrl+shift+alt+right",
+    "command": "-cursorWordPartRightSelect",
+    "when": "textInputFocus"
+  },
+  {
+    "key": "ctrl+shift+alt+left",
+    "command": "workbench.action.focusLeftGroup"
+  },
+  {
+    "key": "cmd+k cmd+left",
+    "command": "-workbench.action.focusLeftGroup"
+  },
+  {
+    "key": "ctrl+shift+alt+right",
+    "command": "workbench.action.focusRightGroup"
+  },
+  {
+    "key": "cmd+k cmd+right",
+    "command": "-workbench.action.focusRightGroup"
   }
 ]
-
