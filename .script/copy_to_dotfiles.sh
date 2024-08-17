@@ -10,6 +10,9 @@ cp $SCRIPT_PATH/copy_to_dotfiles.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/back_to_exec_environment.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/variables.sh $GIT_PATH/.script/
 
+cp $VSCODE_PATH/settings.json $GIT_PATH/.vscode/
+cp $VSCODE_PATH/keybindings.json $GIT_PATH/.vscode/
+
 cp $ZSH_PATH/alias.zsh $GIT_PATH/.zsh/
 cp $ZSH_PATH/fzf_function.zsh $GIT_PATH/.zsh/
 cp $ZSH_PATH/init.zsh $GIT_PATH/.zsh/
