@@ -51,12 +51,6 @@
       [:!TOSdown_arrow :!Ttab :vscode]
     ]}
 
-    {:des "Visual Studio Code tab move key bind"
-    :rules [
-      [:!TOSleft_arrow :!C1 :vscode]
-      [:!TOSright_arrow :!C2 :vscode]
-    ]}
-
     {:des "Visual Studio Code file to another tab"
     :rules [
       [:!!left_arrow :!TCleft_arrow :vscode]
