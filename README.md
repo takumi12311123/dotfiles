@@ -4,6 +4,8 @@
 .
 └── root/
     ├── .config/
+    │   ├── karabiner/
+    │   │   └── karabiner.json
     │   ├── karabiner.edn
     │   └── starship.toml
     ├── .homebrew/
@@ -32,7 +34,7 @@
     └── .zshrc
 ```
 
-I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27opti9s!(%27fancy4~fullPath!false~trailAgSlaE4~rootDot4)~8(%278%27root3c9fig-karabAer.edn-starEip.toml3homebrew-Brew73image-my_screen_images352-52.settAg.5export3script-ide.E-copy_to_dot7s.E3vscodeFtt6-keybAd6*0-alias0-fzf_functi90-Ait0Fcrets0Ftopt03skhdrc3tmux.c9f3yabairc3zpro7*0_history*0rc%27)~versi9!%271%27)*%5CnC-*C0.zE3*.4!true5iterm6Ags.js97file8source!9onAinC%20%20EshF-se%01FECA98765430-*>)
+I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiEs!(%27fancy6~fullPath!false~trail9gSlaG6~rootDot6)~C(%27C%27root5cEfig-3-437-3.edn-starGip.toml5homebrew-BrewA5image-my_screen_images582-82.F.8export5script-ide.G-copy_to_dotAs.G5vscode-Fs7-keyb9d9gs7*HaliasHfzf_functiEH9itHsecretsHsetopt05skhdrc5tmux.cEf5yabairc5zproA*0_history*0rc%27)~versiE!%271%27)*%5Cn4-*40.zG3karab9er4%20%205*.6!true7.jsE8iterm9inAfileCsource!EonFsett9gGshH0-%01HGFECA98765430-*>)
 
 I'm Using
 
