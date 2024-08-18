@@ -4,6 +4,7 @@ source ~/.script/variables.sh
 
 cp $CONFIG_PATH/karabiner.edn $GIT_PATH/.config/
 cp $CONFIG_PATH/starship.toml $GIT_PATH/.config/
+cp $CONFIG_PATH/karabiner/karabiner.json $GIT_PATH/.config/karabiner/
 
 cp $SCRIPT_PATH/ide.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/copy_to_dotfiles.sh $GIT_PATH/.script/
@@ -25,3 +26,5 @@ cp ~/.zprofile $GIT_PATH/
 cp ~/.zsh_history $GIT_PATH/
 cp ~/.zshrc $GIT_PATH/
 cp ~/.tmux.conf $GIT_PATH/
+
+echo 'copy to dotfiles done!'
