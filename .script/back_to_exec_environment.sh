@@ -2,7 +2,7 @@
 
 source ~/.script/variables.sh
 
-cp $GIT_PATH/.config/karabiner.edn $CONFIG_PATH/
+cp $GIT_PATH/.config/gokurakujoudo/karabiner.edn $CONFIG_PATH/gokurakujoudo
 cp $GIT_PATH/.config/starship.toml $CONFIG_PATH/
 
 cp $GIT_PATH/.script/ide.sh $SCRIPT_PATH/
