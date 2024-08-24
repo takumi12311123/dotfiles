@@ -66,5 +66,7 @@
   "scm.defaultViewMode": "tree",
   "files.refactoring.autoSave": false,
   "github.copilot.editor.enableAutoCompletions": true,
-  "githubPullRequests.pullBranch": "never"
+  "githubPullRequests.pullBranch": "never",
+  "liveshare.accessibility.soundsEnabled": false,
+  "editor.accessibilitySupport": "off"
 }
