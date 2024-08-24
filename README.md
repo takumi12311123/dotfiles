@@ -93,3 +93,7 @@ https://github.com/FelixKratz/SketchyBar
 ### Raycast
 
 https://www.raycast.com/
+
+### Homerow
+
+https://www.homerow.app/
