@@ -59,9 +59,9 @@
 
     {:des "Visual Studio Code view Denifition"
     :rules [
-      [:!!f :f12 :vscode]
+      [:!!e :f12 :vscode]
       [:!!r :!Rf12 :vscode]
-      [:!!d :!Whyphen :vscode]
+      [:!!w :!Whyphen :vscode]
     ]}
 
     {:des "Iterm2 move tab key bind"

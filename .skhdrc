@@ -1,12 +1,10 @@
 # focus window
-alt + shift + ctrl + cmd - x : yabai -m window --focus recent || yabai -m display --focus recent
 alt + shift + ctrl + cmd - h : yabai -m window --focus west || yabai -m display --focus west
 alt + shift + ctrl + cmd - j : yabai -m window --focus south || yabai -m display --focus south
 alt + shift + ctrl + cmd - k : yabai -m window --focus north || yabai -m display --focus north
 alt + shift + ctrl + cmd - l : yabai -m window --focus east || yabai -m display --focus east
 
 # swap window
-alt + shift + ctrl + cmd - p : yabai -m window --swap recent
 alt + shift + ctrl + cmd - y : yabai -m window --swap west  || $(yabai -m window --display west; yabai -m display --focus west)
 alt + shift + ctrl + cmd - u : yabai -m window --swap south  || $(yabai -m window --display south; yabai -m display --focus south)
 alt + shift + ctrl + cmd - i : yabai -m window --swap north  || $(yabai -m window --display north; yabai -m display --focus north)
@@ -27,20 +25,8 @@ alt + shift + ctrl - o : yabai -m window --resize right:-20:0
 # rotate tree
 alt + shift + ctrl - r : yabai -m space --rotate 90
 
-# mirror tree y-axis
-alt + shift + ctrl - s : yabai -m space --mirror y-axis
-
-# mirror tree x-axis
-alt + shift + ctrl - x : yabai -m space --mirror x-axis
-
-# toggle desktop offset
-alt + shift + ctrl - v : yabai -m space --toggle padding && yabai -m space --toggle gap
-
 # toggle window fullscreen zoom
 alt + shift + ctrl - f : yabai -m window --toggle zoom-fullscreen
-
-# toggle window native fullscreen
-alt + shift + ctrl - g : yabai -m window --toggle native-fullscreen
 
 # toggle window split type
 alt + shift + ctrl - e : yabai -m window --toggle split
