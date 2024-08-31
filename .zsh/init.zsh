@@ -10,9 +10,6 @@ export GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn"
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ff00'
 
-## oh-my-zsh
-source $ZSH/oh-my-zsh.sh
-
 ## syntax-highlighting
 source ~/Git-Project/github.com/zdharma-continuum/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
