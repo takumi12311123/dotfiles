@@ -1,5 +1,4 @@
 setopt share_history
-setopt correct
 setopt no_beep
 setopt hist_ignore_dups
 setopt hist_ignore_all_dups
