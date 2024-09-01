@@ -1,6 +1,5 @@
 plugins=(
   git
-  zsh-autosuggestions
 )
 
 export ZSH="$HOME/.oh-my-zsh"
@@ -12,6 +11,15 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ff00'
 
 ## syntax-highlighting
 source ~/Git-Project/github.com/zdharma-continuum/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+
+## zsh-completions
+## zsh-autosuggestions
+
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+  source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+  autoload -Uz compinit && compinit
+fi
 
 ## docker desktop
 source /Users/takumiakasaka/.docker/init-zsh.sh || true
