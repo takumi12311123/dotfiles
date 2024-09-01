@@ -1,11 +1,22 @@
+# FIXME: remove if above function is good
+# function fzf-history-selection() {
+#     BUFFER=`history -n 1 | tac  | awk '!a[$0]++' | fzf-tmux -p 80% --exact --no-sort`
+#     CURSOR=#BUFFER
+#     zle reset-prompt
+# }
+# zle -N fzf-history-selection
+# bindkey '^h' fzf-history-selection
+
 ## history
+# NOTE: read history from zsh_history
 alias h='fzf-history-selection'
 function fzf-history-selection() {
-    BUFFER=`history -n 1 | tac  | awk '!a[$0]++' | fzf-tmux -p 80%`
-    CURSOR=#BUFFER
-    zle reset-prompt
+    # NOTE: remove timestamp between : and ; from zsh_history
+    local selected_command=$(sed 's/^.*;//' ~/.zsh_history | tac | uniq | fzf-tmux -p 80% --exact --no-sort)
+    if [[ -n "$selected_command" ]]; then
+        print -z "$selected_command"
+    fi
 }
-zle -N fzf-history-selection
 bindkey '^h' fzf-history-selection
 
 ## fzf-cdr
