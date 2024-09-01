@@ -1,4 +1,4 @@
-# FIXME: remove if above function is good
+# FIXME: remove if under function is good
 # function fzf-history-selection() {
 #     BUFFER=`history -n 1 | tac  | awk '!a[$0]++' | fzf-tmux -p 80% --exact --no-sort`
 #     CURSOR=#BUFFER
