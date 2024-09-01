@@ -7,15 +7,13 @@
 # zle -N fzf-history-selection
 # bindkey '^h' fzf-history-selection
 
-## history
-# NOTE: read history from zsh_history
+## fzf-history
 alias h='fzf-history-selection'
 function fzf-history-selection() {
-    # NOTE: remove timestamp between : and ; from zsh_history
-    local selected_command=$(sed 's/^.*;//' ~/.zsh_history | tac | uniq | fzf-tmux -p 80% --exact --no-sort)
-    if [[ -n "$selected_command" ]]; then
-        print -z "$selected_command"
-    fi
+  local selected_command=$(history -n 1  | tac | uniq | fzf-tmux -p 80% --exact --no-sort)
+  if [[ -n "$selected_command" ]]; then
+      print -z "$selected_command"
+  fi
 }
 bindkey '^h' fzf-history-selection
 
