@@ -15,7 +15,6 @@ function fzf-history-selection() {
       print -z "$selected_command"
   fi
 }
-bindkey '^h' fzf-history-selection
 
 ## fzf-cdr
 alias cdd='fzf-cdr'
