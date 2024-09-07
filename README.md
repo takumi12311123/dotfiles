@@ -93,3 +93,7 @@ https://www.raycast.com/
 ### Homerow
 
 https://www.homerow.app/
+
+### Atuin
+
+https://github.com/atuinsh/atuin
