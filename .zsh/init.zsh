@@ -29,6 +29,7 @@ eval "$(starship init zsh)"
 
 ## atuin setting
 # FIXME: maybe remove
+# NOTE: brew uninstall atuin
 eval "$(atuin init zsh)"
 eval "$(atuin init zsh --disable-ctrl-r)"
 
