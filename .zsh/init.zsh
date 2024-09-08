@@ -2,7 +2,6 @@ plugins=(
   git
 )
 
-export ZSH="$HOME/.oh-my-zsh"
 export GOPATH="$HOME"
 export PATH="$HOME/.local/bin:$GOPATH/bin:$HOME/.asdf/shims:$PATH"
 export GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn"
