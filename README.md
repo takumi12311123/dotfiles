@@ -10,6 +10,8 @@
     │   └── starship.toml
     ├── .homebrew/
     │   └── Brewfile
+    ├── .homerow/
+    │   └── README.md
     ├── .image/
     │   └── my_screen_images
     ├── .iterm2/
@@ -31,10 +33,11 @@
     ├── .yabairc
     ├── .zprofile
     ├── .zsh_history
-    └── .zshrc
+    ├── .zshrc
+    └── .README.md
 ```
 
-I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiEs!(%27fancy6~fullPath!false~trail9gSlaG6~rootDot6)~C(%27C%27root5cEfig-3-437-3.edn-starGip.toml5homebrew-BrewA5image-my_screen_images582-82.F.8export5script-ide.G-copy_to_dotAs.G5vscode-Fs7-keyb9d9gs7*HaliasHfzf_functiEH9itHsecretsHsetopt05skhdrc5tmux.cEf5yabairc5zproA*0_history*0rc%27)~versiE!%271%27)*%5Cn4-*40.zG3karab9er4%20%205*.6!true7.jsE8iterm9inAfileCsource!EonFsett9gGshH0-%01HGFECA98765430-*>)
+I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiHs!(%27fancy6~fullPath!false~trailCgSlaJ6~rootDot6)~G(%27G%27root4cHfig-3-537-3.edn-starJip.tomlLbrew-BrewFLrow-94image-my_screen_images482-82.I.8export4script-ide.J-copy_to_dotFs.J4vscode-Is7-keybCdCgs7*NaliasNfzf_functiHNCitNsecretsNsetopt04skhdKtmux.cHf4yabaiKzproF*0_history*0K9%27)~versiH!%271%27)*%5Cn5-*50.zJ3karabCer4*.5%20%206!true7.jsH8iterm9README.mdCinFfileGsource!HonIsettCgJshKrc4L4homeN0-%01NLKJIHGFC98765430-*>)
 
 I'm Using
 
