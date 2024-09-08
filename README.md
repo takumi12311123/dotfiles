@@ -4,9 +4,10 @@
 .
 └── root/
     ├── .config/
+    │   ├── gokurakujoudo/
+    │   │   └── karabiner.edn
     │   ├── karabiner/
     │   │   └── karabiner.json
-    │   ├── karabiner.edn
     │   └── starship.toml
     ├── .homebrew/
     │   └── Brewfile
