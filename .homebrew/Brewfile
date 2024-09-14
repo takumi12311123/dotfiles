@@ -43,6 +43,7 @@ brew "koekeishiya/formulae/yabai", args: ["HEAD"]
 brew "reviewdog/tap/reviewdog"
 brew "xcodesorg/made/xcodes"
 brew "yqrashawn/goku/goku"
+cask "alacritty"
 cask "deepl"
 cask "figma"
 cask "google-cloud-sdk"
