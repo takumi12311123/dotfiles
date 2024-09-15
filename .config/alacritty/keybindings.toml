@@ -1,0 +1,7 @@
+# Alacritty Configuration File
+
+[keyboard]
+bindings = [
+  {key = "Tab",mods = "Control",action = "SelectNextTab"},
+  {key = "Tab",mods = "Control|Shift",action = "SelectPreviousTab"}
+]
