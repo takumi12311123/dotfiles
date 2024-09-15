@@ -4,6 +4,8 @@
 .
 └── root/
     ├── .config/
+    │   ├── alacritty/
+    │   │   └── alacritty.toml
     │   ├── gokurakujoudo/
     │   │   └── karabiner.edn
     │   ├── karabiner/
@@ -15,8 +17,6 @@
     │   └── README.md
     ├── .image/
     │   └── my_screen_images
-    ├── .iterm2/
-    │   └── iterm2.setting.itermexport
     ├── .script/
     │   ├── ide.sh
     │   └── copy_to_dotfiles.sh
@@ -38,7 +38,7 @@
     └── .README.md
 ```
 
-I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiHs!(%27fancy6~fullPath!false~trailCgSlaJ6~rootDot6)~G(%27G%27root4cHfig-3-537-3.edn-starJip.tomlLbrew-BrewFLrow-94image-my_screen_images482-82.I.8export4script-ide.J-copy_to_dotFs.J4vscode-Is7-keybCdCgs7*NaliasNfzf_functiHNCitNsecretsNsetopt04skhdKtmux.cHf4yabaiKzproF*0_history*0K9%27)~versiH!%271%27)*%5Cn5-*50.zJ3karabCer4*.5%20%206!true7.jsH8iterm9README.mdCinFfileGsource!HonIsettCgJshKrc4L4homeN0-%01NLKJIHGFC98765430-*>)
+I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiFs!(%27fancy5~fullPath!false~trailGgSlaH5~rootDot5)~C(%27C%27root4cFfig272-7.toml2gokurakujoudo2-3.edn232-362starHip.tomlKbrew2Brew9Krow284image2my_screen_images4script2ide.H2copy_to_dot9s.H4vscodeJttL2keybGdL*02alias02fzf_functiF02Git0Jcrets0Jtopt04skhdItmux.cFf4yabaiIzpro9*0_history*0I8%27)~versiF!%271%27)*%5Cn--%20%200.zH2*-3karabGer4*.5!true6.jsF7alacritty8README.md9fileCsource!FonGinHshIrc4J2seK4homeLGgs6%01LKJIHGFC987654320-*>)
 
 I'm Using
 
@@ -101,3 +101,7 @@ https://www.homerow.app/
 ### Atuin
 
 https://github.com/atuinsh/atuin
+
+### Alacritty
+
+https://github.com/alacritty/alacritty
