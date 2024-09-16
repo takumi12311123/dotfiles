@@ -81,7 +81,7 @@
           "type" : "basic"
         } ]
       }, {
-        "description" : "Chrome, Visual Studio Code, iterm delete tab key bind",
+        "description" : "Chrome, Visual Studio Code, alacritty delete tab key bind",
         "manipulators" : [ {
           "from" : {
             "key_code" : "w",
@@ -127,7 +127,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.googlecode\\.iterm2$" ]
+            "bundle_identifiers" : [ "^io\\.alacritty$", "^org\\.alacritty$" ]
           } ],
           "type" : "basic"
         } ]
@@ -252,7 +252,7 @@
           "type" : "basic"
         } ]
       }, {
-        "description" : "Iterm2 move tab key bind",
+        "description" : "alacritty move tab key bind",
         "manipulators" : [ {
           "from" : {
             "key_code" : "right_arrow",
@@ -261,12 +261,12 @@
             }
           },
           "to" : [ {
-            "key_code" : "right_arrow",
-            "modifiers" : [ "right_command" ]
+            "key_code" : "tab",
+            "modifiers" : [ "left_control" ]
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.googlecode\\.iterm2$" ]
+            "bundle_identifiers" : [ "^io\\.alacritty$", "^org\\.alacritty$" ]
           } ],
           "type" : "basic"
         }, {
@@ -277,12 +277,12 @@
             }
           },
           "to" : [ {
-            "key_code" : "left_arrow",
-            "modifiers" : [ "right_command" ]
+            "key_code" : "tab",
+            "modifiers" : [ "left_control", "left_shift" ]
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.googlecode\\.iterm2$" ]
+            "bundle_identifiers" : [ "^io\\.alacritty$", "^org\\.alacritty$" ]
           } ],
           "type" : "basic"
         } ]
