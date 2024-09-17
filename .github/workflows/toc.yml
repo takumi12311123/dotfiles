@@ -5,11 +5,12 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
+
+  permissions:
+    contents: read
+    pull-requests: write
+
   generateTOC:
     name: TOC Generator
     runs-on: ubuntu-latest
