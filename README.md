@@ -42,6 +42,12 @@ I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=
 
 I'm Using
 
+<!-- START doctoc -->
+<!-- END doctoc -->
+
+<details><summary>Using List</summary>
+```
+
 ### Karabiner-Element
 
 https://github.com/pqrs-org/Karabiner-Elements
@@ -105,3 +111,7 @@ https://github.com/atuinsh/atuin
 ### Alacritty
 
 https://github.com/alacritty/alacritty
+
+```
+</details>
+```
