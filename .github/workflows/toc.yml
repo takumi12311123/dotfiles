@@ -1,9 +1,14 @@
+name: TOC Generator
+
 on:
   push:
     branches:
       - main
 
-name: TOC Generator
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   generateTOC:
     name: TOC Generator
