@@ -7,12 +7,13 @@ on:
 
 jobs:
 
-  permissions:
-    contents: read
-    pull-requests: write
-
   generateTOC:
-    name: TOC Generator
+
+    permissions:
+      contents: read
+      pull-requests: write
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: technote-space/toc-generator@v4
