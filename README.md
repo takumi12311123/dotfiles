@@ -112,6 +112,5 @@ https://github.com/atuinsh/atuin
 
 https://github.com/alacritty/alacritty
 
-```
 </details>
 ```
