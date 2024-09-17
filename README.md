@@ -46,8 +46,8 @@ I'm Using
 <!-- END doctoc -->
 
 <details><summary>Using List</summary>
-```
 
+```
 ### Karabiner-Element
 
 https://github.com/pqrs-org/Karabiner-Elements
@@ -112,5 +112,6 @@ https://github.com/atuinsh/atuin
 
 https://github.com/alacritty/alacritty
 
-</details>
 ```
+
+</details>
