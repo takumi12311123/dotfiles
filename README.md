@@ -40,11 +40,10 @@
     └── .README.md
 ```
 
-</details>
-
 I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiFs!(%27fancy5~fullPath!false~trailGgSlaH5~rootDot5)~C(%27C%27root4cFfig272-7.toml2gokurakujoudo2-3.edn232-362starHip.tomlKbrew2Brew9Krow284image2my_screen_images4script2ide.H2copy_to_dot9s.H4vscodeJttL2keybGdL*02alias02fzf_functiF02Git0Jcrets0Jtopt04skhdItmux.cFf4yabaiIzpro9*0_history*0I8%27)~versiF!%271%27)*%5Cn--%20%200.zH2*-3karabGer4*.5!true6.jsF7alacritty8README.md9fileCsource!FonGinHshIrc4J2seK4homeLGgs6%01LKJIHGFC987654320-*>)
 
-I'm Using
+</details>
+
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
