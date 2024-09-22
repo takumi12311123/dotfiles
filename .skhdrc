@@ -38,10 +38,12 @@ meh - t : yabai -m window --toggle float && yabai -m window --grid 4:4:1:1:2:2
 # alacritty
 meh - return : osascript -e 'tell application "Alacritty" to run' \
   -e 'tell application "System Events"' \
-  -e 'if visible of application process "Alacritty" is true then' \
+  -e 'if application process "Alacritty" exists then' \
+  -e 'if frontmost of application process "Alacritty" is true then' \
   -e 'set visible of application process "Alacritty" to false' \
   -e 'else' \
   -e 'set visible of application process "Alacritty" to true' \
   -e 'set frontmost of application process "Alacritty" to true' \
+  -e 'end if' \
   -e 'end if' \
   -e 'end tell'
