@@ -5,6 +5,7 @@ plugins=(
 export GOPATH="$HOME"
 export PATH="$HOME/.local/bin:$GOPATH/bin:$HOME/.asdf/shims:$PATH"
 export GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn"
+export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ff00'
 
