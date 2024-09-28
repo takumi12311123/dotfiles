@@ -1,12 +1,3 @@
-# FIXME: remove if under function is good
-# function fzf-history-selection() {
-#     BUFFER=`history -n 1 | tac  | awk '!a[$0]++' | fzf-tmux -p 80% --exact --no-sort`
-#     CURSOR=#BUFFER
-#     zle reset-prompt
-# }
-# zle -N fzf-history-selection
-# bindkey '^h' fzf-history-selection
-
 ## fzf-history
 alias h='fzf-history-selection'
 function fzf-history-selection() {
