@@ -64,7 +64,7 @@ https://github.com/pqrs-org/Karabiner-Elements
 
 https://github.com/yqrashawn/GokuRakuJoudo
 
-### starship
+### Starship
 
 https://github.com/starship/starship
 
