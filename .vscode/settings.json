@@ -47,10 +47,12 @@
     "clsx",
     "followee",
     "gohey",
+    "libvalue",
     "loadenv",
     "nestjs",
     "noheader",
     "pyautogui",
+    "salesdate",
     "wedinc"
   ],
 
@@ -68,5 +70,20 @@
   "github.copilot.editor.enableAutoCompletions": true,
   "githubPullRequests.pullBranch": "never",
   "liveshare.accessibility.soundsEnabled": false,
-  "editor.accessibilitySupport": "off"
+  "editor.accessibilitySupport": "off",
+  "roo-cline.allowedCommands": [
+    "npm test",
+    "npm install",
+    "tsc",
+    "git log",
+    "git diff",
+    "git show"
+  ],
+  "github.copilot.chat.scopeSelection": true,
+  "github.copilot.chat.generateTests.codeLens": true,
+  "github.copilot.chat.search.semanticTextResults": true,
+  "githubPullRequests.experimental.chat": true,
+  "vsicons.dontShowNewVersionMessage": true,
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.chat.edits.codesearch.enabled": true
 }
