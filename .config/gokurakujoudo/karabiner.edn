@@ -19,7 +19,7 @@
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
 
-  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :vscode ["^com\\.microsoft\\.VSCode$"]}
+  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.cursor\\.app$"]}
 
   :main [
     {:des "Change right_command to command+control+option+shift"
@@ -38,30 +38,38 @@
       [:!TOSleft_arrow :!TStab :chrome]
     ]}
 
-    {:des "Chrome, Visual Studio Code, alacritty delete tab key bind"
+    {:des "Chrome, Visual Studio Code, Cursor, alacritty delete tab key bind"
     :rules [
       [:!TOSw :!Cw :chrome]
       [:!TOSw :!Cw :vscode]
+      [:!TOSw :!Cw :cursor]
       [:!TOSw :!Cw :alacritty]
     ]}
 
-    {:des "Visual Studio Code file move key bind"
+    {:des "Visual Studio Code, Cursor file move key bind"
     :rules [
       [:!TOSup_arrow :!TStab :vscode]
       [:!TOSdown_arrow :!Ttab :vscode]
+      [:!TOSup_arrow :!TStab :cursor]
+      [:!TOSdown_arrow :!Ttab :cursor]
     ]}
 
-    {:des "Visual Studio Code file to another tab"
+    {:des "Visual Studio Code, Cursor file to another tab"
     :rules [
       [:!!left_arrow :!TCleft_arrow :vscode]
       [:!!right_arrow :!TCright_arrow :vscode]
+      [:!!left_arrow :!TCleft_arrow :cursor]
+      [:!!right_arrow :!TCright_arrow :cursor]
     ]}
 
-    {:des "Visual Studio Code view Denifition"
+    {:des "Visual Studio Code, Cursor view Denifition"
     :rules [
       [:!!e :f12 :vscode]
       [:!!r :!Rf12 :vscode]
       [:!!w :!Whyphen :vscode]
+      [:!!e :f12 :cursor]
+      [:!!r :!Rf12 :cursor]
+      [:!!w :!Whyphen :cursor]
     ]}
 
     {:des "alacritty move tab key bind"
