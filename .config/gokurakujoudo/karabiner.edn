@@ -19,7 +19,7 @@
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
 
-  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.cursor\\.app$"]}
+  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"]}
 
   :main [
     {:des "Change right_command to command+control+option+shift"
