@@ -127,7 +127,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         }, {
@@ -194,7 +194,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         }, {
@@ -210,7 +210,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         } ]
@@ -261,7 +261,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         }, {
@@ -277,7 +277,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         } ]
@@ -342,7 +342,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         }, {
@@ -358,7 +358,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         }, {
@@ -374,7 +374,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "^com\\.cursor\\.app$" ]
+            "bundle_identifiers" : [ "^com\\.todesktop\\.230313mzl4w4u92$" ]
           } ],
           "type" : "basic"
         } ]
