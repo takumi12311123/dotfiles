@@ -13,6 +13,10 @@
   "editor.formatOnSave": true,
   "editor.inlineSuggest.enabled": true,
   "editor.dragAndDrop": false,
+  "editor.accessibilitySupport": "off",
+
+  "workbench.layoutControl.enabled": false,
+
   "emeraldwalk.runonsave": {
     "commands": [
       {
@@ -56,21 +60,22 @@
     "wedinc"
   ],
 
-  "extensions.ignoreRecommendations": false,
-  "diffEditor.ignoreTrimWhitespace": false,
-  "explorer.confirmDragAndDrop": false,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
+  "files.refactoring.autoSave": false,
+
+  "extensions.ignoreRecommendations": false,
+  "vsicons.dontShowNewVersionMessage": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "explorer.confirmDragAndDrop": false,
   "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.suggest.autoImports": true,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "window.zoomLevel": 0.3,
   "scm.defaultViewMode": "tree",
-  "files.refactoring.autoSave": false,
-  "github.copilot.editor.enableAutoCompletions": true,
-  "githubPullRequests.pullBranch": "never",
   "liveshare.accessibility.soundsEnabled": false,
-  "editor.accessibilitySupport": "off",
+
   "roo-cline.allowedCommands": [
     "npm test",
     "npm install",
@@ -79,11 +84,13 @@
     "git diff",
     "git show"
   ],
+
+  "githubPullRequests.pullBranch": "never",
+  "github.copilot.editor.enableAutoCompletions": true,
   "github.copilot.chat.scopeSelection": true,
   "github.copilot.chat.generateTests.codeLens": true,
   "github.copilot.chat.search.semanticTextResults": true,
   "githubPullRequests.experimental.chat": true,
-  "vsicons.dontShowNewVersionMessage": true,
   "github.copilot.nextEditSuggestions.enabled": true,
   "github.copilot.chat.edits.codesearch.enabled": true
 }
