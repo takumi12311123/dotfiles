@@ -2,6 +2,9 @@
 
 source ~/.script/variables.sh
 
+cp $ROOT_PATH/.claude/settings.json $GIT_PATH/.claude/
+cp $ROOT_PATH/.claude/CLAUDE.md $GIT_PATH/.claude/
+
 cp $CONFIG_PATH/alacritty/alacritty.toml $GIT_PATH/.config/alacritty/
 cp $CONFIG_PATH/alacritty/keybindings.toml $GIT_PATH/.config/alacritty/
 cp $CONFIG_PATH/gokurakujoudo/karabiner.edn $GIT_PATH/.config/gokurakujoudo
