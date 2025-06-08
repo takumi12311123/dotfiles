@@ -1,6 +1,7 @@
-# multiple execute
+# Workflow multiple execute
 
-use https://github.com/d-kuro/gwq
+https://github.com/d-kuro/gwq
+https://github.com/d-kuro/gwq?tab=readme-ov-file#multiple-ai-agent-workflow
 
 # Development Philosophy
 
@@ -14,3 +15,11 @@ use https://github.com/d-kuro/gwq
 - Then proceed with the implementation to make the tests pass
 - During implementation, do not modify the tests; keep fixing the code
 - Repeat the process until all tests pass
+
+# rule
+- Please make sure to consult the user whenever you plan to use an implementation method or technique that hasn't been used in other files.
+
+# Frontend Development Rule 
+
+- creating a new component if the requirement can be met with minor modifications to an existing component.
+
