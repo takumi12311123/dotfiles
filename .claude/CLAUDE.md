@@ -17,9 +17,9 @@ https://github.com/d-kuro/gwq?tab=readme-ov-file#multiple-ai-agent-workflow
 - Repeat the process until all tests pass
 
 # rule
+
 - Please make sure to consult the user whenever you plan to use an implementation method or technique that hasn't been used in other files.
+- For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools simultaneously rather than sequentially.
 
 # Frontend Development Rule 
-
 - creating a new component if the requirement can be met with minor modifications to an existing component.
-
