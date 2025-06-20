@@ -1,5 +1,15 @@
 # Orchestrator Framework
 
+## GitHub
+
+you can see issue and pr by gh command.
+```
+gh issue view
+gh pr view
+```
+
+## Orchestrator
+
 1. Initial Analysis
 
 - Analyze the entire task to understand its scope and requirements
