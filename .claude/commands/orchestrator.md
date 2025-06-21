@@ -3,6 +3,7 @@
 ## GitHub
 
 you can see issue and pr by gh command.
+
 ```
 gh issue view
 gh pr view
@@ -46,6 +47,7 @@ gh pr view
 ### Plan Preview:
 
 1. Initial Analysis
+
 - Review project structure and determine test/lint setup
 
 2. Quality Checks (parallel)

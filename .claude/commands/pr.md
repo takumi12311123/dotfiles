@@ -3,6 +3,7 @@
 ## Important Rules
 
 - PR titles must be written in **English**
+- PR body must be written in **Japanese**
 - Link related GitHub tickets in the format `issue: #123`
 - Always use the `gh pr create` command to create PRs
 - Review the diff against the base branch and include a summary of approximately 100 characters
@@ -25,13 +26,13 @@ git log --oneline main..HEAD
 ```bash
 # Use gh pr create command
 gh pr create --title "feat: implement user authentication" --body "$(cat <<'EOF'
-## Summary
-Implemented user authentication functionality. This includes JWT authentication with login/logout features and access token refresh capabilities for improved user experience.
+## 概要
+ユーザー認証機能を実装しました。JWT認証によるログイン・ログアウト機能と、アクセストークンのリフレッシュ機能を追加し、ユーザー体験を向上させました。
 
-## Changes
-- Introduced JWT authentication
-- Implemented login/logout functionality
-- Added token refresh feature
+## 変更点
+- JWT認証の導入
+- ログイン・ログアウト機能の実装
+- トークンリフレッシュ機能の追加
 
 issue: #123
 EOF
@@ -41,6 +42,7 @@ EOF
 ## PR Checklist
 
 - [ ] Is the PR title in English?
+- [ ] PR 本文は日本語で記載されていますか？
 - [ ] Are related GitHub tickets linked?
 - [ ] Have you thoroughly reviewed the diff?
 - [ ] Have you included a summary of approximately 100 characters?
