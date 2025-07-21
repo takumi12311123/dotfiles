@@ -1,71 +1,66 @@
-# Orchestrator Framework
+---
+allowed-tools: Bash(gh:*), Bash(git:*), Bash(npm:*), Bash(pytest:*)
+description: Orchestrate complex multi-step development tasks with structured planning
+argument-hint: <task-description> - describe the complex task to orchestrate
+---
 
-## GitHub
+## Context
 
-you can see issue and pr by gh command.
+- Current repository: !`git remote get-url origin 2>/dev/null || echo "No remote repository"`
+- Active issues: !`gh issue list --limit 5 2>/dev/null || echo "No GitHub CLI or issues available"`
+- Active PRs: !`gh pr list --limit 3 2>/dev/null || echo "No active PRs"`
+- Project type: !`if [ -f package.json ]; then echo "Node.js project"; elif [ -f requirements.txt ]; then echo "Python project"; else echo "Unknown project type"; fi`
 
-```
-gh issue view
-gh pr view
-```
+## Orchestration Framework
 
-## Orchestrator
+Execute complex tasks using structured, parallel processing:
 
-1. Initial Analysis
+### 1. Initial Analysis
 
-- Analyze the entire task to understand its scope and requirements
-- Identify dependencies, potential blockers, and execution flow
-- **Generate a structured execution Plan and present it to the user for confirmation or adjustment before proceeding**
+- Analyze task scope, requirements, and dependencies
+- Identify potential blockers and execution flow
+- **Present structured execution plan for user confirmation**
 
-2. Step Planning
+### 2. Step Planning
 
-- Break the task into 2–4 sequential steps
-- Define subtasks within each step that can run in parallel
-- Specify the required context from previous steps
+- Break task into 2-4 sequential steps
+- Define parallel subtasks within each step
+- Specify required context from previous steps
 
-3. Step-by-Step Execution
+### 3. Step-by-Step Execution
 
-- Execute all subtasks in the current step in parallel
-- Collect results as concise summaries (100–200 words each)
-- Pass only relevant context to the next step
+- Execute all subtasks in current step in parallel
+- Collect results as concise summaries (100-200 words each)
+- Pass only relevant context to next step
 - Wait for all subtasks to complete before continuing
 
-4. Step Review and Adaptation
+### 4. Review and Adaptation
 
-- After each step, review the outcome and assess whether the remaining steps are still appropriate
+- After each step, assess if remaining steps are appropriate
 - Modify, add, or remove steps as necessary
-- If new issues arise, insert intermediate analysis or correction steps
+- Insert intermediate steps for new issues
 
-5. Progressive Aggregation
+### 5. Progressive Aggregation
 
-- Synthesize the results of completed steps
-- Build a progressively complete understanding of the task
-- Use partial insights from earlier steps to inform and optimize later steps
+- Synthesize results from completed steps
+- Build progressively complete understanding
+- Use insights from earlier steps to optimize later ones
 
-## 🧠 Example: "Test, Lint, and Commit"
+## Example Orchestration: "Test, Lint, and Commit"
 
-### Plan Preview:
+### Execution Plan:
 
-1. Initial Analysis
+1. **Analysis**: Review project structure and tooling setup
+2. **Quality Checks** (parallel): Run tests, linting, check git status
+3. **Fixes & Prep** (parallel): Fix errors, generate commit message
+4. **Final Validation** (parallel): Re-run checks, commit changes
 
-- Review project structure and determine test/lint setup
+_Note: If Step 2 has no errors, skip Step 3 and proceed to simplified Step 4_
 
-2. Quality Checks (parallel)
+## Your Task
 
-- Run tests
-- Run linting
-- Check git status
+Orchestrate the provided complex task using the framework above:
 
-3. Fixes & Commit Prep (parallel)
-
-- Fix lint errors
-- Fix test failures
-- Generate commit message
-
-4. Final Validation (parallel)
-
-- Re-run tests
-- Re-run lint
-- Commit changes
-
-If no errors in Step 2: skip Step 3, proceed directly to simplified Step 4.
+1. First, analyze the task and present a structured execution plan
+2. Wait for user confirmation before proceeding
+3. Execute the plan using the orchestration framework above

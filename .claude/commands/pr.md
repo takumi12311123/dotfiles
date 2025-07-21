@@ -1,56 +1,69 @@
-# PR Creation Rules
+---
+allowed-tools: Bash(gh:*), Bash(git:*)
+description: Create a pull request with proper formatting and review
+argument-hint: [title] [issue-number] (optional - will analyze changes if not provided)
+---
 
-## Important Rules
+## Context
 
-- PR titles must be written in **English**
-- PR body must be written in **Japanese**
-- Link related GitHub tickets in the format `issue: #123`
-- Always use the `gh pr create` command to create PRs
-- Review the diff against the base branch and include a summary of approximately 100 characters
-- If there are any unclear points or concerns when reviewing the diff, consult the user before creating the PR
+- Current branch: !`git branch --show-current`
+- Diff against main: !`git diff main...HEAD --stat`
+- Commit history: !`git log --oneline main..HEAD`
+- Related issues: !`gh issue list --limit 5 2>/dev/null || echo "No issues found"`
 
 ## PR Creation Process
 
-### 1. Review the Differences
+### 1. Change Analysis
 
-```bash
-# Check diff against main branch
-git diff main...HEAD
+Review the changes to understand:
 
-# Check commit history
-git log --oneline main..HEAD
+- What functionality was added/modified/fixed
+- Impact and scope of changes
+- Any potential concerns or breaking changes
+
+### 2. PR Requirements
+
+**Title Format (English):**
+
+- Use conventional commit format: `<type>: <description>`
+- Keep under 50 characters
+- Examples: `feat: add user authentication`, `fix: resolve token expiration`
+
+**Body Format (Japanese):**
+
 ```
-
-### 2. Create the PR
-
-```bash
-# Use gh pr create command
-gh pr create --title "feat: implement user authentication" --body "$(cat <<'EOF'
 ## 概要
-ユーザー認証機能を実装しました。JWT認証によるログイン・ログアウト機能と、アクセストークンのリフレッシュ機能を追加し、ユーザー体験を向上させました。
+[Brief overview of changes in Japanese]
 
 ## 変更点
-- JWT認証の導入
-- ログイン・ログアウト機能の実装
-- トークンリフレッシュ機能の追加
+- [List of specific changes]
+- [Additional modifications]
 
-issue: #123
-EOF
-)"
+## 注意点
+[Any concerns or breaking changes if applicable]
+
+issue: #[issue-number]
 ```
 
-## PR Checklist
+### 3. Quality Checks
 
-- [ ] Is the PR title in English?
-- [ ] PR 本文は日本語で記載されていますか？
-- [ ] Are related GitHub tickets linked?
-- [ ] Have you thoroughly reviewed the diff?
-- [ ] Have you included a summary of approximately 100 characters?
-- [ ] Are there any unclear points or concerns? (If yes, consult the user)
-- [ ] Are you using the `gh pr create` command?
+Before creating PR:
 
-## Notes
+- [ ] All changes are intentional and reviewed
+- [ ] No sensitive information or debug code included
+- [ ] Related issue numbers are identified
+- [ ] Changes align with project conventions
 
-- Always review the diff before creating a PR to ensure no unintended changes are included
-- Create a clear summary of approximately 100 characters based on the diff
-- Explain changes clearly to help reviewers understand the modifications
+### Your Task
+
+Based on the diff analysis above:
+
+1. **Review the changes** and identify the main purpose
+2. **Generate appropriate PR title** (English, conventional format)
+3. **Create PR body** (Japanese, following template above)
+4. **Link related issues** if any exist
+5. **Create the PR** using `gh pr create`
+
+If title and issue number were provided as arguments, use those. Otherwise, analyze the changes and suggest appropriate values.
+
+**Important**: If any changes seem unclear or concerning, ask for clarification before creating the PR.

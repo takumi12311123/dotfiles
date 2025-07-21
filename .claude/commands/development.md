@@ -1,175 +1,104 @@
-# Development Rules
+---
+allowed-tools: Bash(ls:*), Bash(find:*), Bash(rg:*), Bash(npm:*), Bash(pytest:*), Bash(git:*)
+description: Follow development best practices and code quality standards
+argument-hint: [task-description] (optional - describe what you're working on)
+---
 
-## Core Development Principles
+## Project Context
 
-### 1. Code Quality Standards
+- Project structure: !`find . -type f -name "package.json" -o -name "requirements.txt" -o -name "Cargo.toml" -o -name "go.mod" | head -5`
+- Available scripts: !`if [ -f package.json ]; then cat package.json | grep -A 10 '"scripts"'; elif [ -f requirements.txt ]; then echo "Python project detected"; fi`
+- Git status: !`git status --porcelain`
 
-- **Always check existing code patterns** before implementing new features
-- **Follow the project's established conventions** for naming, structure, and style
-- **Never assume libraries are available** - always verify in package.json, requirements.txt, etc.
-- **Minimize code duplication** - reuse existing components and utilities
+## Development Workflow
 
-### 2. Before Starting Development
+Follow these core principles for high-quality development:
 
-- [ ] Understand the task requirements completely
-- [ ] Search the codebase for similar implementations
-- [ ] Check for existing utilities or helper functions
-- [ ] Verify required dependencies are installed
-- [ ] Create a todo list for complex tasks using TodoWrite tool
+### 1. Research Phase
 
-### 3. Development Workflow
+- **Check existing patterns**: Search codebase for similar implementations
+- **Verify dependencies**: Confirm required libraries are available
+- **Understand conventions**: Follow project's established patterns
 
-#### Step 1: Research and Planning
+### 2. Implementation Standards
 
-```bash
-# Search for related code patterns
-rg "pattern" --type js
-# Check file structure
-ls -la src/
-# Read relevant files to understand context
-```
+#### Code Quality
 
-#### Step 2: Implementation
+- Write clean, readable code with descriptive names
+- Keep functions small and focused (single responsibility)
+- Follow existing code style and conventions
+- Add appropriate error handling and edge case management
 
-- Write clean, readable code
-- Follow existing code style (indentation, naming conventions)
-- Add appropriate error handling
-- Keep functions small and focused
-- Use descriptive variable and function names
+#### Language-Specific Guidelines
 
-#### Step 3: Testing
+**JavaScript/TypeScript:**
 
-```bash
-# Run tests if available
-npm test
-# or
-pytest
-# or check README for test commands
-```
-
-#### Step 4: Code Quality Checks
-
-```bash
-# Always run before completing a task
-npm run lint
-npm run typecheck
-# or equivalent commands for the project
-```
-
-## Language-Specific Rules
-
-### JavaScript/TypeScript
-
-- Use `const` by default, `let` when reassignment is needed
+- Use `const` by default, `let` when reassignment needed
 - Prefer arrow functions for callbacks
-- Use async/await over promises when possible
+- Use async/await over promises
 - Always handle promise rejections
 
-### Python
+**Python:**
 
 - Follow PEP 8 style guide
-- Use type hints for function parameters and returns
-- Prefer f-strings for string formatting
-- Use context managers (with statements) for file operations
+- Use type hints for parameters and returns
+- Prefer f-strings for formatting
+- Use context managers for file operations
 
-### React/Frontend
+**React/Frontend:**
 
-- Prefer functional components with hooks
+- Use functional components with hooks
 - Keep components small and focused
 - Extract reusable logic into custom hooks
 - Use semantic HTML elements
 
-## Security Best Practices
+### 3. Quality Assurance
+
+Run these checks before completing any task:
+
+```bash
+# JavaScript/TypeScript projects
+npm run lint && npm run typecheck && npm test
+
+# Python projects
+ruff check . && mypy . && pytest
+
+# General code search
+rg "TODO|FIXME|console\.log" --type js --type ts
+```
+
+### 4. Security & Best Practices
 
 - **Never commit secrets, keys, or tokens**
-- **Never log sensitive information**
-- **Always validate user input**
+- **Validate all user input**
 - **Use environment variables for configuration**
+- **Handle errors gracefully with meaningful messages**
+- **Optimize for performance (avoid unnecessary re-renders, use memoization)**
 
-## File Management Rules
+### 5. File Management Rules
 
-- **Never create files unless absolutely necessary**
-- **Always prefer editing existing files**
-- **Never create documentation files unless explicitly requested**
-- **Check if a similar file exists before creating a new one**
+- **Prefer editing existing files over creating new ones**
+- **Never create documentation unless explicitly requested**
+- **Check for similar files before creating new ones**
+- **Follow project's directory structure**
 
-## Error Handling
+## Pre-Development Checklist
 
-- Always provide meaningful error messages
-- Handle edge cases appropriately
-- Use try-catch blocks for operations that might fail
-- Log errors appropriately (without exposing sensitive data)
+- [ ] Task requirements understood completely
+- [ ] Similar implementations searched and reviewed
+- [ ] Required dependencies verified as available
+- [ ] Existing utilities and helpers identified
+- [ ] Code patterns and conventions noted
 
-## Performance Considerations
-
-- Avoid unnecessary re-renders in React
-- Use memoization for expensive calculations
-- Implement pagination for large data sets
-- Optimize database queries
-
-## Git Workflow
-
-1. Make small, focused commits
-2. Follow commit message rules (see commit.md)
-3. Always review changes before committing
-4. Never commit directly to main/master branch
-
-## Code Review Checklist
-
-Before marking a task as complete:
+## Completion Checklist
 
 - [ ] Code follows project conventions
 - [ ] No hardcoded values (use constants/config)
-- [ ] Error handling is implemented
-- [ ] Code is self-documenting (clear naming)
-- [ ] No console.logs or debug statements left
+- [ ] Error handling implemented
+- [ ] Code is self-documenting
+- [ ] No debug statements left behind
 - [ ] Tests pass (if applicable)
 - [ ] Linting and type checking pass
+- [ ] Git workflow followed (small, focused commits)
 
-## Common Commands Reference
-
-### Finding Code
-
-```bash
-# Search for text in files
-rg "searchterm"
-# Find files by name
-find . -name "*.js"
-# List files with pattern
-ls src/**/*.ts
-```
-
-### Code Quality
-
-```bash
-# JavaScript/TypeScript
-npm run lint
-npm run typecheck
-npm run format
-
-# Python
-ruff check .
-mypy .
-black .
-```
-
-### Testing
-
-```bash
-# JavaScript
-npm test
-npm run test:watch
-
-# Python
-pytest
-pytest -v
-```
-
-## Important Reminders
-
-- **Do only what is asked** - nothing more, nothing less
-- **Ask for clarification** when requirements are unclear
-- **Use TodoWrite** for complex multi-step tasks
-- **Run quality checks** before completing any task
-- **Follow TDD** when explicitly requested
-- **Check CLAUDE.md** for project-specific instructions
+**Remember**: Do only what is asked, ask for clarification when unclear, and run quality checks before completion.

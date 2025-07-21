@@ -1,68 +1,62 @@
-# Commit Rules
+---
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git diff:*), Bash(git log:*)
+description: Create a git commit with proper message formatting
+argument-hint: [message] (optional - if not provided, will analyze changes and suggest)
+---
 
-## Important Rules
+## Context
 
-- Commit messages must be written in **English**
-- Use clear and understandable English expressions
-- **If multi-line commit messages are not supported, use simple one-line messages**
+- Current git status: !`git status`
+- Current diff (staged and unstaged changes): !`git diff HEAD`
+- Current branch: !`git branch --show-current`
+- Recent commits: !`git log --oneline -10`
 
-## Basic Commit Message Structure
+## Your Task
 
-### Ideal Structure (when multi-line is supported)
+Based on the above changes, create a single git commit following these rules:
+
+### Commit Message Format
+
+**Single line format (preferred):**
+
+```
+<type>: <subject>
+```
+
+**Multi-line format (when detailed explanation needed):**
 
 ```
 <type>: <subject>
 
-line:
-hoge:
+Detailed explanation of changes and reasoning.
+Additional context or breaking changes if applicable.
 ```
 
-### Simple Structure (single line only)
-
-```
-<type>: <subject>
-```
-
-## Commit Message Types
+### Commit Types
 
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only changes
-- `style`: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- `style`: Code formatting, missing semi-colons, etc (no logic changes)
 - `refactor`: Code change that neither fixes a bug nor adds a feature
 - `test`: Adding or modifying tests
-- `chore`: Changes to the build process, auxiliary tools, or libraries
+- `chore`: Build process, auxiliary tools, or libraries
 
-## Examples of Good Commit Messages
+### Guidelines
 
-### Multi-line Example
-
-```
-feat: add user authentication function
-
-Implement JWT based authentication with login/logout features.
-Also add token refresh functionality for better user experience.
-```
-
-### Single Line Examples
-
-```
-feat: add user authentication function
-refactor: remove unnecessary setStringValue function
-fix: correct expired authentication token handling
-```
-
-## Commit Message Checklist
-
-- [ ] Is the message written in English?
-- [ ] Is the English expression clear and understandable?
-- [ ] Does it clearly convey what was changed?
-- [ ] Is the appropriate type selected?
-- [ ] If multi-line is not available, does the single line convey the key point?
-
-## Commit Message Guidelines
-
-- Use imperative mood in present tense ("Add feature" / "Fix bug" etc.)
+- Write in **English** using imperative mood ("Add feature", "Fix bug")
 - Capitalize the first letter
-- Do not end the message with a period
-- Add body only when necessary to provide detailed explanation
+- No period at the end of the subject line
+- Keep subject line under 50 characters
+- Use body for detailed explanation when necessary
+
+### Examples
+
+```
+feat: add user authentication system
+fix: resolve token expiration handling
+refactor: simplify database connection logic
+docs: update API documentation for v2.0
+```
+
+If a commit message was provided as an argument, use it. Otherwise, analyze the changes and suggest an appropriate commit message following these conventions.
