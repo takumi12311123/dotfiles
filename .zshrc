@@ -14,3 +14,6 @@ fi
 
 # Added by Windsurf
 export PATH="/Users/takumiakasaka/.codeium/windsurf/bin:$PATH"
+
+# Added by kiro shell integration
+[[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
