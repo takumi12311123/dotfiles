@@ -16,4 +16,6 @@ fi
 export PATH="/Users/takumiakasaka/.codeium/windsurf/bin:$PATH"
 
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
+
+# Cursor Agent
 export PATH="$HOME/.local/bin:$PATH"
