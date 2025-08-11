@@ -29,3 +29,5 @@ for item in "${SYNC_ITEMS[@]}"; do
     cp -f "$src" "$dst" >/dev/null 2>&1
   fi
 done
+
+echo "Dotfiles copied to $HOME from $DOTFILES_REPO"
