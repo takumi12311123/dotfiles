@@ -3,6 +3,10 @@ plugins=(
 )
 
 export GOPATH="$HOME"
+# Prefer Homebrew early in PATH if available
+if type brew &>/dev/null; then
+  export PATH="$(brew --prefix)/bin:$PATH"
+fi
 export PATH="$HOME/.local/bin:$GOPATH/bin:$HOME/.asdf/shims:$PATH"
 export GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn"
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
@@ -10,15 +14,16 @@ export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ff00'
 
 ## syntax-highlighting
-source ~/Git-Project/github.com/zdharma-continuum/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+source "$(brew --prefix)/share/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" 2>/dev/null || \
+  source ~/Git-Project/github.com/zdharma-continuum/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
-## zsh-completions
-## zsh-autosuggestions
+## zsh-completions and autosuggestions
 if type brew &>/dev/null; then
-  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-  source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  autoload -Uz compinit && compinit
+  FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
+  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
+autoload -Uz compinit
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION-$HOST"
 
 ## docker desktop
 source /Users/takumiakasaka/.docker/init-zsh.sh || true
@@ -27,9 +32,8 @@ source /Users/takumiakasaka/.docker/init-zsh.sh || true
 eval "$(starship init zsh)"
 
 ## atuin setting
-# FIXME: maybe remove
-# NOTE: brew uninstall atuin
-eval "$(atuin init zsh)"
+# Keep only one initialization to avoid conflicts
+# eval "$(atuin init zsh)"
 eval "$(atuin init zsh --disable-ctrl-r)"
 
 ## tmux setting
