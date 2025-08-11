@@ -1,24 +1,33 @@
-#!/bin/zsh
+#!/usr/bin/env bash
+set -euo pipefail
 
-source ~/.script/variables.sh
+# Simple, quiet copy of selected dotfiles from repo to $HOME
+DOTFILES_REPO="${DOTFILES_REPO:-$HOME/Git-Project/github.com/takumi12311123/dotfiles}"
 
-cp $GIT_PATH/.config/gokurakujoudo/karabiner.edn $CONFIG_PATH/gokurakujoudo
-cp $GIT_PATH/.config/starship.toml $CONFIG_PATH/
+SYNC_ITEMS=(
+  ".zshrc"
+  ".zprofile"
+  ".tmux.conf"
+  ".yabairc"
+  ".skhdrc"
+  ".zsh"
+  ".script"
+)
 
-cp $GIT_PATH/.script/ide.sh $SCRIPT_PATH/
-cp $GIT_PATH/.script/copy_to_dotfiles.sh $SCRIPT_PATH/
-cp $GIT_PATH/.script/back_to_exec_environment.sh $SCRIPT_PATH/
-cp $GIT_PATH/.script/variables.sh $SCRIPT_PATH/
+for item in "${SYNC_ITEMS[@]}"; do
+  src="$DOTFILES_REPO/$item"
+  dst="$HOME/$item"
+  if [[ -d "$src" ]]; then
+    mkdir -p "$dst"
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a "$src/" "$dst/" >/dev/null 2>&1
+    else
+      cp -R "$src/." "$dst" >/dev/null 2>&1
+    fi
+  elif [[ -f "$src" ]]; then
+    mkdir -p "$(dirname "$dst")"
+    cp -f "$src" "$dst" >/dev/null 2>&1
+  fi
+done
 
-cp $GIT_PATH/.zsh/alias.zsh $ZSH_PATH/
-cp $GIT_PATH/.zsh/fzf_function.zsh $ZSH_PATH/
-cp $GIT_PATH/.zsh/init.zsh $ZSH_PATH/
-cp $GIT_PATH/.zsh/secrets.zsh $ZSH_PATH/
-cp $GIT_PATH/.zsh/setopt.zsh $ZSH_PATH/
-
-cp $GIT_PATH/.skhdrc $ROOT_PATH/
-cp $GIT_PATH/.yabairc $ROOT_PATH/
-cp $GIT_PATH/.zprofile $ROOT_PATH/
-cp $GIT_PATH/.zsh_history $ROOT_PATH/
-cp $GIT_PATH/.zshrc $ROOT_PATH/
-cp $GIT_PATH/.tmux.conf $ROOT_PATH/
+echo "Dotfiles copied to $HOME from $DOTFILES_REPO"
