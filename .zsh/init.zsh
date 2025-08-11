@@ -27,9 +27,8 @@ source /Users/takumiakasaka/.docker/init-zsh.sh || true
 eval "$(starship init zsh)"
 
 ## atuin setting
-# FIXME: maybe remove
-# NOTE: brew uninstall atuin
-eval "$(atuin init zsh)"
+# Keep only one initialization to avoid conflicts
+# eval "$(atuin init zsh)"
 eval "$(atuin init zsh --disable-ctrl-r)"
 
 ## tmux setting
