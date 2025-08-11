@@ -1,16 +1,14 @@
 ZSH_DIR="${HOME}/.zsh"
 
+# Initialize core settings
 source "${ZSH_DIR}/init.zsh"
 
-if [ -d $ZSH_DIR ] && [ -r $ZSH_DIR ] && [ -x $ZSH_DIR ]; then
-    for file in ${ZSH_DIR}/*.zsh; do
-        # skip init.zsh
-        if [[ "$file" == "${ZSH_DIR}/init.zsh" ]]; then
-            continue
-        fi
-        [ -r $file ] && source $file
-    done
-fi
+# Load optional zsh fragments safely
+setopt null_glob
+for file in "${ZSH_DIR}"/*.zsh; do
+  [[ "$file" == "${ZSH_DIR}/init.zsh" ]] && continue
+  [[ -r "$file" ]] && source "$file"
+done
 
 # Added by Windsurf
 export PATH="/Users/takumiakasaka/.codeium/windsurf/bin:$PATH"
