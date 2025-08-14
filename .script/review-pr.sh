@@ -97,7 +97,9 @@ fi
 # Split the second pane vertically and run gemini in the third pane (if available)
 if command -v gemini &> /dev/null; then
     GEMINI_PATH=$(command -v gemini)
-    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR ${GEMINI_PATH} --sandbox --approval-mode yolo -p '${FULL_PROMPT}'; exec zsh"
+    # Escape prompt for gemini (double quotes with escaped inner quotes)
+    GEMINI_PROMPT=$(echo "$FULL_PROMPT" | sed 's/"/\\"/g')
+    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR ${GEMINI_PATH} --sandbox --approval-mode yolo -p \"${GEMINI_PROMPT}\"; exec zsh"
 else
     tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini not found. You can install it or use another AI tool.'; exec zsh"
 fi
