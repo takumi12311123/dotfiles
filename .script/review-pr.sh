@@ -14,7 +14,7 @@ PR_INPUT="$1"
 REPO=""
 
 # Parse PR number and repo from GitHub URL if provided
-if [[ "$PR_INPUT" =~ ^https?://github.com/([^/]+/[^/]+)/pull/([0-9]+) ]]; then
+if [[ "$PR_INPUT" =~ ^https?://github.com/([^/]+/[^/]+)/pull/([0-9]+)/?$ ]]; then
     REPO="${match[1]}"
     PR_NUMBER="${match[2]}"
 elif [[ "$PR_INPUT" =~ ^[0-9]+$ ]]; then
