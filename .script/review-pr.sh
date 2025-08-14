@@ -15,8 +15,8 @@ REPO=""
 
 # Parse PR number and repo from GitHub URL if provided
 if [[ "$PR_INPUT" =~ ^https?://github.com/([^/]+/[^/]+)/pull/([0-9]+) ]]; then
-    REPO="${BASH_REMATCH[1]}"
-    PR_NUMBER="${BASH_REMATCH[2]}"
+    REPO="${match[1]}"
+    PR_NUMBER="${match[2]}"
 elif [[ "$PR_INPUT" =~ ^[0-9]+$ ]]; then
     PR_NUMBER="$PR_INPUT"
     # Use second argument as repo if provided
@@ -33,6 +33,13 @@ else
     exit 1
 fi
 
+# Check if repository was determined
+if [ -z "$REPO" ]; then
+    echo "Error: Could not determine repository. Please specify it as a second argument."
+    echo "Usage: $0 <pr-number> <owner/repo>"
+    exit 1
+fi
+
 # Set the prompt file path
 PROMPT_FILE="${HOME}/.script/pr-review-prompt.md"
 
@@ -46,8 +53,7 @@ fi
 PROMPT_TEMPLATE=$(cat "$PROMPT_FILE")
 
 # Build the full prompt
-if [ -n "$REPO" ]; then
-    FULL_PROMPT="Repository: ${REPO}
+FULL_PROMPT="Repository: ${REPO}
 Pull Request: #${PR_NUMBER}
 
 以下のghコマンドを実行してPull Requestを取得し、日本語でレビューしてください：
@@ -55,30 +61,28 @@ Pull Request: #${PR_NUMBER}
 2. gh pr diff ${PR_NUMBER} --repo ${REPO}
 
 ${PROMPT_TEMPLATE}"
-else
-    FULL_PROMPT="Pull Request: #${PR_NUMBER}
-
-以下のghコマンドを実行してPull Requestを取得し、日本語でレビューしてください：
-1. gh pr view ${PR_NUMBER} --repo ${REPO}
-2. gh pr diff ${PR_NUMBER} --repo ${REPO}
-
-${PROMPT_TEMPLATE}"
-fi
 
 # Create new tmux session or attach to existing one
 SESSION_NAME="pr-review-${PR_NUMBER}"
 
-# Kill existing session if it exists
+# Check if existing session exists and ask for confirmation
 tmux has-session -t "$SESSION_NAME" 2>/dev/null
 if [ $? -eq 0 ]; then
-    echo "Killing existing session: $SESSION_NAME"
-    tmux kill-session -t "$SESSION_NAME"
+    echo "An existing review session for PR #${PR_NUMBER} was found."
+    echo -n "Do you want to kill it and create a new one? (y/N): "
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        echo "Killing existing session: $SESSION_NAME"
+        tmux kill-session -t "$SESSION_NAME"
+    else
+        echo "Attaching to existing session..."
+        tmux attach-session -t "$SESSION_NAME"
+        exit 0
+    fi
 fi
 
 echo "Creating review session for PR #${PR_NUMBER}..."
-if [ -n "$REPO" ]; then
-    echo "Repository: $REPO"
-fi
+echo "Repository: $REPO"
 
 # Create new session with claude in the first pane
 tmux new-session -d -s "$SESSION_NAME" -n "PR-Review" "echo 'Claude AI Review:'; echo ''; claude \"${FULL_PROMPT}\"; exec zsh"
@@ -92,7 +96,8 @@ fi
 
 # Split the second pane vertically and run gemini in the third pane (if available)
 if command -v gemini &> /dev/null; then
-    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR /opt/homebrew/bin/gemini --sandbox --approval-mode yolo -p \"${FULL_PROMPT}\"; exec zsh"
+    GEMINI_PATH=$(command -v gemini)
+    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR ${GEMINI_PATH} --sandbox --approval-mode yolo -p \"${FULL_PROMPT}\"; exec zsh"
 else
     tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini not found. You can install it or use another AI tool.'; exec zsh"
 fi
