@@ -49,8 +49,8 @@ if [ ! -f "$PROMPT_FILE" ]; then
     exit 1
 fi
 
-# Read the prompt template
-PROMPT_TEMPLATE=$(cat "$PROMPT_FILE")
+# Read the prompt template and escape special characters for shell
+PROMPT_TEMPLATE=$(cat "$PROMPT_FILE" | sed "s/'/'\\\\''/g")
 
 # Build the full prompt
 FULL_PROMPT="Repository: ${REPO}
@@ -85,11 +85,11 @@ echo "Creating review session for PR #${PR_NUMBER}..."
 echo "Repository: $REPO"
 
 # Create new session with claude in the first pane
-tmux new-session -d -s "$SESSION_NAME" -n "PR-Review" "echo 'Claude AI Review:'; echo ''; claude \"${FULL_PROMPT}\"; exec zsh"
+tmux new-session -d -s "$SESSION_NAME" -n "PR-Review" "echo 'Claude AI Review:'; echo ''; claude '${FULL_PROMPT}'; exec zsh"
 
 # Split horizontally and run cursor-agent in the second pane (if available)
 if command -v cursor-agent &> /dev/null; then
-    tmux split-window -h -t "$SESSION_NAME:0" "echo 'Cursor Agent Review:'; echo ''; cursor-agent \"${FULL_PROMPT}\"; exec zsh"
+    tmux split-window -h -t "$SESSION_NAME:0" "echo 'Cursor Agent Review:'; echo ''; cursor-agent '${FULL_PROMPT}'; exec zsh"
 else
     tmux split-window -h -t "$SESSION_NAME:0" "echo 'Cursor Agent not found. You can install it or use another AI tool.'; exec zsh"
 fi
@@ -97,7 +97,7 @@ fi
 # Split the second pane vertically and run gemini in the third pane (if available)
 if command -v gemini &> /dev/null; then
     GEMINI_PATH=$(command -v gemini)
-    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR ${GEMINI_PATH} --sandbox --approval-mode yolo -p \"${FULL_PROMPT}\"; exec zsh"
+    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR ${GEMINI_PATH} --sandbox --approval-mode yolo -p '${FULL_PROMPT}'; exec zsh"
 else
     tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini not found. You can install it or use another AI tool.'; exec zsh"
 fi
