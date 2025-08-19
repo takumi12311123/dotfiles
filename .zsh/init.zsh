@@ -3,10 +3,6 @@ plugins=(
 )
 
 export GOPATH="$HOME"
-# Prefer Homebrew early in PATH if available
-if type brew &>/dev/null; then
-  export PATH="$(brew --prefix)/bin:$PATH"
-fi
 export PATH="$HOME/.local/bin:$GOPATH/bin:$HOME/.asdf/shims:$PATH"
 export GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn"
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
