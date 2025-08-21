@@ -14,7 +14,7 @@ PR の差分の特定行に対して「なぜこの変更をしたのか」の�
 
 - **差分解析** - `gh pr diff` で変更箇所を特定
 - **Why説明** - 変更の背景と理由を特定行にコメント
-- **GitHub Review** - `gh pr review` で差分行に直接コメント投稿
+- **GitHub API Review** - `gh api` で差分行に直接コメント投稿
 
 ## コメント内容（why説明）
 
@@ -39,57 +39,80 @@ gh pr diff <PR番号>
 gh pr diff <PR番号> --name-only
 ```
 
-### 2. 重要箇所の特定
+### 2. 認知負荷が高い箇所の特定
 
-差分を解析して以下を特定：
-- 新規追加された関数・クラス
-- 大きく変更されたロジック
-- 設定やインフラの変更
-- テストケースの追加・変更
+差分を解析して以下を特定（人間が「なぜ？」と疑問を持つ箇所のみ）：
+- 非自明な設計判断・技術選択
+- 複雑で理解困難なロジック  
+- 暗黙の制約・前提条件
+- 明確でないトレードオフ
 
 ### 3. 差分行へのwhy説明コメント投稿
 
-**重要**: PR全体のレビューではなく、差分の特定行に個別コメントを投稿する
+**重要**: GitHub API を使用して差分の特定行に個別コメントを投稿する
 
 ```bash
-# 手順1: 差分で変更された行を特定
-gh pr diff <PR番号> | grep "^+" | head -20
+# 手順1: リポジトリ情報とPR情報を取得
+REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"')
+HEAD_SHA=$(gh pr view <PR番号> --json headRefOid --jq '.headRefOid')
 
-# 手順2: 各重要行に対して個別にライン別コメントを投稿
-gh pr review <PR番号> --comment --body "なぜこの変更をしたかの説明" --path "ファイル名" --line 行番号
+# 手順2: 差分で認知負荷が高い箇所を特定
+gh pr diff <PR番号>
 
-# 例: agents/pr-comment.md の3行目にコメント
-gh pr review 141 --comment --body "PR説明生成からライン別コメント機能への変更：レビュワーが具体的な変更箇所を理解しやすくするため" --path "agents/pr-comment.md" --line 3
+# 手順3: 本当に必要な箇所のみにコメント投稿
+gh api repos/$REPO/pulls/<PR番号>/comments \
+  --method POST \
+  --field body="簡潔なwhy説明" \
+  --field commit_id="$HEAD_SHA" \
+  --field path="ファイルパス" \
+  --field line=行番号
 
-# 注意: --path は差分に含まれるファイルパスと完全一致させる
-# 注意: --line は差分での行番号（元ファイルの行番号ではない）
+# 実例：
+REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"')
+HEAD_SHA=$(gh pr view 141 --json headRefOid --jq '.headRefOid')
+gh api repos/$REPO/pulls/141/comments \
+  --method POST \
+  --field body="API直接利用: gh pr reviewではライン別コメント不可のため" \
+  --field commit_id="$HEAD_SHA" \
+  --field path=".claude/agents/pr-comment.md" \
+  --field line=52
 ```
 
-## コメント例（why説明）
+## コメント例（簡潔なwhy説明）
 
-- `新しいエージェント機能追加：PRレビューの効率化のため、差分行に直接コメントできる機能が必要だった`
-- `設定ファイル変更：GitHub CLIとの連携強化により、コマンドラインからのPRレビューを可能にするため`
-- `関数リファクタリング：コードの再利用性向上とメンテナンス性確保のため、共通処理を分離`
+- `API直接利用: gh pr reviewではライン別コメント不可のため`
+- `非同期処理: UI応答性確保のため`  
+- `キャッシュ無効化: データ整合性の制約`
+- `型ガード追加: 実行時エラー回避のため`
 
 ## 実行例
 
-差分の重要行それぞれに個別コメントを投稿：
+認知負荷が高い箇所のみに簡潔なコメント投稿：
 
 ```bash
-# 1. 差分確認
+# 1. 汎用的なリポジトリ情報取得
+REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"')
+HEAD_SHA=$(gh pr view 141 --json headRefOid --jq '.headRefOid')
+
+# 2. 差分確認（認知負荷が高い箇所を特定）
 gh pr diff 141
 
-# 2. 重要な変更行を特定して、それぞれに個別コメント投稿
-gh pr review 141 --comment --body "説明機能からレビュー機能への変更：具体的な差分行へのコメント機能が必要だったため" --path "agents/pr-comment.md" --line 3
+# 3. 本当に必要な箇所のみコメント投稿
+gh api repos/$REPO/pulls/141/comments \
+  --method POST \
+  --field body="API直接利用: gh pr reviewではライン別コメント不可のため" \
+  --field commit_id="$HEAD_SHA" \
+  --field path=".claude/agents/pr-comment.md" \
+  --field line=52
 
-gh pr review 141 --comment --body "ライン別コメント機能追加：GitHub Review機能を活用してピンポイントな説明を可能にするため" --path "agents/pr-comment.md" --line 15
-
-# 3. 結果確認
+# 4. 結果確認
 gh pr view 141
 ```
 
 ## 注意点
 
-- **1つのコマンドで1つの行にコメント**を投稿
-- **複数行にコメントしたい場合は複数回実行**
-- **--path のファイルパスは差分に表示されるパスと完全一致**させる
+- **GitHub API を使用**：`gh pr review` コマンドではライン別コメント不可
+- **commit_id 必須**：PRのhead SHA を正確に指定
+- **path は差分パスと完全一致**：差分に表示されるファイルパスを使用
+- **line は実ファイルの行番号**：新規ファイルの場合は追加行番号
+- **1つのAPIコールで1つの行**：複数行には複数回実行が必要
