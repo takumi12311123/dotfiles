@@ -12,6 +12,7 @@ SYNC_ITEMS=(
   ".skhdrc"
   ".zsh"
   ".script"
+  ".claude"
 )
 
 for item in "${SYNC_ITEMS[@]}"; do
