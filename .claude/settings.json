@@ -95,5 +95,22 @@
   "statusLine": {
     "type": "command",
     "command": "npx ccusage@latest statusline"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".go\"))' | xargs -r -I {} sh -c 'gofmt -w \"$1\" && goimports -w \"$1\"' _ {}"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".ts\") or endswith(\".tsx\"))' | xargs -r -I {} sh -c 'npx prettier --write \"$1\"' _ {}"
+          }
+        ]
+      }
+    ]
   }
 }
