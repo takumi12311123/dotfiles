@@ -1,0 +1,42 @@
+# Codex CLI Configuration File
+
+# Model reasoning effort - controls AI's reasoning depth
+# Options: "low", "medium", "high"
+# Recommended: "high" for more comprehensive responses
+model_reasoning_effort = "high"
+
+# Hide internal AI reasoning process to reduce verbose output
+hide_agent_reasoning = true
+
+# Enable network access for web browsing and API calls
+network_access = true
+
+# Tools configuration
+[tools]
+# Enable web search functionality
+web_search = true
+
+# Notification settings
+# Play sound when task completes (macOS specific)
+notify = ["bash", "-lc", "afplay /System/Library/Sounds/Ping.aiff"]
+
+# Trusted projects configuration
+projects = { "/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-server" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-schema" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/eyday/eyday" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/wedinc/one-admin" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/supsysjp/zero-gcp-resources" = { trust_level = "trusted" } }
+
+# MCP (Multi-Computational Platform) Servers
+# Add external service integrations here
+
+# Example: Context7 MCP server
+# [mcp_servers.context7]
+# command = "npx"
+# args = ["-y", "@upstash/context7-mcp@latest"]
+
+# Example: Figma MCP server
+# [mcp_servers.figma]
+# command = "npx"
+# args = ["-y", "mcp-remote", "http://127.0.0.1:3845/sse"]
+
+# Additional MCP servers can be added below
+# [mcp_servers.your_server_name]
+# command = "your_command"
+# args = ["your", "arguments"]

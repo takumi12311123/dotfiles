@@ -13,6 +13,8 @@ cp $CONFIG_PATH/gokurakujoudo/karabiner.edn $GIT_PATH/.config/gokurakujoudo
 cp $CONFIG_PATH/starship/starship.toml $GIT_PATH/.config/starship/
 cp $CONFIG_PATH/karabiner/karabiner.json $GIT_PATH/.config/karabiner/
 
+cp ~/.codex/config.toml $GIT_PATH/codex/
+
 cp $SCRIPT_PATH/ide.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/copy_to_dotfiles.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/back_to_exec_environment.sh $GIT_PATH/.script/
