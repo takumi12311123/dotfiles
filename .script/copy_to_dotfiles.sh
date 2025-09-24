@@ -34,4 +34,8 @@ cp ~/.zsh_history $GIT_PATH/
 cp ~/.zshrc $GIT_PATH/
 cp ~/.tmux.conf $GIT_PATH/
 
+# Copy Codex config (only the public config, not private projects)
+mkdir -p $GIT_PATH/codex
+cp ~/.codex/config.toml $GIT_PATH/codex/ 2>/dev/null || true
+
 echo 'copy to dotfiles done!'
