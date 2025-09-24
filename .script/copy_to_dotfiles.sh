@@ -13,6 +13,9 @@ cp $CONFIG_PATH/gokurakujoudo/karabiner.edn $GIT_PATH/.config/gokurakujoudo
 cp $CONFIG_PATH/starship/starship.toml $GIT_PATH/.config/starship/
 cp $CONFIG_PATH/karabiner/karabiner.json $GIT_PATH/.config/karabiner/
 
+cp ~/.codex/config.toml $GIT_PATH/.codex/
+cp ~/.codex/prompts/* $GIT_PATH/.codex/prompts/
+
 cp $SCRIPT_PATH/ide.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/copy_to_dotfiles.sh $GIT_PATH/.script/
 cp $SCRIPT_PATH/back_to_exec_environment.sh $GIT_PATH/.script/
@@ -33,5 +36,9 @@ cp ~/.zprofile $GIT_PATH/
 cp ~/.zsh_history $GIT_PATH/
 cp ~/.zshrc $GIT_PATH/
 cp ~/.tmux.conf $GIT_PATH/
+
+# Copy Codex config (only the public config, not private projects)
+mkdir -p $GIT_PATH/codex
+cp ~/.codex/config.toml $GIT_PATH/codex/ 2>/dev/null || true
 
 echo 'copy to dotfiles done!'
