@@ -118,10 +118,6 @@
       "Bash(chmod 777:*)"
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": "npx ccusage@latest statusline"
-  },
   "hooks": {
     "PostToolUse": [
       {
@@ -138,5 +134,10 @@
         ]
       }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "npx ccusage@latest statusline"
+  },
+  "alwaysThinkingEnabled": false
 }
