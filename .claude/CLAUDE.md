@@ -38,6 +38,48 @@ This includes but is not limited to:
 
 - creating a new component if the requirement can be met with minor modifications to an existing component.
 
+# 自動レビュー＆説明フロー (Auto Review & Explanation Flow)
+
+## トリガー条件
+実装完了後、以下の条件を満たす場合に自動的にレビューフローを実行:
+- 差分が100行以上ある場合
+
+## 自動実行フロー
+
+### 1. 差分チェック
+- `git diff --stat` で変更行数を確認
+- 100行以上の変更がある場合、次のステップへ進む
+
+### 2. コード品質チェック（順次実行）
+以下を順番に実行し、すべてパスした場合のみ次へ進む:
+1. **フォーマット**: `go fmt ./...` および `goimports -w .`
+2. **リント**: `golangci-lint run`
+3. **テスト**: `go test -race -parallel 4 ./...`
+
+### 3. コードレビュー
+- Taskツールで `review` エージェントを起動
+- 包括的なコードレビューを実施
+- レビュー結果を分析
+
+### 4. 指摘事項の修正
+- Critical/Major issuesがあれば修正
+- 修正後、再度ステップ2からやり直し
+
+### 5. 実装内容の説明
+- すべてのチェックとレビューがパスしたら
+- Taskツールで `explain-implementation` エージェントを起動
+- 実装内容・意図・影響範囲をユーザーに簡潔に説明
+
+## 実行例
+```
+実装完了 → 差分チェック（150行） → format → lint → test → review → 修正 → explain-implementation → ユーザーへ報告
+```
+
+## 注意事項
+- レビューで指摘された Critical/Major issues は必ず修正すること
+- テストが失敗した場合は原因を特定し、修正してから再実行
+- 説明は簡潔に（10-15文程度）、技術的に正確に
+
 # 深夜自動実装モード (Overnight Auto-Implementation Mode)
 
 ## 目的

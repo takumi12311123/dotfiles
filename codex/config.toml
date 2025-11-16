@@ -1,15 +1,29 @@
-# Codex CLI Configuration File
-
-# Model reasoning effort - controls AI's reasoning depth
-# Options: "low", "medium", "high"
-# Recommended: "high" for more comprehensive responses
-model_reasoning_effort = "high"
 
 # Hide internal AI reasoning process to reduce verbose output
 hide_agent_reasoning = true
 
 # Enable network access for web browsing and API calls
 network_access = true
+model = "gpt-5-codex"
+model_reasoning_effort = "medium"
+
+[projects."/Users/takumiakasaka/Git-Project/github.com/wedinc/bellroy"]
+trust_level = "trusted"
+
+[projects."/Users/takumiakasaka/Git-Project/github.com/supsysjp/zero-gcp-resources"]
+trust_level = "trusted"
+
+[projects."/Users/takumiakasaka/Git-Project/github.com/eyday/eyday-server"]
+trust_level = "trusted"
+
+[projects."/Users/takumiakasaka/Git-Project/github.com/eyday/eyday"]
+trust_level = "trusted"
+
+[projects."/Users/takumiakasaka/Git-Project/github.com/eyday/eyday-gcp-resources"]
+trust_level = "trusted"
+
+[projects."/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-server"]
+trust_level = "trusted"
 
 # Tools configuration
 [tools]
@@ -20,9 +34,8 @@ web_search = true
 # Play sound when task completes (macOS specific)
 notify = ["bash", "-lc", "afplay /System/Library/Sounds/Ping.aiff"]
 
-# Custom system prompt for enhanced development workflow
-# To include projects configuration, ensure .projects.toml exists in ~/.codex/
-prompt_file = ".codex/system-prompt.md"
+# Trusted projects configuration
+projects = { "/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-server" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-schema" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/eyday/eyday" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/wedinc/one-admin" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/supsysjp/zero-gcp-resources" = { trust_level = "trusted" } }
 
 # MCP (Multi-Computational Platform) Servers
 # Add external service integrations here
