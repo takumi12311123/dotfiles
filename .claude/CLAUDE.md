@@ -51,10 +51,27 @@ This includes but is not limited to:
 - 100行以上の変更がある場合、次のステップへ進む
 
 ### 2. コード品質チェック（順次実行）
-以下を順番に実行し、すべてパスした場合のみ次へ進む:
-1. **フォーマット**: `go fmt ./...` および `goimports -w .`
-2. **リント**: `golangci-lint run`
-3. **テスト**: `go test -race -parallel 4 ./...`
+プロジェクトの言語・環境を検出し、適切なコマンドを順番に実行。すべてパスした場合のみ次へ進む:
+1. **フォーマット**: 言語に応じたフォーマッターを実行
+   - Go: `go fmt ./...`, `goimports -w .`
+   - TypeScript/JavaScript: `npm run format` または `prettier --write .`
+   - Python: `black .` または `ruff format .`
+   - Rust: `cargo fmt`
+2. **リント**: 言語に応じたリンターを実行
+   - Go: `golangci-lint run`
+   - TypeScript/JavaScript: `npm run lint` または `eslint .`
+   - Python: `ruff check .` または `pylint`
+   - Rust: `cargo clippy`
+3. **テスト**: 言語に応じたテストコマンドを実行
+   - Go: `go test -race -parallel 4 ./...`
+   - TypeScript/JavaScript: `npm test`
+   - Python: `pytest` または `python -m pytest`
+   - Rust: `cargo test`
+
+**検出方法**:
+- プロジェクトルートのファイル（`go.mod`, `package.json`, `pyproject.toml`, `Cargo.toml`等）で言語を判定
+- package.jsonの`scripts`セクションに定義されたコマンドがあればそれを優先
+- 該当するコマンドが存在しない場合はスキップして次へ進む
 
 ### 3. コードレビュー
 - Taskツールで `review` エージェントを起動
