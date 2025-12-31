@@ -28,17 +28,17 @@ Run `codex-review` SKILL **automatically before** asking for user confirmation i
 - After completing code implementation
 - Before `git commit`
 - Before creating PR
-- Before saying "これでいいですか?" or "確認してください"
+- Before asking "Is this okay?" or "Please confirm"
 
 ## Forbidden Patterns
 
 **NEVER DO THIS:**
-- ❌ Complete implementation → "これでいいですか?" (NO codex-review)
+- ❌ Complete implementation → "Is this okay?" (NO codex-review)
 - ❌ Skip codex-review and ask user directly
 - ❌ Present to user with blocking issues remaining
 
 **ALWAYS DO THIS:**
-- ✅ Complete implementation → codex-review → Fix issues → ok: true → "Codexレビュー完了、これでいいですか?"
+- ✅ Complete implementation → codex-review → Fix issues → ok: true → "Codex review passed, is this okay?"
 
 ## Self-Check Before User Confirmation
 
@@ -57,38 +57,38 @@ If ANY checkbox is unchecked → Run codex-review first, then present.
 When presenting after successful review:
 
 ```markdown
-## [タイトル] ✅
+## [Title] ✅
 
-[実装・設計内容の説明]
+[Implementation/design details in Japanese]
 
-### Codexレビュー結果
-- **ステータス**: ✅ ok
-- **反復回数**: 2/5
-- **修正項目**:
-  1. [修正内容1]
-  2. [修正内容2]
-- **Advisory(参考)**: [任意対応の指摘があれば]
+### Codex Review Results
+- **Status**: ✅ ok
+- **Iterations**: 2/5
+- **Fixed Issues**:
+  1. [Fix 1]
+  2. [Fix 2]
+- **Advisory (optional)**: [Minor suggestions if any]
 
-この内容で進めてよろしいですか?
+Is this okay to proceed?
 ```
 
 When blocking issues remain after max iterations:
 
 ```markdown
-## [タイトル] ⚠️
+## [Title] ⚠️
 
-[内容説明]
+[Details in Japanese]
 
-### Codexレビュー結果
-- **ステータス**: ⚠️ 未解決issue残存
-- **反復回数**: 5/5 (上限到達)
+### Codex Review Results
+- **Status**: ⚠️ Unresolved issues remain
+- **Iterations**: 5/5 (max reached)
 
-### 未解決のBlocking Issues
+### Unresolved Blocking Issues
 1. `file.py:42-45`
-   - **問題**: [問題の説明]
-   - **推奨**: [推奨される対応]
+   - **Problem**: [Description]
+   - **Recommendation**: [Suggested fix]
 
-これらを解決してから進めるべきですが、どうしますか?
+Should we fix these before proceeding?
 ```
 
 ---
@@ -110,7 +110,7 @@ When blocking issues remain after max iterations:
 
 # Core Rules
 
-- Please make sure to consult the user whenever you plan to use an implementation method or technique that hasn't been used in other files
+- Consult the user whenever you plan to use an implementation method or technique that hasn't been used in other files
 - For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools simultaneously rather than sequentially
 
 ---
@@ -185,90 +185,3 @@ This includes but is not limited to:
 - **Subagents**: Use separate context windows for parallel processing
 - **Codex**: Offload deep analysis to reduce Claude Code context consumption
 - **Results**: Only return concise summaries to main context
-
----
-
-# 深夜自動実装モード (Overnight Auto-Implementation Mode)
-
-## 目的
-開発者が不在の深夜帯でも効率的に実装を進められるようにする
-
-## 事前許可済み操作
-以下の操作は明示的な許可なしに実行可能:
-- **テスト実行**: `npm test`, `go test`, `pytest`, `cargo test` 等
-- **ビルド**: `npm run build`, `go build`, `cargo build` 等
-- **リント/フォーマット**: `npm run lint`, `golangci-lint`, `rustfmt`, `black` 等
-- **型チェック**: `npm run typecheck`, `tsc --noEmit` 等
-- **ファイル操作**: src/, tests/, lib/ 配下のファイルの作成・編集
-- **git操作**: status, diff, log, branch (commit/pushは除く)
-- **ドキュメント生成**: `npm run docs`, `go doc` 等
-- **codex-review**: 実装完了時の自動レビュー
-
-## 実装戦略
-
-### 1. タスク管理
-- TodoWriteツールで全タスクを事前に分解・記録
-- 各タスクに推定時間を設定(最大30分/タスク)
-- 詰まったタスクはスキップし、次のタスクへ進む
-
-### 2. 進捗管理
-- 1時間ごとに進捗をメモリーに保存
-- 各チェックポイントで以下を記録:
-  - 完了したタスク
-  - 現在のタスク
-  - 発生した問題
-  - 次のアクション
-
-### 3. 自己検証ループ
-- 30分ごとに以下を確認:
-  - 現在のタスクが元の目的に沿っているか
-  - コードが既存のパターンに従っているか
-  - テストが通っているか
-  - **codex-reviewを通過しているか**
-
-### 4. AI エージェントとの協調作業
-- **設計相談**: 複雑な設計判断が必要な場合
-  - `codex-design` SKILLで設計方針を相談
-- **コードレビュー**: 実装完了後(自動)
-  - `codex-review` SKILLで品質チェック
-  - フィードバックを受けて改善
-- **問題解決**: エラーや予期しない動作の場合
-  - Codexと協調デバッグセッション
-  - 複数の視点から最適解を導出
-
-### 5. エラーハンドリング
-- エラー発生時は3回まで別アプローチで再試行
-- 解決不能な場合は詳細なエラーログを残して次へ
-- 朝の報告書に未解決事項として記載
-
-### 6. 実装前チェックリスト
-実装開始前に必ず確認:
-- [ ] 仕様/要件が明確か
-- [ ] テストケースが定義されているか
-- [ ] 既存コードのパターンを理解したか
-- [ ] ロールバック方法が明確か
-- [ ] 必要なライブラリは既にインストール済みか
-
-## 報告書フォーマット
-朝の報告書には以下を含める:
-```markdown
-# 深夜実装レポート [日付]
-
-## 完了タスク
-- [x] タスク名: 結果の要約
-  - Codexレビュー: ✅ ok (反復: 2/5)
-
-## 未完了タスク
-- [ ] タスク名: 理由と推奨アクション
-
-## 発生した問題
-- 問題の詳細と試みた解決策
-
-## Codexレビューサマリ
-- 総レビュー回数: 5回
-- 平均反復: 2.4/5
-- 未解決issue: なし
-
-## 次のステップ
-- 推奨される次のアクション
-```
