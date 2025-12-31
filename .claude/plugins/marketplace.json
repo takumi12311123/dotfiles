@@ -1,0 +1,23 @@
+{
+  "name": "Local Plugins",
+  "plugins": {
+    "go-lsp": {
+      "name": "Go LSP",
+      "description": "Language Server Protocol support for Go using gopls",
+      "version": "1.0.0",
+      "source": {
+        "type": "local",
+        "path": "go-lsp"
+      }
+    },
+    "typescript-lsp": {
+      "name": "TypeScript LSP",
+      "description": "Language Server Protocol support for TypeScript/JavaScript using typescript-language-server",
+      "version": "1.0.0",
+      "source": {
+        "type": "local",
+        "path": "typescript-lsp"
+      }
+    }
+  }
+}

@@ -113,5 +113,17 @@
     "type": "command",
     "command": "npx ccusage@latest statusline"
   },
-  "alwaysThinkingEnabled": false
+  "alwaysThinkingEnabled": false,
+  "enabledPlugins": {
+    "go-lsp@local": true,
+    "typescript-lsp@local": true
+  },
+  "extraKnownMarketplaces": {
+    "local": {
+      "source": {
+        "source": "directory",
+        "path": ".claude/plugins"
+      }
+    }
+  }
 }
