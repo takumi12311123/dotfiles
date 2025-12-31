@@ -1,6 +1,6 @@
 ---
 name: infra-terraform
-description: Terraformのベストプラクティスに従い、安全でスケーラブルなインフラストラクチャをコードとして管理します。モジュール化、状態管理、セキュリティを重視したIaC実装に自動適用されます。
+description: Enforces Terraform best practices for safe and scalable infrastructure as code. Emphasizes modularity, state management, and security. Automatically applied for IaC implementation.
 metadata:
   context: terraform, infrastructure, iac, aws, gcp, azure
   auto-trigger: true
@@ -8,26 +8,26 @@ metadata:
 
 # Infrastructure as Code with Terraform
 
-## 概要
+## Overview
 
-このスキルは、Terraformによるインフラストラクチャ管理のベストプラクティスを提供します。モジュール設計、状態管理、セキュリティ、CI/CD統合を重視し、信頼性の高いインフラストラクチャを構築します。
+This skill provides best practices for Terraform infrastructure management. It emphasizes module design, state management, security, and CI/CD integration to build reliable infrastructure.
 
-## 自動トリガー条件
+## Auto-Trigger Conditions
 
-以下の場合に自動的にこのスキルが適用されます:
+This skill is automatically applied when:
 
-- Terraformファイル (`.tf`, `.tfvars`) の作成・編集
-- インフラストラクチャのプロビジョニング
-- クラウドリソース管理
-- "インフラ構築"、"Terraform"などのキーワード
+- Creating or editing Terraform files (`.tf`, `.tfvars`)
+- Infrastructure provisioning tasks
+- Cloud resource management
+- Keywords like "infrastructure", "Terraform" are mentioned
 
-## プロジェクト構造
+## Project Structure
 
-### ルートモジュール構造
+### Root Module Structure
 
 ```bash
 terraform-project/
-├── environments/              # 環境別ルートモジュール
+├── environments/              # Environment-specific root modules
 │   ├── dev/
 │   │   ├── main.tf
 │   │   ├── variables.tf
@@ -38,7 +38,7 @@ terraform-project/
 │   │   └── ...
 │   └── prod/
 │       └── ...
-├── modules/                   # 再利用可能なモジュール
+├── modules/                   # Reusable modules
 │   ├── network/
 │   │   ├── main.tf
 │   │   ├── variables.tf
@@ -48,24 +48,24 @@ terraform-project/
 │   │   └── ...
 │   └── database/
 │       └── ...
-├── .terraform.lock.hcl       # プロバイダーバージョンロック
+├── .terraform.lock.hcl       # Provider version lock
 ├── .gitignore
 └── README.md
 ```
 
-### ファイル命名規則
+### File Naming Conventions
 
-- `main.tf` - メインリソース定義
-- `variables.tf` - 入力変数定義
-- `outputs.tf` - 出力値定義
-- `versions.tf` - Terraform/プロバイダーバージョン
-- `backend.tf` - リモートバックエンド設定
-- `data.tf` - データソース定義（オプション）
-- `locals.tf` - ローカル変数定義（オプション）
+- `main.tf` - Main resource definitions
+- `variables.tf` - Input variable declarations
+- `outputs.tf` - Output value declarations
+- `versions.tf` - Terraform/provider versions
+- `backend.tf` - Remote backend configuration
+- `data.tf` - Data source definitions (optional)
+- `locals.tf` - Local variable definitions (optional)
 
-## モジュール設計原則
+## Module Design Principles
 
-### 1. 標準モジュール構造
+### 1. Standard Module Structure
 
 ```hcl
 # modules/network/main.tf
@@ -149,7 +149,7 @@ output "vpc_cidr_block" {
 }
 ```
 
-### 2. モジュール呼び出し
+### 2. Module Invocation
 
 ```hcl
 # environments/prod/main.tf
@@ -176,9 +176,9 @@ module "compute" {
 }
 ```
 
-## 状態管理ベストプラクティス
+## State Management Best Practices
 
-### 1. リモートバックエンド設定 (S3 + DynamoDB)
+### 1. Remote Backend Configuration (S3 + DynamoDB)
 
 ```hcl
 # environments/prod/backend.tf
@@ -190,31 +190,31 @@ terraform {
     encrypt        = true
     dynamodb_table = "terraform-state-lock-prod"
 
-    # バージョニング有効化を推奨
+    # Enable versioning (recommended)
     versioning     = true
   }
 }
 ```
 
-### 2. 状態ファイル分離
+### 2. State File Isolation
 
 ```bash
-# 環境ごとに分離
+# Separate by environment
 environments/
-├── dev/     # dev環境の状態
-├── staging/ # staging環境の状態
-└── prod/    # prod環境の状態（最も厳格な管理）
+├── dev/     # dev environment state
+├── staging/ # staging environment state
+└── prod/    # prod environment state (most strictly managed)
 
-# または、ワークスペース利用
+# Or use workspaces
 terraform workspace new dev
 terraform workspace new staging
 terraform workspace new prod
 ```
 
-### 3. 状態ロック
+### 3. State Locking
 
 ```hcl
-# DynamoDBテーブル作成（AWSの場合）
+# Create DynamoDB table (for AWS)
 resource "aws_dynamodb_table" "terraform_lock" {
   name           = "terraform-state-lock-${var.environment}"
   billing_mode   = "PAY_PER_REQUEST"
@@ -232,7 +232,7 @@ resource "aws_dynamodb_table" "terraform_lock" {
 }
 ```
 
-## バージョン管理
+## Version Management
 
 ```hcl
 # versions.tf
@@ -260,9 +260,9 @@ provider "aws" {
 }
 ```
 
-## 変数と環境管理
+## Variables and Environment Management
 
-### 1. 変数定義
+### 1. Variable Definitions
 
 ```hcl
 # variables.tf
@@ -295,7 +295,7 @@ variable "tags" {
 }
 ```
 
-### 2. tfvarsファイル
+### 2. tfvars Files
 
 ```hcl
 # environments/prod/terraform.tfvars
@@ -313,7 +313,7 @@ tags = {
 }
 ```
 
-### 3. ローカル変数
+### 3. Local Variables
 
 ```hcl
 # locals.tf
@@ -327,7 +327,7 @@ locals {
     }
   )
 
-  # 環境別設定
+  # Environment-specific configuration
   instance_type = {
     dev     = "t3.micro"
     staging = "t3.small"
@@ -338,17 +338,17 @@ locals {
 }
 ```
 
-## セキュリティベストプラクティス
+## Security Best Practices
 
-### 1. シークレット管理
+### 1. Secret Management
 
 ```hcl
-# ❌ BAD - ハードコード禁止
+# ❌ BAD - Hardcoded secrets
 resource "aws_db_instance" "bad" {
-  password = "hardcoded-password"  # 絶対にNG
+  password = "hardcoded-password"  # Never do this
 }
 
-# ✅ GOOD - Secrets Manager使用
+# ✅ GOOD - Use Secrets Manager
 data "aws_secretsmanager_secret_version" "db_password" {
   secret_id = "prod/db/password"
 }
@@ -357,7 +357,7 @@ resource "aws_db_instance" "good" {
   password = data.aws_secretsmanager_secret_version.db_password.secret_string
 }
 
-# ✅ GOOD - 環境変数使用
+# ✅ GOOD - Use environment variables
 variable "db_password" {
   description = "Database password"
   type        = string
@@ -365,7 +365,7 @@ variable "db_password" {
 }
 ```
 
-### 2. センシティブデータのマスキング
+### 2. Sensitive Data Masking
 
 ```hcl
 variable "api_key" {
@@ -381,7 +381,7 @@ output "connection_string" {
 }
 ```
 
-### 3. IAMポリシー（最小権限の原則）
+### 3. IAM Policies (Least Privilege Principle)
 
 ```hcl
 resource "aws_iam_role_policy" "app" {
@@ -404,10 +404,10 @@ resource "aws_iam_role_policy" "app" {
 }
 ```
 
-## リソース命名規則
+## Resource Naming Conventions
 
 ```hcl
-# 命名パターン: {environment}-{service}-{resource-type}-{index}
+# Naming pattern: {environment}-{service}-{resource-type}-{index}
 resource "aws_instance" "web" {
   count = var.instance_count
 
@@ -416,13 +416,13 @@ resource "aws_instance" "web" {
   }
 }
 
-# 例: prod-web-server-1, prod-web-server-2, prod-web-server-3
+# Example: prod-web-server-1, prod-web-server-2, prod-web-server-3
 ```
 
-## データソース活用
+## Data Source Usage
 
 ```hcl
-# 既存リソースの参照
+# Reference existing resources
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -444,7 +444,7 @@ resource "aws_instance" "app" {
 }
 ```
 
-## 条件分岐とループ
+## Conditionals and Loops
 
 ### 1. count
 
@@ -499,9 +499,9 @@ resource "aws_security_group" "app" {
 }
 ```
 
-## CI/CD統合
+## CI/CD Integration
 
-### 1. GitHub Actions例
+### 1. GitHub Actions Example
 
 ```yaml
 # .github/workflows/terraform.yml
@@ -547,7 +547,7 @@ jobs:
         working-directory: ./environments/prod
 ```
 
-### 2. Pre-commit hooks
+### 2. Pre-commit Hooks
 
 ```yaml
 # .pre-commit-config.yaml
@@ -561,80 +561,80 @@ repos:
       - id: terraform_tflint
 ```
 
-## 実装チェックリスト
+## Implementation Checklist
 
-### 設計フェーズ
-- [ ] 環境分離戦略を決定（ディレクトリ or ワークスペース）
-- [ ] モジュール境界を定義
-- [ ] 命名規則を策定
-- [ ] タグ戦略を決定
+### Design Phase
+- [ ] Decide environment isolation strategy (directory vs workspace)
+- [ ] Define module boundaries
+- [ ] Establish naming conventions
+- [ ] Determine tagging strategy
 
-### 実装フェーズ
-- [ ] リモートバックエンド設定
-- [ ] プロバイダーバージョン固定
-- [ ] 変数バリデーション追加
-- [ ] センシティブ変数をマーク
-- [ ] モジュールREADME作成
-- [ ] データソースで既存リソース参照
+### Implementation Phase
+- [ ] Configure remote backend
+- [ ] Pin provider versions
+- [ ] Add variable validation
+- [ ] Mark sensitive variables
+- [ ] Create module READMEs
+- [ ] Reference existing resources with data sources
 
-### セキュリティ
-- [ ] シークレットをハードコードしない
-- [ ] 最小権限のIAMポリシー
-- [ ] 状態ファイルの暗号化
-- [ ] .gitignoreで機密ファイル除外
+### Security
+- [ ] Don't hardcode secrets
+- [ ] Use least privilege IAM policies
+- [ ] Encrypt state files
+- [ ] Exclude sensitive files in .gitignore
 
-### テスト・デプロイ
-- [ ] `terraform fmt`で整形
-- [ ] `terraform validate`で検証
-- [ ] `terraform plan`で変更確認
-- [ ] ドリフト検出の自動化
-- [ ] CI/CDパイプライン構築
+### Testing & Deployment
+- [ ] Format with `terraform fmt`
+- [ ] Validate with `terraform validate`
+- [ ] Review changes with `terraform plan`
+- [ ] Automate drift detection
+- [ ] Build CI/CD pipeline
 
-## ベストプラクティス
+## Best Practices
 
 ### DO ✅
-- モジュールを小さく保つ（単一責任）
-- リモートバックエンドを使用
-- 状態ファイルをバージョン管理から除外
-- .terraform.lock.hclをコミット
-- タグを一貫して適用
-- ドキュメントを最新に保つ
-- terraform fmtを実行
+- Keep modules small (single responsibility)
+- Use remote backends
+- Exclude state files from version control
+- Commit .terraform.lock.hcl
+- Apply tags consistently
+- Keep documentation up to date
+- Run terraform fmt
 
 ### DON'T ❌
-- 巨大なモジュールを作らない
-- ハードコードされたシークレット
-- 状態ファイルをgitにコミット
-- プロバイダーバージョンを固定しない
-- 本番環境で`terraform destroy`を気軽に実行
-- 環境間でコードを重複させる
+- Don't create mega-modules
+- Don't hardcode secrets
+- Don't commit state files to git
+- Don't leave provider versions unpinned
+- Don't casually run `terraform destroy` in production
+- Don't duplicate code across environments
 
-## トラブルシューティング
+## Troubleshooting
 
 ```bash
-# 状態ファイルの確認
+# Show state file
 terraform show
 
-# 状態ファイルのリスト
+# List state file contents
 terraform state list
 
-# 特定リソースの詳細
+# Show specific resource details
 terraform state show aws_instance.web[0]
 
-# リソースのインポート
+# Import existing resources
 terraform import aws_instance.web i-1234567890abcdef0
 
-# 状態の更新（ドリフト修正）
+# Refresh state (fix drift)
 terraform refresh
 
-# ドリフト検出
+# Detect drift
 terraform plan -detailed-exitcode
 ```
 
-## コスト最適化
+## Cost Optimization
 
 ```hcl
-# タグによるコスト配分
+# Cost allocation via tags
 locals {
   cost_tags = {
     CostCenter  = var.cost_center
@@ -643,11 +643,11 @@ locals {
   }
 }
 
-# リソースの自動停止（非本番環境）
+# Auto-shutdown for non-production (example)
 resource "aws_instance" "app" {
-  # ... 他の設定 ...
+  # ... other configuration ...
 
-  # 本番以外は夜間停止
+  # Only run in production 24/7
   count = var.environment == "prod" ? var.instance_count : 0
 
   tags = merge(
@@ -659,13 +659,13 @@ resource "aws_instance" "app" {
 }
 ```
 
-## まとめ
+## Summary
 
-このスキルは以下を保証します:
+This skill ensures:
 
-- 🏗️ **モジュール化**: 再利用可能で保守しやすいコード
-- 🔒 **セキュリティ**: シークレット管理と最小権限
-- 📊 **状態管理**: 安全なリモートバックエンドとロック
-- 🚀 **CI/CD**: 自動化されたデプロイメント
-- 💰 **コスト最適化**: タグ付けとリソース管理
-- 📚 **ドキュメント**: 明確なモジュール説明
+- 🏗️ **Modularity**: Reusable and maintainable code
+- 🔒 **Security**: Secret management and least privilege
+- 📊 **State Management**: Safe remote backend with locking
+- 🚀 **CI/CD**: Automated deployments
+- 💰 **Cost Optimization**: Tagging and resource management
+- 📚 **Documentation**: Clear module descriptions

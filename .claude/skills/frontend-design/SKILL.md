@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Figmaデザインを本番環境対応のコードに変換し、1:1のビジュアル精度を実現します。フロントエンド実装、UIコンポーネント作成、Figma URLが提供された場合に自動的に使用されます。
+description: Translates Figma designs into production-ready code with 1:1 visual fidelity. Automatically applied for frontend implementation, UI component creation, and when Figma URLs are provided.
 metadata:
   context: frontend, ui, react, typescript, tailwind, figma
   auto-trigger: true
@@ -8,68 +8,68 @@ metadata:
 
 # Frontend Design Implementation
 
-## 概要
+## Overview
 
-このスキルは、Figmaデザインをピクセルパーフェクトな本番対応コードに変換するための構造化されたワークフローを提供します。デザインシステムとの一貫性、適切なコンポーネント再利用、アクセシビリティを確保します。
+This skill provides a structured workflow for translating Figma designs into pixel-perfect production-ready code. It ensures consistency with design systems, proper component reuse, and accessibility compliance.
 
-## 自動トリガー条件
+## Auto-Trigger Conditions
 
-以下の場合に自動的にこのスキルが適用されます:
+This skill is automatically applied when:
 
-- フロントエンド実装タスク
-- UIコンポーネントの作成・修正
-- Figma URLが提供された場合
-- "デザイン実装"、"コンポーネント作成"などのキーワード
-- TypeScript/React/Tailwind CSS関連のタスク
+- Working on frontend implementation tasks
+- Creating or modifying UI components
+- Figma URLs are provided
+- Keywords like "design implementation", "component creation" are mentioned
+- Working with TypeScript/React/Tailwind CSS
 
-## ワークフロー
+## Workflow
 
-### 1. プロジェクト構造の確認
+### 1. Project Structure Verification
 
 ```bash
-# 既存のコンポーネント構造を確認
+# Verify existing component structure
 src/
-├── components/     # 再利用可能なUIコンポーネント
-├── features/       # 機能別コンポーネント
-├── hooks/          # カスタムフック
-├── styles/         # グローバルスタイル
-├── types/          # TypeScript型定義
-└── utils/          # ユーティリティ関数
+├── components/     # Reusable UI components
+├── features/       # Feature-specific components
+├── hooks/          # Custom hooks
+├── styles/         # Global styles
+├── types/          # TypeScript type definitions
+└── utils/          # Utility functions
 ```
 
-### 2. デザインシステムの確認
+### 2. Design System Check
 
-実装前に以下を確認:
+Before implementation, verify:
 
-- **既存のコンポーネント**: 再利用可能なコンポーネントを優先
-- **デザイントークン**: カラー、スペーシング、タイポグラフィ
-- **スタイルガイド**: 命名規則、構造パターン
-- **状態管理**: 既存の状態管理パターン
+- **Existing Components**: Prioritize reusable components
+- **Design Tokens**: Colors, spacing, typography
+- **Style Guide**: Naming conventions, structural patterns
+- **State Management**: Existing state management patterns
 
-### 3. コンポーネント設計原則
+### 3. Component Design Principles
 
-#### TypeScript型定義
+#### TypeScript Type Definitions
 ```typescript
-// Props型を明示的に定義
+// Define Props types explicitly
 interface ComponentProps {
-  // 必須プロパティ
+  // Required properties
   id: string;
   title: string;
 
-  // オプショナルプロパティ
+  // Optional properties
   description?: string;
 
-  // イベントハンドラー
+  // Event handlers
   onClick?: () => void;
 
-  // スタイルのカスタマイズ
+  // Style customization
   className?: string;
 }
 ```
 
-#### コンポーネント構造
+#### Component Structure
 ```typescript
-// 関数コンポーネント + TypeScript
+// Function component + TypeScript
 export const Component: React.FC<ComponentProps> = ({
   id,
   title,
@@ -77,31 +77,31 @@ export const Component: React.FC<ComponentProps> = ({
   onClick,
   className
 }) => {
-  // カスタムフック
+  // Custom hooks
   const { state, handlers } = useComponentLogic();
 
-  // 条件付きレンダリング
+  // Conditional rendering
   if (!title) return null;
 
   return (
     <div className={cn('base-styles', className)}>
-      {/* コンポーネント実装 */}
+      {/* Component implementation */}
     </div>
   );
 };
 ```
 
-### 4. スタイリング戦略
+### 4. Styling Strategy
 
-#### Tailwind CSS優先
+#### Tailwind CSS First
 ```typescript
-// Tailwind クラスを使用
+// Use Tailwind classes
 <div className="flex items-center gap-4 p-6 rounded-lg bg-white shadow-md">
   <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
 </div>
 ```
 
-#### 条件付きスタイル
+#### Conditional Styles
 ```typescript
 import { cn } from '@/utils/cn';
 
@@ -115,46 +115,46 @@ import { cn } from '@/utils/cn';
 >
 ```
 
-### 5. アクセシビリティ要件
+### 5. Accessibility Requirements
 
-必須事項:
-- ✅ **セマンティックHTML**: `<button>`, `<nav>`, `<header>` など
-- ✅ **ARIA属性**: `aria-label`, `aria-describedby`, `role`
-- ✅ **キーボードナビゲーション**: Tab, Enter, Escapeサポート
-- ✅ **フォーカス管理**: 適切なフォーカススタイル
-- ✅ **カラーコントラスト**: WCAG AA準拠 (4.5:1以上)
+Must-haves:
+- ✅ **Semantic HTML**: `<button>`, `<nav>`, `<header>`, etc.
+- ✅ **ARIA Attributes**: `aria-label`, `aria-describedby`, `role`
+- ✅ **Keyboard Navigation**: Tab, Enter, Escape support
+- ✅ **Focus Management**: Proper focus styles
+- ✅ **Color Contrast**: WCAG AA compliance (4.5:1 minimum)
 
 ```typescript
 <button
-  aria-label="メニューを開く"
+  aria-label="Open menu"
   aria-expanded={isOpen}
   onClick={handleClick}
   onKeyDown={(e) => e.key === 'Enter' && handleClick()}
 >
 ```
 
-### 6. パフォーマンス最適化
+### 6. Performance Optimization
 
 ```typescript
-// 1. React.memo で不要な再レンダリング防止
+// 1. React.memo to prevent unnecessary re-renders
 export const MemoizedComponent = React.memo(Component);
 
-// 2. useCallback でイベントハンドラーを最適化
+// 2. useCallback to optimize event handlers
 const handleClick = useCallback(() => {
-  // 処理
+  // processing
 }, [dependencies]);
 
-// 3. useMemo で計算コストの高い処理をキャッシュ
+// 3. useMemo to cache expensive computations
 const expensiveValue = useMemo(
   () => computeExpensiveValue(data),
   [data]
 );
 
-// 4. 動的インポートでコード分割
+// 4. Dynamic imports for code splitting
 const HeavyComponent = lazy(() => import('./HeavyComponent'));
 ```
 
-### 7. テスト戦略
+### 7. Testing Strategy
 
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -175,48 +175,48 @@ describe('Component', () => {
 });
 ```
 
-### 8. 実装チェックリスト
+### 8. Implementation Checklist
 
-実装前:
-- [ ] 既存の類似コンポーネントを検索
-- [ ] デザインシステムのトークンを確認
-- [ ] 必要なアセット（画像、アイコン）を特定
+Before implementation:
+- [ ] Search for similar existing components
+- [ ] Verify design system tokens
+- [ ] Identify required assets (images, icons)
 
-実装中:
-- [ ] TypeScript型定義を作成
-- [ ] Tailwind CSSでスタイリング
-- [ ] アクセシビリティ要件を満たす
-- [ ] レスポンシブデザイン対応
-- [ ] エラーハンドリング実装
+During implementation:
+- [ ] Create TypeScript type definitions
+- [ ] Style with Tailwind CSS
+- [ ] Meet accessibility requirements
+- [ ] Implement responsive design
+- [ ] Add error handling
 
-実装後:
-- [ ] ビジュアル確認（デザインと比較）
-- [ ] ユニットテスト作成
-- [ ] ストーリーブック追加（存在する場合）
-- [ ] ドキュメント更新
+After implementation:
+- [ ] Visual verification (compare with design)
+- [ ] Write unit tests
+- [ ] Add to Storybook (if exists)
+- [ ] Update documentation
 
-## ベストプラクティス
+## Best Practices
 
 ### DO ✅
-- 既存コンポーネントの再利用を優先
-- デザインシステムのトークンを使用
-- セマンティックHTMLを使用
-- アクセシビリティを最初から考慮
-- エッジケースのエラーハンドリング
-- パフォーマンスを意識した実装
+- Prioritize reusing existing components
+- Use design system tokens
+- Use semantic HTML
+- Consider accessibility from the start
+- Handle edge case errors
+- Implement with performance in mind
 
 ### DON'T ❌
-- 新規コンポーネントを安易に作成しない
-- ハードコードされた値を使用しない
-- インラインスタイルを多用しない
-- アクセシビリティを後回しにしない
-- テストを書かない
-- グローバルスタイルを汚染しない
+- Don't create new components carelessly
+- Don't use hardcoded values
+- Don't overuse inline styles
+- Don't defer accessibility
+- Don't skip writing tests
+- Don't pollute global styles
 
-## エラーハンドリング
+## Error Handling
 
 ```typescript
-// エラーバウンダリー
+// Error Boundary
 class ErrorBoundary extends React.Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Component error:', error, errorInfo);
@@ -230,7 +230,7 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
-// ローディング・エラー状態
+// Loading & Error states
 const Component = () => {
   const { data, isLoading, error } = useQuery();
 
@@ -242,23 +242,23 @@ const Component = () => {
 };
 ```
 
-## Figma統合（オプション）
+## Figma Integration (Optional)
 
-Figma MCP Serverが利用可能な場合:
+When Figma MCP Server is available:
 
-1. デザインURLからノードIDを取得
-2. デザイントークンを自動抽出
-3. ビジュアルリファレンスをキャプチャ
-4. アセットを自動ダウンロード
-5. 実装後にビジュアル比較
+1. Extract node ID from design URL
+2. Auto-extract design tokens
+3. Capture visual reference
+4. Auto-download assets
+5. Visual comparison after implementation
 
-## まとめ
+## Summary
 
-このスキルは以下を保証します:
+This skill ensures:
 
-- 🎨 **デザインとの1:1精度**: ピクセルパーフェクト実装
-- ♿ **アクセシビリティ**: WCAG準拠
-- 🔄 **再利用性**: コンポーネント指向
-- ⚡ **パフォーマンス**: 最適化された実装
-- 🧪 **テスト可能性**: 保守しやすいコード
-- 📚 **一貫性**: デザインシステムへの準拠
+- 🎨 **1:1 Accuracy with Design**: Pixel-perfect implementation
+- ♿ **Accessibility**: WCAG compliance
+- 🔄 **Reusability**: Component-oriented approach
+- ⚡ **Performance**: Optimized implementation
+- 🧪 **Testability**: Maintainable code
+- 📚 **Consistency**: Adherence to design system

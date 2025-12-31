@@ -1,6 +1,6 @@
 ---
 name: backend-go
-description: Goバックエンド開発のベストプラクティスに従い、クリーンアーキテクチャ、テスト駆動開発、保守性の高いコードを実現します。Goのバックエンド実装、API開発、マイクロサービス構築に自動適用されます。
+description: Enforces Go backend best practices following clean architecture, dependency injection, and test-driven development. Automatically applied for Go backend implementation, API development, and microservices construction.
 metadata:
   context: go, backend, api, microservices, clean-architecture
   auto-trigger: true
@@ -8,51 +8,51 @@ metadata:
 
 # Backend Go Development
 
-## 概要
+## Overview
 
-このスキルは、Goバックエンド開発におけるベストプラクティスを提供します。クリーンアーキテクチャ、依存性注入、テスト駆動開発を重視し、スケーラブルで保守性の高いコードベースを構築します。
+This skill provides best practices for Go backend development. It emphasizes clean architecture, dependency injection, and test-driven development to build scalable and maintainable codebases.
 
-## 自動トリガー条件
+## Auto-Trigger Conditions
 
-以下の場合に自動的にこのスキルが適用されます:
+This skill is automatically applied when:
 
-- Goファイル (`.go`) の作成・編集
-- バックエンドAPI開発
-- マイクロサービス実装
-- データベース操作
-- "バックエンド実装"、"API作成"などのキーワード
+- Creating or editing Go files (`.go`)
+- Working on backend API development
+- Implementing microservices
+- Database operations
+- Keywords like "backend implementation", "API creation" are mentioned
 
-## プロジェクト構造 (Clean Architecture)
+## Project Structure (Clean Architecture)
 
 ```bash
 project/
 ├── cmd/
-│   └── api/                    # アプリケーションエントリーポイント
+│   └── api/                    # Application entry point
 │       └── main.go
-├── internal/                   # プライベートコード（外部からimport不可）
-│   ├── domain/                 # ビジネスロジック層（最も内側）
-│   │   ├── entity/            # エンティティ（ビジネスオブジェクト）
-│   │   ├── repository/        # リポジトリインターフェース
-│   │   └── service/           # ドメインサービス
-│   ├── usecase/               # アプリケーションビジネスルール
+├── internal/                   # Private code (cannot be imported externally)
+│   ├── domain/                 # Business logic layer (innermost)
+│   │   ├── entity/            # Entities (business objects)
+│   │   ├── repository/        # Repository interfaces
+│   │   └── service/           # Domain services
+│   ├── usecase/               # Application business rules
 │   │   └── user/
 │   │       ├── create.go
 │   │       └── get.go
-│   ├── handler/               # プレゼンテーション層（外側）
-│   │   ├── http/              # HTTPハンドラー
-│   │   └── grpc/              # gRPCハンドラー
-│   ├── repository/            # データアクセス層
-│   │   ├── postgres/          # PostgreSQL実装
-│   │   └── redis/             # Redis実装
-│   └── infrastructure/        # 外部依存
-│       ├── config/            # 設定管理
-│       ├── database/          # DB接続
-│       └── logger/            # ロガー
-├── pkg/                       # パブリックライブラリ（外部から利用可能）
+│   ├── handler/               # Presentation layer (outermost)
+│   │   ├── http/              # HTTP handlers
+│   │   └── grpc/              # gRPC handlers
+│   ├── repository/            # Data access layer
+│   │   ├── postgres/          # PostgreSQL implementation
+│   │   └── redis/             # Redis implementation
+│   └── infrastructure/        # External dependencies
+│       ├── config/            # Configuration management
+│       ├── database/          # DB connection
+│       └── logger/            # Logger
+├── pkg/                       # Public libraries (can be imported externally)
 │   ├── validator/
 │   ├── middleware/
 │   └── errors/
-├── test/                      # 統合テスト
+├── test/                      # Integration tests
 │   ├── integration/
 │   └── e2e/
 ├── go.mod
@@ -61,9 +61,9 @@ project/
 └── README.md
 ```
 
-## レイヤー設計原則
+## Layer Design Principles
 
-### 1. Domain Layer (内側)
+### 1. Domain Layer (Innermost)
 
 ```go
 // internal/domain/entity/user.go
@@ -74,7 +74,7 @@ import (
     "github.com/google/uuid"
 )
 
-// User エンティティ - ビジネスロジックのみ
+// User entity - business logic only
 type User struct {
     ID        uuid.UUID
     Email     string
@@ -83,7 +83,7 @@ type User struct {
     UpdatedAt time.Time
 }
 
-// Validate ドメインバリデーション
+// Validate domain validation
 func (u *User) Validate() error {
     if u.Email == "" {
         return ErrInvalidEmail
@@ -103,7 +103,7 @@ import (
     "yourproject/internal/domain/entity"
 )
 
-// UserRepository インターフェース定義（実装は外側のレイヤー）
+// UserRepository interface definition (implementation in outer layers)
 type UserRepository interface {
     Create(ctx context.Context, user *entity.User) error
     GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error)
@@ -112,7 +112,7 @@ type UserRepository interface {
 }
 ```
 
-### 2. UseCase Layer (ビジネスルール)
+### 2. UseCase Layer (Business Rules)
 
 ```go
 // internal/usecase/user/create.go
@@ -141,19 +141,19 @@ func NewCreateUserUseCase(userRepo repository.UserRepository) *CreateUserUseCase
 }
 
 func (uc *CreateUserUseCase) Execute(ctx context.Context, input CreateUserInput) (*entity.User, error) {
-    // 1. エンティティ作成
+    // 1. Create entity
     user := &entity.User{
         ID:    uuid.New(),
         Email: input.Email,
         Name:  input.Name,
     }
 
-    // 2. ドメインバリデーション
+    // 2. Domain validation
     if err := user.Validate(); err != nil {
         return nil, err
     }
 
-    // 3. リポジトリを通じて永続化
+    // 3. Persist through repository
     if err := uc.userRepo.Create(ctx, user); err != nil {
         return nil, err
     }
@@ -162,7 +162,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, input CreateUserInput)
 }
 ```
 
-### 3. Handler Layer (プレゼンテーション)
+### 3. Handler Layer (Presentation)
 
 ```go
 // internal/handler/http/user.go
@@ -209,7 +209,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 }
 ```
 
-### 4. Repository Layer (データアクセス)
+### 4. Repository Layer (Data Access)
 
 ```go
 // internal/repository/postgres/user.go
@@ -267,7 +267,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Use
 }
 ```
 
-## 依存性注入 (Dependency Injection)
+## Dependency Injection
 
 ```go
 // cmd/api/main.go
@@ -286,34 +286,34 @@ import (
 )
 
 func main() {
-    // 1. インフラストラクチャ初期化
+    // 1. Initialize infrastructure
     db, err := sql.Open("postgres", "postgresql://...")
     if err != nil {
         log.Fatal(err)
     }
     defer db.Close()
 
-    // 2. リポジトリ層の構築
+    // 2. Build repository layer
     userRepo := postgres.NewUserRepository(db)
 
-    // 3. ユースケース層の構築
+    // 3. Build usecase layer
     createUserUseCase := user.NewCreateUserUseCase(userRepo)
 
-    // 4. ハンドラー層の構築
+    // 4. Build handler layer
     userHandler := http.NewUserHandler(createUserUseCase)
 
-    // 5. ルーター設定
+    // 5. Setup router
     r := gin.Default()
     r.POST("/users", userHandler.CreateUser)
 
-    // 6. サーバー起動
+    // 6. Start server
     if err := r.Run(":8080"); err != nil {
         log.Fatal(err)
     }
 }
 ```
 
-## エラーハンドリング
+## Error Handling
 
 ```go
 // pkg/errors/errors.go
@@ -341,14 +341,14 @@ func (e *AppError) Unwrap() error {
     return e.Err
 }
 
-// 定義済みエラー
+// Predefined errors
 var (
     ErrNotFound      = &AppError{Code: "NOT_FOUND", Message: "resource not found"}
     ErrInvalidInput  = &AppError{Code: "INVALID_INPUT", Message: "invalid input"}
     ErrUnauthorized  = &AppError{Code: "UNAUTHORIZED", Message: "unauthorized"}
 )
 
-// エラーラッピング
+// Error wrapping
 func Wrap(err error, message string) error {
     return &AppError{
         Message: message,
@@ -357,9 +357,9 @@ func Wrap(err error, message string) error {
 }
 ```
 
-## テスト戦略
+## Testing Strategy
 
-### ユニットテスト
+### Unit Tests
 
 ```go
 // internal/usecase/user/create_test.go
@@ -376,7 +376,7 @@ import (
     "yourproject/internal/usecase/user"
 )
 
-// モックリポジトリ
+// Mock repository
 type MockUserRepository struct {
     mock.Mock
 }
@@ -409,7 +409,7 @@ func TestCreateUserUseCase_Execute(t *testing.T) {
 }
 ```
 
-### テーブル駆動テスト
+### Table-Driven Tests
 
 ```go
 func TestValidate(t *testing.T) {
@@ -448,13 +448,13 @@ func TestValidate(t *testing.T) {
 }
 ```
 
-## パフォーマンス最適化
+## Performance Optimization
 
-### 1. コンテキスト管理
+### 1. Context Management
 
 ```go
 func (h *Handler) Handle(c *gin.Context) {
-    // タイムアウト設定
+    // Set timeout
     ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
     defer cancel()
 
@@ -463,7 +463,7 @@ func (h *Handler) Handle(c *gin.Context) {
 }
 ```
 
-### 2. コネクションプーリング
+### 2. Connection Pooling
 
 ```go
 func NewDB(connStr string) (*sql.DB, error) {
@@ -472,26 +472,26 @@ func NewDB(connStr string) (*sql.DB, error) {
         return nil, err
     }
 
-    db.SetMaxOpenConns(25)                 // 最大オープン接続数
-    db.SetMaxIdleConns(5)                  // 最大アイドル接続数
-    db.SetConnMaxLifetime(5 * time.Minute) // 接続の最大生存時間
+    db.SetMaxOpenConns(25)                 // Maximum open connections
+    db.SetMaxIdleConns(5)                  // Maximum idle connections
+    db.SetConnMaxLifetime(5 * time.Minute) // Maximum connection lifetime
 
     return db, nil
 }
 ```
 
-### 3. Goroutineとチャネル
+### 3. Goroutines and Channels
 
 ```go
 func (s *Service) ProcessBatch(ctx context.Context, items []Item) error {
     errCh := make(chan error, len(items))
-    sem := make(chan struct{}, 10) // 同時実行数制限
+    sem := make(chan struct{}, 10) // Limit concurrency
 
     for _, item := range items {
-        sem <- struct{}{} // セマフォ取得
+        sem <- struct{}{} // Acquire semaphore
 
         go func(item Item) {
-            defer func() { <-sem }() // セマフォ解放
+            defer func() { <-sem }() // Release semaphore
 
             if err := s.processItem(ctx, item); err != nil {
                 errCh <- err
@@ -499,13 +499,13 @@ func (s *Service) ProcessBatch(ctx context.Context, items []Item) error {
         }(item)
     }
 
-    // 全ゴルーチン完了を待つ
+    // Wait for all goroutines to complete
     for i := 0; i < cap(sem); i++ {
         sem <- struct{}{}
     }
     close(errCh)
 
-    // エラー集約
+    // Collect errors
     for err := range errCh {
         if err != nil {
             return err
@@ -516,65 +516,65 @@ func (s *Service) ProcessBatch(ctx context.Context, items []Item) error {
 }
 ```
 
-## 実装チェックリスト
+## Implementation Checklist
 
-### 設計フェーズ
-- [ ] クリーンアーキテクチャの各レイヤーを定義
-- [ ] エンティティとビジネスルールを特定
-- [ ] インターフェースを明確に定義
-- [ ] 依存関係の方向を確認（内側→外側への依存禁止）
+### Design Phase
+- [ ] Define each layer of clean architecture
+- [ ] Identify entities and business rules
+- [ ] Clearly define interfaces
+- [ ] Verify dependency direction (no dependency on inner layers)
 
-### 実装フェーズ
-- [ ] Domain層: エンティティとリポジトリインターフェース
-- [ ] UseCase層: ビジネスロジック実装
-- [ ] Repository層: データアクセス実装
-- [ ] Handler層: HTTPハンドラー実装
-- [ ] エラーハンドリング実装
-- [ ] ロギング追加
+### Implementation Phase
+- [ ] Domain layer: Entities and repository interfaces
+- [ ] UseCase layer: Business logic implementation
+- [ ] Repository layer: Data access implementation
+- [ ] Handler layer: HTTP handler implementation
+- [ ] Error handling implementation
+- [ ] Add logging
 
-### テストフェーズ
-- [ ] ユニットテスト作成（カバレッジ80%以上目標）
-- [ ] モックを使った依存の分離
-- [ ] テーブル駆動テスト適用
-- [ ] 統合テスト作成
+### Testing Phase
+- [ ] Create unit tests (target 80%+ coverage)
+- [ ] Isolate dependencies using mocks
+- [ ] Apply table-driven tests
+- [ ] Create integration tests
 
-### 本番デプロイ前
-- [ ] パフォーマンステスト実施
-- [ ] セキュリティレビュー
-- [ ] ドキュメント更新
-- [ ] ログレベル確認
+### Pre-Production Deployment
+- [ ] Conduct performance tests
+- [ ] Security review
+- [ ] Update documentation
+- [ ] Verify log levels
 
-## ベストプラクティス
+## Best Practices
 
 ### DO ✅
-- クリーンアーキテクチャに従う
-- インターフェースを活用した疎結合設計
-- テスト駆動開発（TDD）を実践
-- エラーハンドリングを適切に行う
-- コンテキストを活用したキャンセル処理
-- 構造体のポインタレシーバーを使用
+- Follow clean architecture
+- Use interfaces for loose coupling
+- Practice test-driven development (TDD)
+- Handle errors appropriately
+- Use context for cancellation
+- Use pointer receivers for structs
 
 ### DON'T ❌
-- グローバル変数を使わない
-- パニックを多用しない（エラーを返す）
-- goroutineのリークを起こさない
-- nilチェックを怠らない
-- 巨大な関数を作らない（関数は小さく）
-- 循環依存を作らない
+- Don't use global variables
+- Don't overuse panic (return errors instead)
+- Don't leak goroutines
+- Don't skip nil checks
+- Don't create large functions (keep functions small)
+- Don't create circular dependencies
 
-## セキュリティ
+## Security
 
 ```go
-// 1. SQL Injection対策: プレースホルダー使用
+// 1. SQL Injection prevention: Use placeholders
 query := "SELECT * FROM users WHERE id = $1"
 db.QueryContext(ctx, query, userID)
 
-// 2. パスワードハッシュ化
+// 2. Password hashing
 import "golang.org/x/crypto/bcrypt"
 
 hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
-// 3. レート制限
+// 3. Rate limiting
 import "golang.org/x/time/rate"
 
 limiter := rate.NewLimiter(rate.Limit(10), 100) // 10 req/sec, burst 100
@@ -583,13 +583,13 @@ if !limiter.Allow() {
 }
 ```
 
-## まとめ
+## Summary
 
-このスキルは以下を保証します:
+This skill ensures:
 
-- 🏗️ **クリーンアーキテクチャ**: レイヤー分離と依存性の逆転
-- 🧪 **テスト可能性**: 高いカバレッジと保守性
-- ⚡ **パフォーマンス**: 効率的な並行処理
-- 🔒 **セキュリティ**: 安全なコード実装
-- 📦 **スケーラビリティ**: マイクロサービス対応
-- 📚 **保守性**: 読みやすく拡張しやすいコード
+- 🏗️ **Clean Architecture**: Layer separation and dependency inversion
+- 🧪 **Testability**: High coverage and maintainability
+- ⚡ **Performance**: Efficient concurrency
+- 🔒 **Security**: Secure code implementation
+- 📦 **Scalability**: Microservice-ready
+- 📚 **Maintainability**: Readable and extensible code
