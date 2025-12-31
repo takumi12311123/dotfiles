@@ -15,7 +15,7 @@
 
 {
   :devices {
-    :macbook [{:vendor_id 1452 :product_id 834}]
+    :macbook [{:is_built_in_keyboard true}]
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
 
