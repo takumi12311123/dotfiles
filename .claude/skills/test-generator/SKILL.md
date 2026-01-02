@@ -1,11 +1,7 @@
 ---
 name: test-generator
 description: |
-  Generate comprehensive test cases following TDD principles.
-  Creates unit tests, integration tests, and edge case tests.
-  Used at the start of TDD cycle before implementation.
-  Output: Japanese
-trigger_keywords: test, テスト, TDD, unit test, integration test
+  TDD workflow: Generate tests BEFORE implementation. Use when user requests new feature or bug fix. Write failing tests first, then implement to pass. Creates unit, integration, and edge case tests.
 ---
 
 # Test Generator SKILL
