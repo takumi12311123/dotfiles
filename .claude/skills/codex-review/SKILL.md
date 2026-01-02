@@ -1,13 +1,7 @@
 ---
 name: codex-review
 description: |
-  **AUTOMATIC REVIEW GATE** executed before user confirmation.
-  Codex reviews design/implementation in read-only sandbox.
-  Iterates review→fix→re-review until clean (ok: true).
-  Triggers: after implementation/design completion, before git commit/PR, before user confirmation.
-  Output: Japanese
-trigger_keywords: 実装完了, 設計完了, これでいいですか, 確認, approval, review, commit, PR
-auto_trigger: true
+  MANDATORY quality gate. Run this skill BEFORE: (1) asking user "Is this okay?", (2) git commit, (3) creating PR, (4) presenting any implementation or design to user. Codex reviews in read-only sandbox, iterates until ok:true. NEVER skip this step.
 ---
 
 # Codex Automatic Review Gate

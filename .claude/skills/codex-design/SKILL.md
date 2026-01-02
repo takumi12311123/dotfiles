@@ -1,11 +1,7 @@
 ---
 name: codex-design
 description: |
-  Consult with Codex on complex design and architectural decisions.
-  Use before implementing new patterns, making architecture choices, or performance-critical implementations.
-  Codex provides alternative perspectives and identifies potential pitfalls.
-  Output: Japanese
-trigger_keywords: 設計, アーキテクチャ, 設計相談, architecture, design decision, performance optimization
+  Consult Codex for architectural decisions. Use when: (1) introducing patterns not in codebase, (2) 3+ design options exist, (3) performance-critical implementation, (4) major refactoring. Get risk assessment before coding.
 ---
 
 # Codex Design Consultation
