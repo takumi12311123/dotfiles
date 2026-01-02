@@ -1,7 +1,5 @@
 ## shell script alias
 alias ide="source ~/.script/ide.sh"
-alias copy_to_dotfiles="source ~/.script/copy_to_dotfiles.sh"
-alias back_to_exec_environment="bash ~/.script/back_to_exec_environment.sh"
 alias review-pr="zsh ~/.script/review-pr.sh"
 
 ## git alias
