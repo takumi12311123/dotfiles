@@ -1,7 +1,7 @@
 ---
 allowed-tools: Bash(git:*), Bash(gh:*)
 description: Complete PR workflow - branch, commit, push, create/update PR
-argument-hint: [commit-message] (optional - will analyze changes if not provided)
+argument-hint: "[commit-message] (optional - will analyze changes if not provided)"
 ---
 
 ## Full PR Workflow
