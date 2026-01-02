@@ -18,6 +18,15 @@
         "type": "local",
         "path": "typescript-lsp"
       }
+    },
+    "terraform-lsp": {
+      "name": "Terraform LSP",
+      "description": "Language Server Protocol support for Terraform using terraform-ls",
+      "version": "1.0.0",
+      "source": {
+        "type": "local",
+        "path": "terraform-lsp"
+      }
     }
   }
 }

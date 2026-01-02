@@ -47,6 +47,7 @@ brew "zsh-completions"
 brew "bufbuild/buf/buf"
 brew "felixkratz/formulae/sketchybar"
 brew "hashicorp/tap/terraform", link: false
+brew "hashicorp/tap/terraform-ls"
 brew "jondot/tap/hygen"
 brew "koekeishiya/formulae/skhd"
 brew "koekeishiya/formulae/yabai", args: ["HEAD"]
