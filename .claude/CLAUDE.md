@@ -4,8 +4,16 @@
 - Parallelize independent operations for efficiency
 - NEVER install libraries without explicit user permission (go get, npm install, pip, etc.)
 - Prefer modifying existing components over creating new ones
-- Follow TDD: use `test-generator` skill to write tests first, then implement
 
-# Quality Gate
+# Quality Gate (CRITICAL)
 
-Run `codex-review` skill before ANY user confirmation, git commit, or PR creation.
+BEFORE asking user confirmation, git commit, or PR:
+1. Run `codex-review` skill
+2. Fix all blocking issues
+3. Achieve ok: true status
+4. Include review summary in response
+
+# TDD
+
+Use `test-generator` skill BEFORE implementation.
+Write failing tests first, then implement to pass.
