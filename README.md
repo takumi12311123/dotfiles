@@ -1,125 +1,156 @@
 # dotfiles
 
-<details><summary>dotfiles</summary>
+macOS向けの開発環境設定ファイル一式。シェル、エディタ、ウィンドウマネージャ、AIツールの設定を管理。
+
+## 前提条件
+
+- macOS (Apple Silicon)
+- Homebrew
+- Git
+- Zsh
+
+## クイックスタート
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/takumi12311123/dotfiles.git
+cd dotfiles
+
+# Homebrewパッケージをインストール
+brew bundle --file=.homebrew/Brewfile
+
+# シンボリックリンクを作成
+./setup.sh
+
+# シークレットファイルを設定（テンプレートからコピー）
+cp .zsh/secrets.zsh.template ~/.zsh/secrets.zsh
+chmod 600 ~/.zsh/secrets.zsh
+# ~/.zsh/secrets.zsh を編集して必要な値を設定
+```
+
+## ディレクトリ構成
 
 ```
 .
-└── root/
-    ├── .config/
-    │   ├── alacritty/
-    │   │   └── alacritty.toml
-    │   ├── gokurakujoudo/
-    │   │   └── karabiner.edn
-    │   ├── karabiner/
-    │   │   └── karabiner.json
-    │   └── starship/
-    │       └── starship.toml
-    ├── .homebrew/
-    │   └── Brewfile
-    ├── .homerow/
-    │   └── README.md
-    ├── .image/
-    │   └── my_screen_images
-    ├── .script/
-    │   ├── ide.sh
-    │   └── copy_to_dotfiles.sh
-    ├── .vscode/
-    │   ├── settings.json
-    │   └── keybindings.json
-    ├── .zsh/
-    │   ├── alias.zsh
-    │   ├── fzf_function.zsh
-    │   ├── init.zsh
-    │   ├── secrets.zsh
-    │   └── setopt.zsh
-    ├── .skhdrc
-    ├── .tmux.conf
-    ├── .yabairc
-    ├── .zprofile
-    ├── .zsh_history
-    ├── .zshrc
-    └── .README.md
+├── .claude/          # Claude Code設定（skills, commands, plugins）
+├── .codex/           # Codex CLI設定
+├── .config/          # アプリケーション設定
+│   ├── alacritty/    # ターミナルエミュレータ
+│   ├── gokurakujoudo/# Karabiner設定（EDN形式）
+│   └── starship/     # プロンプトテーマ
+├── .homebrew/        # Brewfile（パッケージ一覧）
+├── .script/          # カスタムスクリプト
+├── .zsh/             # Zsh設定（モジュール分割）
+├── .skhdrc           # キーボードショートカット
+├── .tmux.conf        # ターミナルマルチプレクサ
+├── .yabairc          # タイル型ウィンドウマネージャ
+├── .zprofile         # ログインシェル環境変数
+└── .zshrc            # Zshメイン設定
 ```
 
-I made this by [https://tree.nathanfriend.io/](<https://tree.nathanfriend.io/?s=(%27optiGs!(%27fancy5~fullPath!false~trailHgSlaI5~rootDot5)~F(%27F%27root4cGfig27N7.toml2gokurakujoudoN3.edn23N3629N9.tomlLbrew2BrewCLrow284image2my_screen_images4script2ide.I2copy_to_dotCs.I4vscodeKttO2keybHdO*02alias02fzf_functiG02Hit0Kcrets0Ktopt04skhdJtmux.cGf4yabaiJzproC*0_history*0J8%27)~versiG!%271%27)*%5Cn--%20%200.zI2*-3karabHer4*.5!true6.jsG7alacritty8README.md9starIipCfileFsource!GonHinIshJrc4K2seL4homeN2-OHgs6%01ONLKJIHGFC987654320-*>)
+## 主要コンポーネント
 
-</details>
+### シェル環境
 
+| ツール | 用途 |
+|--------|------|
+| [Zsh](https://github.com/zsh-users/zsh) | メインシェル |
+| [Starship](https://github.com/starship/starship) | プロンプトテーマ |
+| [Atuin](https://github.com/atuinsh/atuin) | シェル履歴管理 |
+| [fzf](https://github.com/junegunn/fzf) | ファジーファインダー |
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+### ターミナル/エディタ
 
+| ツール | 用途 |
+|--------|------|
+| [Alacritty](https://github.com/alacritty/alacritty) | ターミナルエミュレータ |
+| [tmux](https://github.com/tmux/tmux) | ターミナルマルチプレクサ |
+| [Neovim](https://github.com/neovim/neovim) | エディタ |
 
+### ウィンドウ管理
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+| ツール | 用途 |
+|--------|------|
+| [yabai](https://github.com/koekeishiya/yabai) | タイル型ウィンドウマネージャ |
+| [skhd](https://github.com/koekeishiya/skhd) | ホットキーデーモン |
+| [SketchyBar](https://github.com/FelixKratz/SketchyBar) | カスタムメニューバー |
 
-<details><summary>Using List</summary>
+### キーボード
 
-```
-### Karabiner-Element
+| ツール | 用途 |
+|--------|------|
+| [Karabiner-Elements](https://github.com/pqrs-org/Karabiner-Elements) | キーリマッピング |
+| [GokuRakuJoudo](https://github.com/yqrashawn/GokuRakuJoudo) | Karabiner設定DSL |
 
-https://github.com/pqrs-org/Karabiner-Elements
+### AIツール
 
-### GokuRakuJoudo
+| ツール | 用途 |
+|--------|------|
+| [Claude Code](https://claude.com/claude-code) | AIコーディングアシスタント |
+| [Codex CLI](https://github.com/openai/codex) | OpenAI Codex CLI |
 
-https://github.com/yqrashawn/GokuRakuJoudo
+## カスタムコマンド/エイリアス
 
-### Starship
+### Git操作（fzf連携）
 
-https://github.com/starship/starship
+- `ga` - インタラクティブなgit add（diffプレビュー付き）
+- `gr` - インタラクティブなgit restore
+- `gd` - インタラクティブなgit diff
+- `gsp` - インタラクティブなgit stash pop
+- `gss` - インタラクティブなgit stash save
+- `gbd` - インタラクティブなブランチ削除
 
-### Homebrew
+### ナビゲーション
 
-https://github.com/Homebrew/brew
+- `cdd` - ghqで管理されたリポジトリへ移動
+- `h` - 履歴検索
+- `search` - コード検索してエディタで開く
 
-### fzf
+### その他
 
-https://github.com/junegunn/fzf
+- `ide` - tmuxでIDE風レイアウトを構築
+- `review-pr` - 複数AIでPRレビュー
 
-### tmux
+## シークレット管理
 
-https://github.com/tmux/tmux
+機密情報は`~/.zsh/secrets.zsh`に保存（gitignore済み）。
 
-### tmux-fzf
+```bash
+# テンプレートをコピーして権限を設定
+cp .zsh/secrets.zsh.template ~/.zsh/secrets.zsh
+chmod 600 ~/.zsh/secrets.zsh
 
-https://github.com/junegunn/fzf/blob/master/bin/fzf-tmux
-
-### zsh
-
-https://github.com/zsh-users/zsh
-
-### yabai
-
-https://github.com/koekeishiya/yabai
-
-### skhd
-
-https://github.com/koekeishiya/skhd
-
-### lazy.nvim
-
-https://github.com/folke/lazy.nvim
-
-### SketchyBar
-
-https://github.com/FelixKratz/SketchyBar
-
-### Raycast
-
-https://www.raycast.com/
-
-### Homerow
-
-https://www.homerow.app/
-
-### Atuin
-
-https://github.com/atuinsh/atuin
-
-### Alacritty
-
-https://github.com/alacritty/alacritty
-
+# 必要な値を設定
+vim ~/.zsh/secrets.zsh
 ```
 
-</details>
+## Karabiner設定の更新
+
+```bash
+# EDNファイルを編集後、Karabiner設定を生成
+goku
+```
+
+## トラブルシューティング
+
+### setup.shが失敗する
+
+```bash
+# 事前チェックを確認
+which git
+which brew
+
+# 権限を確認
+chmod +x setup.sh
+```
+
+### シンボリックリンクを再作成したい
+
+```bash
+# setup.shは既存リンクを自動検出して更新
+./setup.sh
+```
+
+## ライセンス
+
+MIT
