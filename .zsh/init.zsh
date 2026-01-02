@@ -2,8 +2,7 @@ plugins=(
   git
 )
 
-export GOPATH="$HOME"
-export PATH="$HOME/.local/bin:$GOPATH/bin:$HOME/.asdf/shims:$PATH"
+# PATH and GOPATH are set in .zprofile (login shell)
 export GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn"
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 
