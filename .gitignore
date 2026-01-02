@@ -1,6 +1,10 @@
-.script/variables.sh
 .zsh/secrets.zsh
 .zsh_history
 .serena
-codex/.projects.toml
-codex/.system-prompt.md
+
+# Codex local files
+.codex/.projects.toml
+.codex/.system-prompt.md
+
+# Karabiner auto-generated (managed by GokuRakuJoudo)
+.config/karabiner/
