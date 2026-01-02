@@ -120,7 +120,8 @@
   "alwaysThinkingEnabled": false,
   "enabledPlugins": {
     "go-lsp@local": true,
-    "typescript-lsp@local": true
+    "typescript-lsp@local": true,
+    "terraform-lsp@local": true
   },
   "extraKnownMarketplaces": {
     "local": {
