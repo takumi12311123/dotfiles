@@ -61,6 +61,7 @@
       "Bash(git cherry-pick:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
+      "Bash(codex:*)",
       "mcp__serena__check_onboarding_performed",
       "mcp__serena__onboarding",
       "mcp__serena__list_dir",
