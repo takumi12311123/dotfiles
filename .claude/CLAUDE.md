@@ -7,11 +7,13 @@
 
 # Quality Gate (CRITICAL)
 
-BEFORE asking user confirmation, git commit, or PR:
-1. Run `codex-review` skill
-2. Fix all blocking issues
-3. Achieve ok: true status
-4. Include review summary in response
+Run `codex-review` skill BEFORE:
+- Asking "commit?" or similar confirmation
+- Running git commit
+- Creating PR
+
+Applies to ANY file changes (code, config, Brewfile, etc.).
+Fix all blocking issues and achieve ok: true status.
 
 # TDD
 
