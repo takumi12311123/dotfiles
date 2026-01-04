@@ -5,14 +5,23 @@
 - NEVER install libraries without explicit user permission (go get, npm install, pip, etc.)
 - Prefer modifying existing components over creating new ones
 
+# Plan Mode
+
+When in plan mode:
+1. Write plan to `.claude/plans/{task-name}.md`
+2. Run `codex-review` skill on the plan
+3. Fix blocking issues until ok: true
+4. Then ExitPlanMode
+
 # Quality Gate (CRITICAL)
 
 Run `codex-review` skill BEFORE:
+- Exiting plan mode (after writing plan to file)
 - Asking "commit?" or similar confirmation
 - Running git commit
 - Creating PR
 
-Applies to ANY file changes (code, config, Brewfile, etc.).
+Applies to ANY file changes (code, config, Brewfile, plans, etc.).
 Fix all blocking issues and achieve ok: true status.
 
 # TDD
