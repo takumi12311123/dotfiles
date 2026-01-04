@@ -6,5 +6,12 @@
 .codex/.projects.toml
 .codex/.system-prompt.md
 
+# Claude Code plugins cache
+.claude/plugins/cache/
+.claude/plugins/install-counts-cache.json
+.claude/plugins/installed_plugins.json
+.claude/plugins/known_marketplaces.json
+.claude/plugins/marketplaces/
+
 # Karabiner auto-generated (managed by GokuRakuJoudo)
 .config/karabiner/

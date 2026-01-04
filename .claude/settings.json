@@ -117,11 +117,11 @@
     "type": "command",
     "command": "npx ccusage@latest statusline"
   },
-  "alwaysThinkingEnabled": false,
   "enabledPlugins": {
     "go-lsp@local": true,
     "typescript-lsp@local": true,
-    "terraform-lsp@local": true
+    "terraform-lsp@local": true,
+    "ralph-wiggum@claude-code-plugins": true
   },
   "extraKnownMarketplaces": {
     "local": {
@@ -130,5 +130,6 @@
         "path": ".claude/plugins"
       }
     }
-  }
+  },
+  "alwaysThinkingEnabled": false
 }
