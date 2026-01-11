@@ -3,20 +3,24 @@
 # Layout:
 #   +---------+------------------+
 #   | lazygit |   claude code    |
-#   |  (25%)  |      (75%)       |
+#   |  (33%)  |      (67%)       |
 #   +---------+------------------+
 
 SESSION_NAME="dev"
 WORK_DIR="${1:-$(pwd)}"
 
+# Get current terminal size
+TERM_WIDTH=$(tput cols)
+TERM_HEIGHT=$(tput lines)
+
 # Kill existing session if exists
 tmux kill-session -t "$SESSION_NAME" 2>/dev/null
 
-# Create new session with lazygit (left pane)
-tmux new-session -d -s "$SESSION_NAME" -c "$WORK_DIR"
+# Create new session with actual terminal size
+tmux new-session -d -s "$SESSION_NAME" -c "$WORK_DIR" -x "$TERM_WIDTH" -y "$TERM_HEIGHT"
 
-# Split vertically: left 25%, right 75% (claude code on right)
-tmux split-window -h -p 75 -t "$SESSION_NAME" -c "$WORK_DIR"
+# Split vertically: left 33% for lazygit
+tmux split-window -h -p 67 -t "$SESSION_NAME" -c "$WORK_DIR"
 
 # Layout: pane 0 = left (lazygit), pane 1 = right (claude code)
 tmux send-keys -t "$SESSION_NAME:0.0" 'lazygit' C-m
