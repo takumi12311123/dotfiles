@@ -1,6 +1,7 @@
 ## shell script alias
 alias ide="source ~/.script/ide.sh"
 alias review-pr="zsh ~/.script/review-pr.sh"
+alias dev="~/.script/dev.sh"
 
 ## git alias
 alias gs='git status --short --branch'
