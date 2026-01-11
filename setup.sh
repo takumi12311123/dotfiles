@@ -187,6 +187,8 @@ step "Setting up .config..."
 mkdir -p "$HOME/.config"
 create_symlink "$DOTFILES_DIR/.config/alacritty" "$HOME/.config/alacritty"
 create_symlink "$DOTFILES_DIR/.config/gokurakujoudo" "$HOME/.config/gokurakujoudo"
+mkdir -p "$HOME/Library/Application Support/com.mitchellh.ghostty"
+create_symlink "$DOTFILES_DIR/.config/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 mkdir -p "$HOME/.config/starship"
 create_symlink "$DOTFILES_DIR/.config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
 
