@@ -19,7 +19,7 @@
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
 
-  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"]}
+  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :ghostty ["^com\\.mitchellh\\.ghostty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"]}
 
   :main [
     {:des "Change right_command to command+control+option+shift"
@@ -38,12 +38,13 @@
       [:!TOSleft_arrow :!TStab :chrome]
     ]}
 
-    {:des "Chrome, Visual Studio Code, Cursor, alacritty delete tab key bind"
+    {:des "Chrome, Visual Studio Code, Cursor, alacritty, ghostty delete tab key bind"
     :rules [
       [:!TOSw :!Cw :chrome]
       [:!TOSw :!Cw :vscode]
       [:!TOSw :!Cw :cursor]
       [:!TOSw :!Cw :alacritty]
+      [:!TOSw :!Cw :ghostty]
     ]}
 
     {:des "Visual Studio Code, Cursor file move key bind"
@@ -72,9 +73,11 @@
       [:!!w :!Whyphen :cursor]
     ]}
 
-    {:des "alacritty move tab key bind"
+    {:des "alacritty, ghostty move tab key bind"
     :rules [
       [:!TOSright_arrow :!Ttab :alacritty]
       [:!TOSleft_arrow :!TStab :alacritty]
+      [:!TOSright_arrow :!Ttab :ghostty]
+      [:!TOSleft_arrow :!TStab :ghostty]
     ]}
 ]}
