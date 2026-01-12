@@ -191,6 +191,8 @@ mkdir -p "$HOME/Library/Application Support/com.mitchellh.ghostty"
 create_symlink "$DOTFILES_DIR/.config/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 mkdir -p "$HOME/.config/starship"
 create_symlink "$DOTFILES_DIR/.config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
+mkdir -p "$HOME/.config/prr"
+create_symlink "$DOTFILES_DIR/.config/prr/config.toml" "$HOME/.config/prr/config.toml"
 
 # .claude directory (selective - keep local data like history, todos)
 step "Setting up .claude..."

@@ -1,0 +1,6 @@
+[prr]
+# Token is read from environment variable GH_TOKEN (set in ~/.zsh/secrets.zsh)
+# token = "..."
+
+# Directory to store review files
+workdir = "/Users/takumiakasaka/.local/share/prr"
