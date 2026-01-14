@@ -6,15 +6,19 @@
 #   |  (33%)  |      (67%)       |
 #   +---------+------------------+
 
-SESSION_NAME="dev"
 WORK_DIR="${1:-$(pwd)}"
+DIR_NAME=$(basename "$WORK_DIR")
+SESSION_NAME="dev-${DIR_NAME}"
 
 # Get current terminal size
 TERM_WIDTH=$(tput cols)
 TERM_HEIGHT=$(tput lines)
 
-# Kill existing session if exists
-tmux kill-session -t "$SESSION_NAME" 2>/dev/null
+# If session already exists, just attach to it
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    tmux attach-session -t "$SESSION_NAME"
+    exit 0
+fi
 
 # Create new session with actual terminal size
 tmux new-session -d -s "$SESSION_NAME" -c "$WORK_DIR" -x "$TERM_WIDTH" -y "$TERM_HEIGHT"
