@@ -26,4 +26,4 @@
 - Prefer editing existing files over creating new ones
 - Consult user before using patterns not in codebase
 - Use `test-generator` skill before implementation (TDD)
-- **ファイル編集後は必ず `quality-gate` を実行してからcommit/PRを行う**
+- **Run `quality-gate` skill immediately after editing files, before responding to user**
