@@ -15,8 +15,8 @@ TERM_WIDTH=$(tput cols)
 TERM_HEIGHT=$(tput lines)
 
 # If session already exists, just attach to it
-if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    tmux attach-session -t "$SESSION_NAME"
+if tmux has-session -t "=$SESSION_NAME" 2>/dev/null; then
+    tmux attach-session -t "=$SESSION_NAME"
     exit 0
 fi
 
