@@ -20,9 +20,6 @@ web_search = true
 # Play sound when task completes (macOS specific)
 notify = ["bash", "-lc", "afplay /System/Library/Sounds/Ping.aiff"]
 
-# Trusted projects configuration
-projects = { "/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-server" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/supsysjp/boba-schema" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/eyday/eyday" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/wedinc/one-admin" = { trust_level = "trusted" } , "/Users/takumiakasaka/Git-Project/github.com/supsysjp/zero-gcp-resources" = { trust_level = "trusted" } }
-
 # MCP (Multi-Computational Platform) Servers
 # Add external service integrations here
 
