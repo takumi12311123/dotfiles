@@ -377,6 +377,73 @@ Claude Code constructs the prompt dynamically based on:
 5. **Testing** blocking issues
 6. Advisory issues (document only, don't fix automatically)
 
+## 📝 Plan Review Mode
+
+When triggered from **ExitPlanMode** (via quality-gate Step 1), Codex reviews the **plan itself** instead of code changes.
+
+### When to Trigger
+
+- quality-gate detects plan mode exit
+- Plan file has been written to `.claude/plans/{task-name}.md`
+
+### Plan Review Prompt
+
+```bash
+codex exec --sandbox read-only "$(cat <<'EOF'
+# Plan Review Request
+
+## Plan Content
+[Contents of .claude/plans/{task-name}.md]
+
+## Review Focus Areas
+- **実現可能性**: 計画は技術的に実現可能か？見落としている制約はないか？
+- **リスク評価**: 潜在的なリスクや問題点は適切に特定されているか？
+- **代替案**: より良いアプローチはないか？
+- **影響範囲**: 変更の影響範囲は正確に把握されているか？副作用は？
+- **依存関係**: ステップ間の依存関係は正しいか？順序は適切か？
+- **テスト戦略**: テスト方針は十分か？
+
+## Required Output Format (JSON only, in Japanese)
+
+{
+  "ok": boolean,
+  "phase": "plan-review",
+  "summary": "計画レビューのサマリ(日本語)",
+  "issues": [
+    {
+      "severity": "blocking|advisory",
+      "category": "feasibility|risk|alternative|scope|dependency|testing",
+      "section": "計画内の該当セクション",
+      "problem": "問題の具体的な説明(日本語)",
+      "recommendation": "改善案(日本語)"
+    }
+  ],
+  "suggestions": "計画の改善提案(日本語)"
+}
+
+**Severity Guidelines:**
+- **blocking**: 計画に致命的な問題。修正が必要 → ok: false
+- **advisory**: 改善推奨だが計画として進めることは可能
+EOF
+)"
+```
+
+### Plan Review Iteration
+
+- If `ok: false`: Claude Code revises the plan, re-submits for review
+- Max 3 iterations for plan review (lighter than code review)
+- If plan passes, present to user for approval via ExitPlanMode
+
+### Output to User (Plan Review)
+
+```markdown
+### Codex計画レビュー結果
+- **ステータス**: ✅ ok / ⚠️ 要修正
+- **反復回数**: 1/3
+- **指摘事項**: [修正した項目のリスト]
+- **改善提案**: [advisory項目のリスト]
+```
+
 ## 🎯 Success Criteria
 
 Review is considered successful when:
