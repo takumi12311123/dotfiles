@@ -45,20 +45,22 @@ Check current branch:
 - If already on a feature branch:
   - Continue with that branch
 
-### Step 2: Commit Changes
+### Step 2: Commit Changes (Fine-Grained)
 
-Create commit with conventional commit format:
+Create **multiple atomic commits** grouped by logical unit.
 
-**Commit Message Format:**
-```
-<type>: <subject>
+**Do NOT create a single big commit.** Instead:
 
-[Optional detailed explanation]
+1. **Analyze all changes** and group by logical unit (feature, fix, config, test, docs, etc.)
+2. **Stage and commit each group separately** in dependency order
+3. Each commit should be independently understandable
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
+**Grouping Strategy:**
+- Config/dependency changes → separate commit
+- Each distinct feature or fix → separate commit
+- Tests → same commit as implementation OR separate commit
+- Documentation → separate commit
+- Refactoring → separate commit from behavioral changes
 
 **Commit Types:**
 - `feat`: New feature
@@ -70,17 +72,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - `test`: Adding/modifying tests
 - `chore`: Build/tooling changes
 
-**Process:**
-1. Stage all changes: `git add .`
-2. If commit message provided as argument, use it
-3. Otherwise, analyze changes and generate appropriate message
-4. Create commit with message in HEREDOC format:
+**Process for each logical group:**
+1. Stage specific files: `git add path/to/file1 path/to/file2`
+2. Create commit with HEREDOC format:
    ```bash
    git commit -m "$(cat <<'EOF'
-   feat: add user authentication
-
-   - Implement OAuth2 flow
-   - Add JWT token handling
+   feat: add JWT token handling
 
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -88,6 +85,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>
    EOF
    )"
    ```
+3. Repeat for next group
+
+**Commit order (dependencies first):**
+1. Infrastructure/config changes
+2. Dependencies/utilities
+3. Core implementation
+4. Tests
+5. Documentation
+
+**Guidelines:**
+- Aim for **2-5 commits** for typical PRs
+- Don't over-split trivial changes (single file change = one commit is fine)
+- If argument provided and changes are small/cohesive, use single commit
 
 ### Step 3: Push to Remote
 
