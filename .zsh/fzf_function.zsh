@@ -1,7 +1,7 @@
 ## fzf-history
 alias h='fzf-history-selection'
 function fzf-history-selection() {
-  local selected_command=$(history -n 1  | tac | uniq | fzf-tmux -p 80% --exact --no-sort)
+  local selected_command=$(history -n 1  | tac | uniq | fzf --exact --no-sort)
   if [[ -n "$selected_command" ]]; then
       print -z "$selected_command"
   fi
@@ -10,7 +10,7 @@ function fzf-history-selection() {
 ## fzf-cdr
 alias cdd='fzf-cdr'
 function fzf-cdr() {
-    target_dir=`ghq list -p | sed 's/^[^ ][^ ]*  *//' | fzf-tmux -p 80%`
+    target_dir=`ghq list -p | sed 's/^[^ ][^ ]*  *//' | fzf`
     target_dir=`echo ${target_dir/\~/$HOME}`
     if [ -n "$target_dir" ]; then
       cd $target_dir
@@ -25,7 +25,7 @@ function git-diff() {
 		case $opt in
 		  f) selected_file="$OPTARG"; break ;;
 		  s)
-		  	selected_file="$(git ls-files -m | fzf-tmux -p 80%)"
+		  	selected_file="$(git ls-files -m | fzf)"
 		  	if [ -z $selected_file ]; then
 		  		echo "No selected for diff."
 		  		return 1
@@ -48,7 +48,7 @@ function git-add() {
   local git_repo_root
   git_repo_root=$(git rev-parse --show-toplevel)
   local selected
-  selected=$(unbuffer \git status -s | fzf-tmux -m -p 80% --ansi --bind="k:preview-up" --bind="j:preview-down" \
+  selected=$(unbuffer \git status -s | fzf -m --ansi --bind="k:preview-up" --bind="j:preview-down" \
                     --preview='
                         if [[ {} =~ "^\?\?" ]]; then
                           bat --theme="Visual Studio Dark+" {2};
@@ -90,7 +90,7 @@ function git-restore() {
   local git_repo_root
   git_repo_root=$(git rev-parse --show-toplevel)
   local selected
-  selected=$(unbuffer git status -s | fzf-tmux -m -p 80% --ansi --bind="k:preview-up" --bind="j:preview-down" \
+  selected=$(unbuffer git status -s | fzf -m --ansi --bind="k:preview-up" --bind="j:preview-down" \
                     --preview='
                         file=$(echo {} | awk "{print \$2}");
                         if [[ {} =~ "^\?\?" ]]; then
@@ -112,7 +112,7 @@ function git-restore() {
 alias gsp='git-stash-pop'
 function git-stash-pop() {
   local selected
-  selected=$(git stash list "$@" | fzf-tmux -p 80% --ansi --no-sort --reverse --print-query --query="$query" \
+  selected=$(git stash list "$@" | fzf --ansi --no-sort --reverse --print-query --query="$query" \
                 --bind="ctrl-space:preview-page-up" \
                 --bind="space:preview-page-down" \
                 --bind="k:preview-up" \
@@ -133,7 +133,7 @@ function git-stash-selected-files() {
   local instructions="Select multiple files by TAB, and then press Enter to stash them"
   local selected_files
   selected_files=$(unbuffer \git status --porcelain | \
-                   fzf-tmux -p 80% --multi \
+                   fzf --multi \
                        --bind="k:preview-up" \
                        --bind="j:preview-down" \
                        --header="$instructions" \
@@ -167,7 +167,7 @@ function ag-and-code() {
       echo 'Usage: agg PATTERN'
       return 0
     fi
-    result=`ag $1 | fzf-tmux -p 80%`
+    result=`ag $1 | fzf`
     line=`echo "$result" | awk -F ':' '{print $2}'`
     file=`echo "$result" | awk -F ':' '{print $1}'`
     if [ -n "$file" ]; then
@@ -176,4 +176,4 @@ function ag-and-code() {
 }
 
 ## fzf-switch
-alias gsw='git switch $(git branch -a | tr -d " " | fzf-tmux -p 80% --height 100% --prompt "CHECKOUT BRANCH>" --preview "git log --color=always {}" | head -n 1 | sed -e "s/^\*\s*//g" | perl -pe "s/remotes\/origin\///g")'
+alias gsw='git switch $(git branch -a | tr -d " " | fzf --height 100% --prompt "CHECKOUT BRANCH>" --preview "git log --color=always {}" | head -n 1 | sed -e "s/^\*\s*//g" | perl -pe "s/remotes\/origin\///g")'
