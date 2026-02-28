@@ -210,6 +210,11 @@ create_symlink "$DOTFILES_DIR/.codex/config.toml" "$HOME/.codex/config.toml"
 create_symlink "$DOTFILES_DIR/.codex/prompts" "$HOME/.codex/prompts"
 create_symlink "$DOTFILES_DIR/.codex/skills" "$HOME/.codex/skills"
 
+# .takt directory
+step "Setting up .takt..."
+mkdir -p "$HOME/.takt"
+create_symlink "$DOTFILES_DIR/.takt/config.yaml" "$HOME/.takt/config.yaml"
+
 # .script directory
 step "Setting up .script..."
 create_symlink "$DOTFILES_DIR/.script" "$HOME/.script"
@@ -220,6 +225,34 @@ echo ""
 verify_setup
 
 echo ""
+
+# Post-install: AI tool setup
+step "Setting up AI tools..."
+
+# RTK: Install hook script for Claude Code (--no-patch since settings.json is managed by dotfiles)
+if command -v rtk &>/dev/null; then
+    info "Setting up RTK hook for Claude Code..."
+    rtk init -g --no-patch 2>/dev/null || warn "RTK hook setup skipped (run 'rtk init -g --no-patch' manually)"
+else
+    warn "RTK not installed. Run 'brew install rtk' first."
+fi
+
+# agent-browser: Install Chromium for headless browser automation
+if command -v agent-browser &>/dev/null; then
+    info "Installing Chromium for agent-browser..."
+    agent-browser install 2>/dev/null || warn "agent-browser Chromium install skipped (run 'agent-browser install' manually)"
+else
+    warn "agent-browser not installed. Run 'brew install agent-browser' first."
+fi
+
+# TAKT: Verify installation
+if command -v takt &>/dev/null; then
+    info "TAKT is installed: $(takt --version 2>/dev/null || echo 'version unknown')"
+else
+    warn "TAKT not installed. Run 'brew install takt' first."
+fi
+
+echo ""
 echo "======================================"
 echo "  Setup complete!"
 echo "======================================"
@@ -228,6 +261,9 @@ echo "Notes:"
 echo "  - Backup files created with .bak extension (timestamped if exists)"
 echo "  - Local secrets stay in ~/.zsh/secrets.zsh (not symlinked)"
 echo "  - Run 'goku' to generate Karabiner config from .edn"
+echo "  - RTK: Restart Claude Code for hook to take effect"
+echo "  - agent-browser: Run 'agent-browser install' if Chromium was not installed"
+echo "  - TAKT: Run 'takt' in a project to start orchestrated workflow"
 echo ""
 
 # Check if secrets.zsh exists
