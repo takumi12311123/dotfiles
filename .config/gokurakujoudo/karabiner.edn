@@ -76,8 +76,16 @@
 
     {:des "cmux move pane key bind"
     :rules [
-      [:!TOSp :!COleft_arrow :cmux]
-      [:!TOSn :!COright_arrow :cmux]
+      [:!Sleft_arrow :!COleft_arrow :cmux]
+      [:!Rleft_arrow :!COleft_arrow :cmux]
+      [:!Sright_arrow :!COright_arrow :cmux]
+      [:!Rright_arrow :!COright_arrow :cmux]
+    ]}
+
+    {:des "cmux move workspace key bind"
+    :rules [
+      [:!TOSup_arrow :!TCopen_bracket :cmux]
+      [:!TOSdown_arrow :!TCclose_bracket :cmux]
     ]}
 
     {:des "alacritty, ghostty, cmux move tab key bind"
