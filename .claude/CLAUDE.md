@@ -78,3 +78,5 @@ you have violated the most important rule. IMMEDIATELY run quality-gate.
 #   If not, run it NOW before responding to user.                            #
 #                                                                            #
 ##############################################################################
+
+@RTK.md
