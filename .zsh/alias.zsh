@@ -10,7 +10,7 @@ alias pull='git pull --ff-only origin $(git_current_branch)'
 alias gp='git push origin $(git_current_branch)'
 alias gswc='git switch -c'
 alias gcim='git commit -m'
-alias gbd="git branch | grep -v '^[*+]' | awk '{print $1}' | fzf-tmux -p 80% -0 --multi --preview 'git show --color=always {-1}' | xargs -r git branch --delete"
+alias gbd="git branch | grep -v '^[*+]' | awk '{print $1}' | fzf -0 --multi --preview 'git show --color=always {-1}' | xargs -r git branch --delete"
 
 ## other alias
 alias lsa="ls -a"
