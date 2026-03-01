@@ -210,11 +210,6 @@ create_symlink "$DOTFILES_DIR/.codex/config.toml" "$HOME/.codex/config.toml"
 create_symlink "$DOTFILES_DIR/.codex/prompts" "$HOME/.codex/prompts"
 create_symlink "$DOTFILES_DIR/.codex/skills" "$HOME/.codex/skills"
 
-# .takt directory
-step "Setting up .takt..."
-mkdir -p "$HOME/.takt"
-create_symlink "$DOTFILES_DIR/.takt/config.yaml" "$HOME/.takt/config.yaml"
-
 # .script directory
 step "Setting up .script..."
 create_symlink "$DOTFILES_DIR/.script" "$HOME/.script"
@@ -245,13 +240,6 @@ else
     warn "agent-browser not installed. Run 'brew install agent-browser' first."
 fi
 
-# TAKT: Verify installation
-if command -v takt &>/dev/null; then
-    info "TAKT is installed: $(takt --version 2>/dev/null || echo 'version unknown')"
-else
-    warn "TAKT not installed. Run 'brew install takt' first."
-fi
-
 echo ""
 echo "======================================"
 echo "  Setup complete!"
@@ -263,7 +251,6 @@ echo "  - Local secrets stay in ~/.zsh/secrets.zsh (not symlinked)"
 echo "  - Run 'goku' to generate Karabiner config from .edn"
 echo "  - RTK: Restart Claude Code for hook to take effect"
 echo "  - agent-browser: Run 'agent-browser install' if Chromium was not installed"
-echo "  - TAKT: Run 'takt' in a project to start orchestrated workflow"
 echo ""
 
 # Check if secrets.zsh exists

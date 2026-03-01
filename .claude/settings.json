@@ -62,7 +62,6 @@
       "Bash(git commit:*)",
       "Bash(git branch:*)",
       "Bash(codex:*)",
-      "Bash(takt:*)",
       "Bash(rtk:*)",
       "Bash(agent-browser:*)",
       "mcp__serena__check_onboarding_performed",
