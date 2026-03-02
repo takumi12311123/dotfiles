@@ -8,10 +8,12 @@
   - [ディレクトリ構成](#%E3%83%87%E3%82%A3%E3%83%AC%E3%82%AF%E3%83%88%E3%83%AA%E6%A7%8B%E6%88%90)
   - [主要コンポーネント](#%E4%B8%BB%E8%A6%81%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88)
     - [シェル環境](#%E3%82%B7%E3%82%A7%E3%83%AB%E7%92%B0%E5%A2%83)
-    - [ターミナル/エディタ](#%E3%82%BF%E3%83%BC%E3%83%9F%E3%83%8A%E3%83%AB%E3%82%A8%E3%83%87%E3%82%A3%E3%82%BF)
+    - [ターミナル](#%E3%82%BF%E3%83%BC%E3%83%9F%E3%83%8A%E3%83%AB)
+    - [エディタ](#%E3%82%A8%E3%83%87%E3%82%A3%E3%82%BF)
     - [ウィンドウ管理](#%E3%82%A6%E3%82%A3%E3%83%B3%E3%83%89%E3%82%A6%E7%AE%A1%E7%90%86)
     - [キーボード](#%E3%82%AD%E3%83%BC%E3%83%9C%E3%83%BC%E3%83%89)
     - [AIツール](#ai%E3%83%84%E3%83%BC%E3%83%AB)
+  - [開発ワークフロー](#%E9%96%8B%E7%99%BA%E3%83%AF%E3%83%BC%E3%82%AF%E3%83%95%E3%83%AD%E3%83%BC)
   - [カスタムコマンド/エイリアス](#%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%82%A8%E3%82%A4%E3%83%AA%E3%82%A2%E3%82%B9)
     - [Git操作（fzf連携）](#git%E6%93%8D%E4%BD%9Cfzf%E9%80%A3%E6%90%BA)
     - [ナビゲーション](#%E3%83%8A%E3%83%93%E3%82%B2%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3)
@@ -27,7 +29,7 @@
 
 # dotfiles
 
-macOS向けの開発環境設定ファイル一式。シェル、エディタ、ウィンドウマネージャ、AIツールの設定を管理。
+macOS向けの開発環境設定ファイル一式。シェル、ターミナル（cmux）、ウィンドウマネージャ、AIツールの設定を管理。
 
 ## 前提条件
 
@@ -46,7 +48,7 @@ cd dotfiles
 # Homebrewパッケージをインストール
 brew bundle --file=.homebrew/Brewfile
 
-# シンボリックリンクを作成
+# シンボリックリンクを作成（AIツールのセットアップも含む）
 ./setup.sh
 
 # シークレットファイルを設定（テンプレートからコピー）
@@ -62,14 +64,20 @@ chmod 600 ~/.zsh/secrets.zsh
 ├── .claude/          # Claude Code設定（skills, commands, plugins）
 ├── .codex/           # Codex CLI設定
 ├── .config/          # アプリケーション設定
-│   ├── alacritty/    # ターミナルエミュレータ
+│   ├── alacritty/    # ターミナルエミュレータ（レガシー）
+│   ├── ghostty/      # ターミナルエミュレータ（cmuxベース）
 │   ├── gokurakujoudo/# Karabiner設定（EDN形式）
+│   ├── karabiner/    # Karabiner-Elements設定
+│   ├── prr/          # PRレビューツール設定
 │   └── starship/     # プロンプトテーマ
 ├── .homebrew/        # Brewfile（パッケージ一覧）
 ├── .script/          # カスタムスクリプト
+│   ├── dev.sh        # cmux開発環境（difit + Claude Code）
+│   ├── ide.sh        # tmux IDE風レイアウト（レガシー）
+│   └── review-pr.sh  # 複数AIでPRレビュー
 ├── .zsh/             # Zsh設定（モジュール分割）
 ├── .skhdrc           # キーボードショートカット
-├── .tmux.conf        # ターミナルマルチプレクサ
+├── .tmux.conf        # tmux設定（レガシー）
 ├── .yabairc          # タイル型ウィンドウマネージャ
 ├── .zprofile         # ログインシェル環境変数
 └── .zshrc            # Zshメイン設定
@@ -86,13 +94,22 @@ chmod 600 ~/.zsh/secrets.zsh
 | [Atuin](https://github.com/atuinsh/atuin) | シェル履歴管理 |
 | [fzf](https://github.com/junegunn/fzf) | ファジーファインダー |
 
-### ターミナル/エディタ
+### ターミナル
 
 | ツール | 用途 |
 |--------|------|
-| [Alacritty](https://github.com/alacritty/alacritty) | ターミナルエミュレータ |
-| [tmux](https://github.com/tmux/tmux) | ターミナルマルチプレクサ |
+| [cmux](https://cmux.dev) | ターミナルマルチプレクサ（メイン、Ghosttyベース） |
+| [Ghostty](https://ghostty.org) | ターミナルエミュレータ |
+| [tmux](https://github.com/tmux/tmux) | ターミナルマルチプレクサ（レガシー） |
+| [Alacritty](https://github.com/alacritty/alacritty) | ターミナルエミュレータ（レガシー） |
+
+### エディタ
+
+| ツール | 用途 |
+|--------|------|
 | [Neovim](https://github.com/neovim/neovim) | エディタ |
+| [Cursor](https://cursor.sh) | AIエディタ |
+| [VS Code](https://code.visualstudio.com) | エディタ |
 
 ### ウィンドウ管理
 
@@ -115,6 +132,30 @@ chmod 600 ~/.zsh/secrets.zsh
 |--------|------|
 | [Claude Code](https://claude.com/claude-code) | AIコーディングアシスタント |
 | [Codex CLI](https://github.com/openai/codex) | OpenAI Codex CLI |
+| [RTK](https://github.com/rtk-ai/rtk) | Claude Codeトークン最適化プロキシ |
+| [difit](https://github.com/nicolo-ribaudo/difit) | Web UIのGit diffビューア（AIプロンプト生成） |
+| [agent-browser](https://github.com/anthropics/agent-browser) | ヘッドレスブラウザ自動化 |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Google Gemini CLI |
+
+## 開発ワークフロー
+
+メインのターミナル環境はcmux。`dev` コマンドでdifit（diffビューア）とClaude Codeを左右分割で起動する。
+
+```
++----------+----------+
+|  difit   |  claude  |
+|  (50%)   |  (50%)   |
++----------+----------+
+```
+
+```bash
+# cmuxターミナル内で実行
+dev           # カレントディレクトリで起動
+dev ~/project # 指定ディレクトリで起動
+```
+
+- difitはブランチのdiffを自動検出してWeb UIで表示
+- `meh + return`（Alt+Cmd+Shift+Return）でcmuxの表示/非表示を切り替え
 
 ## カスタムコマンド/エイリアス
 
@@ -123,6 +164,7 @@ chmod 600 ~/.zsh/secrets.zsh
 - `ga` - インタラクティブなgit add（diffプレビュー付き）
 - `gr` - インタラクティブなgit restore
 - `gd` - インタラクティブなgit diff
+- `gsw` - インタラクティブなブランチ切り替え
 - `gsp` - インタラクティブなgit stash pop
 - `gss` - インタラクティブなgit stash save
 - `gbd` - インタラクティブなブランチ削除
@@ -135,7 +177,8 @@ chmod 600 ~/.zsh/secrets.zsh
 
 ### その他
 
-- `ide` - tmuxでIDE風レイアウトを構築
+- `dev` - cmuxでdifit + Claude Code分割レイアウトを起動
+- `ide` - tmuxでIDE風レイアウトを構築（レガシー）
 - `review-pr` - 複数AIでPRレビュー
 
 ## シークレット管理

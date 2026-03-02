@@ -21,6 +21,10 @@ Available skills:
 - `test-generator` - TDD test generation
 - `latest-docs` - Auto: verify latest documentation before implementation
 - `date-check` - Verify current date from system
+- `difit` - Git diff viewer with web UI and AI prompt generation
+- `prr` - Terminal-based GitHub PR review tool
+- `rtk` - Token optimization proxy for Claude Code
+- `agent-browser` - Headless browser automation for AI agents
 
 ## Key Principles
 
