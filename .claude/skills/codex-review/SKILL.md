@@ -37,7 +37,7 @@ git diff HEAD --name-status --find-renames
 **Critical: Codex runs in read-only sandbox for safety**
 
 ```bash
-codex exec --sandbox read-only "$(cat <<'EOF'
+codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 # Review Request
 
 ## Context
@@ -389,7 +389,7 @@ When triggered from **ExitPlanMode** (via quality-gate Step 1), Codex reviews th
 ### Plan Review Prompt
 
 ```bash
-codex exec --sandbox read-only "$(cat <<'EOF'
+codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 # Plan Review Request
 
 ## Plan Content
