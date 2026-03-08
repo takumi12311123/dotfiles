@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "ok": { "type": "boolean" },
+    "phase": { "type": "string", "const": "plan-review" },
+    "summary": { "type": "string" },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": { "type": "string", "enum": ["blocking", "advisory"] },
+          "category": { "type": "string", "enum": ["feasibility", "risk", "alternative", "scope", "dependency", "testing"] },
+          "section": { "type": "string" },
+          "problem": { "type": "string" },
+          "recommendation": { "type": "string" }
+        },
+        "required": ["severity", "category", "section", "problem", "recommendation"],
+        "additionalProperties": false
+      }
+    },
+    "suggestions": { "type": "string" }
+  },
+  "required": ["ok", "phase", "summary", "issues", "suggestions"],
+  "additionalProperties": false
+}

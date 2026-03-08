@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "ok": { "type": "boolean" },
+    "phase": { "type": "string", "enum": ["arch", "detail", "cross-check"] },
+    "summary": { "type": "string" },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": { "type": "string", "enum": ["blocking", "advisory"] },
+          "category": { "type": "string", "enum": ["correctness", "security", "perf", "maintainability", "testing", "style"] },
+          "file": { "type": "string" },
+          "lines": { "type": "string" },
+          "problem": { "type": "string" },
+          "recommendation": { "type": "string" }
+        },
+        "required": ["severity", "category", "file", "lines", "problem", "recommendation"],
+        "additionalProperties": false
+      }
+    },
+    "notes_for_next_review": { "type": "string" }
+  },
+  "required": ["ok", "phase", "summary", "issues", "notes_for_next_review"],
+  "additionalProperties": false
+}
