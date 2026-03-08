@@ -37,8 +37,16 @@ git diff HEAD --name-status --find-renames
 **Critical: Codex runs in read-only sandbox for safety**
 
 ```bash
-codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
+ROOT=$(git rev-parse --show-toplevel)
+REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-review.XXXXXX")
+
+codex exec -m gpt-5.4 --sandbox read-only \
+  --output-schema "$ROOT/.claude/skills/codex-review/review-schema.json" \
+  -o "$REVIEW_OUT" \
+  "$(cat <<'EOF'
 # Review Request
+
+すべての文字列フィールド（summary, problem, recommendation, notes_for_next_review）は日本語で記述してください。
 
 ## Context
 [Claude Code provides implementation summary in Japanese]
@@ -56,32 +64,11 @@ codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 ## Previous Review Notes
 [Notes from previous iteration, if any]
 
-## Required Output Format (JSON only, in Japanese)
-
-必ず以下のJSON形式で出力してください:
-
-{
-  "ok": boolean,  // blocking issue がなければ true
-  "phase": "arch|detail|cross-check",
-  "summary": "レビュー全体のサマリ(日本語)",
-  "issues": [
-    {
-      "severity": "blocking|advisory",
-      "category": "correctness|security|perf|maintainability|testing|style",
-      "file": "path/to/file",
-      "lines": "42-45",
-      "problem": "問題の具体的な説明(日本語)",
-      "recommendation": "修正案(コード例を含む、日本語)"
-    }
-  ],
-  "notes_for_next_review": "次回レビュー時の引き継ぎ事項(日本語)"
-}
-
-**Severity Guidelines:**
+## Severity Guidelines
 - **blocking**: Must be fixed. Even one blocking issue → ok: false
 - **advisory**: Recommended improvement. Does not affect ok status
 
-**Category Definitions:**
+## Category Definitions
 - correctness: Logic errors, incorrect behavior
 - security: Security vulnerabilities, unsafe practices
 - perf: Performance issues, inefficiency
@@ -90,6 +77,21 @@ codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 - style: Code style, naming conventions (usually advisory)
 EOF
 )"
+
+# Verify result (fail-closed on error)
+if [ $? -ne 0 ] || [ ! -s "$REVIEW_OUT" ]; then
+  rm -f "$REVIEW_OUT"
+  echo "ERROR: codex exec failed or produced empty output" >&2
+  exit 1
+fi
+
+# Parse result and cleanup
+if ! jq . "$REVIEW_OUT"; then
+  rm -f "$REVIEW_OUT"
+  echo "ERROR: invalid review JSON" >&2
+  exit 1
+fi
+rm -f "$REVIEW_OUT"
 ```
 
 **Important: Wait for Codex completion**
@@ -364,9 +366,11 @@ Claude Code constructs the prompt dynamically based on:
 - Project-specific context
 
 ### Result Parsing
-- Expect JSON output from Codex
-- Validate JSON schema before processing
-- Handle malformed responses gracefully
+- `--output-schema` guarantees JSON schema compliance via OpenAI structured output
+- `-o` outputs result to a unique temp file (via `mktemp`) — avoids stale reads and parallel conflicts
+- Schema paths use `$(git rev-parse --show-toplevel)` for location-independent execution
+- Always verify `codex exec` exit code and file non-emptiness before parsing (fail-closed)
+- `mktemp`, `codex exec`, verification, `jq` parse, and `rm -f` cleanup all run in the same shell block
 - Extract issues by severity for fixing
 
 ### Fix Priority
@@ -389,8 +393,16 @@ When triggered from **ExitPlanMode** (via quality-gate Step 1), Codex reviews th
 ### Plan Review Prompt
 
 ```bash
-codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
+ROOT=$(git rev-parse --show-toplevel)
+PLAN_REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-plan-review.XXXXXX")
+
+codex exec -m gpt-5.4 --sandbox read-only \
+  --output-schema "$ROOT/.claude/skills/codex-review/plan-review-schema.json" \
+  -o "$PLAN_REVIEW_OUT" \
+  "$(cat <<'EOF'
 # Plan Review Request
+
+すべての文字列フィールド（summary, section, problem, recommendation, suggestions）は日本語で記述してください。
 
 ## Plan Content
 [Contents of .claude/plans/{task-name}.md]
@@ -403,29 +415,26 @@ codex exec -m gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 - **依存関係**: ステップ間の依存関係は正しいか？順序は適切か？
 - **テスト戦略**: テスト方針は十分か？
 
-## Required Output Format (JSON only, in Japanese)
-
-{
-  "ok": boolean,
-  "phase": "plan-review",
-  "summary": "計画レビューのサマリ(日本語)",
-  "issues": [
-    {
-      "severity": "blocking|advisory",
-      "category": "feasibility|risk|alternative|scope|dependency|testing",
-      "section": "計画内の該当セクション",
-      "problem": "問題の具体的な説明(日本語)",
-      "recommendation": "改善案(日本語)"
-    }
-  ],
-  "suggestions": "計画の改善提案(日本語)"
-}
-
-**Severity Guidelines:**
+## Severity Guidelines
 - **blocking**: 計画に致命的な問題。修正が必要 → ok: false
 - **advisory**: 改善推奨だが計画として進めることは可能
 EOF
 )"
+
+# Verify result (fail-closed on error)
+if [ $? -ne 0 ] || [ ! -s "$PLAN_REVIEW_OUT" ]; then
+  rm -f "$PLAN_REVIEW_OUT"
+  echo "ERROR: codex exec failed or produced empty output" >&2
+  exit 1
+fi
+
+# Parse result and cleanup
+if ! jq . "$PLAN_REVIEW_OUT"; then
+  rm -f "$PLAN_REVIEW_OUT"
+  echo "ERROR: invalid plan review JSON" >&2
+  exit 1
+fi
+rm -f "$PLAN_REVIEW_OUT"
 ```
 
 ### Plan Review Iteration
