@@ -40,7 +40,7 @@ git diff HEAD --name-status --find-renames
 ROOT=$(git rev-parse --show-toplevel)
 REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-review.XXXXXX")
 
-codex exec -m gpt-5.4 --sandbox read-only \
+codex exec --model gpt-5.4 --sandbox read-only \
   --output-schema "$ROOT/.claude/skills/codex-review/review-schema.json" \
   -o "$REVIEW_OUT" \
   "$(cat <<'EOF'
@@ -396,7 +396,7 @@ When triggered from **ExitPlanMode** (via quality-gate Step 1), Codex reviews th
 ROOT=$(git rev-parse --show-toplevel)
 PLAN_REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-plan-review.XXXXXX")
 
-codex exec -m gpt-5.4 --sandbox read-only \
+codex exec --model gpt-5.4 --sandbox read-only \
   --output-schema "$ROOT/.claude/skills/codex-review/plan-review-schema.json" \
   -o "$PLAN_REVIEW_OUT" \
   "$(cat <<'EOF'
