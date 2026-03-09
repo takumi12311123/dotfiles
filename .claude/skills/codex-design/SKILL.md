@@ -70,7 +70,7 @@ Claude Code proposes 2-3 viable approaches:
 Execute Codex in read-only sandbox for design review:
 
 ```bash
-codex exec --sandbox read-only "$(cat <<'EOF'
+codex exec --model gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 # Design Consultation Request
 
 ## Context
