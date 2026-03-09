@@ -203,6 +203,11 @@ create_symlink "$DOTFILES_DIR/.claude/commands" "$HOME/.claude/commands"
 create_symlink "$DOTFILES_DIR/.claude/skills" "$HOME/.claude/skills"
 create_symlink "$DOTFILES_DIR/.claude/plugins" "$HOME/.claude/plugins"
 
+# .gemini directory (selective - keep auth/history local)
+step "Setting up .gemini..."
+mkdir -p "$HOME/.gemini"
+create_symlink "$DOTFILES_DIR/.gemini/settings.json" "$HOME/.gemini/settings.json"
+
 # .codex directory
 step "Setting up .codex..."
 mkdir -p "$HOME/.codex"

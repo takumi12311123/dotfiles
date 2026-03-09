@@ -1,0 +1,28 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "general": {
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": "30d",
+      "warningAcknowledged": true
+    }
+  },
+  "modelConfigs": {
+    "customOverrides": [
+      {
+        "match": { "model": "gemini-3-pro-preview" },
+        "modelConfig": {
+          "generateContentConfig": {
+            "thinkingConfig": {
+              "thinkingBudget": 65536
+            }
+          }
+        }
+      }
+    ]
+  }
+}
