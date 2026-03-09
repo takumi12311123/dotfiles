@@ -48,7 +48,7 @@ you have violated the most important rule. IMMEDIATELY run quality-gate.
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + codex-review |
+| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + codex-review + gemini-review (parallel) |
 | latest-docs | Before implementation | Verify latest documentation |
 | backend-go | Go implementation | Go backend best practices |
 | frontend-design | Figma implementation | Figma to code implementation |
@@ -59,6 +59,8 @@ you have violated the most important rule. IMMEDIATELY run quality-gate.
 | Skill | Description |
 |-------|-------------|
 | codex-review | Code review via Codex |
+| gemini-review | Code review via Gemini (parallel with codex-review) |
+| web-research | 3者裏取りリサーチ (Claude + Codex + Gemini) |
 | test-generator | TDD: Generate tests before implementation |
 | security-scan | Security vulnerability scanning |
 | codex-design | Design consultation for complex decisions |

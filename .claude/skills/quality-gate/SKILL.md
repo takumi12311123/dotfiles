@@ -34,8 +34,18 @@ Ensure code quality through automated checks before any user-facing action.
 └─────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────┐
-│  3. Run codex-review                                │
-│     → Wait for ok: true                             │
+│  3. Run codex-review + gemini-review IN PARALLEL    │
+│     → Launch both as background tasks               │
+│     → Wait for both to complete                     │
+│     → Merge results                                 │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│  4. Merge & Evaluate Review Results                 │
+│     → Both agree ok: proceed                        │
+│     → Codex blocking: must fix                      │
+│     → Gemini-only blocking: present as advisory+    │
+│     → Contradictions: flag to user                  │
 └─────────────────────────────────────────────────────┘
                         ↓
           ┌─────────────────────────┐
@@ -176,7 +186,7 @@ Format, build, and test checks typically need full runs:
 6. Skip unavailable commands gracefully (no error)
 7. If no checks found, proceed to codex-review
 
-## Step 3: Run codex-review
+## Step 3: Run codex-review + gemini-review IN PARALLEL
 
 **When triggered from ExitPlanMode (plan review):**
 - Step 1 already ran Plan Review via codex-review
@@ -184,14 +194,148 @@ Format, build, and test checks typically need full runs:
 - Proceed directly to user presentation for plan approval
 
 **When triggered from commit/PR/user confirmation (code review):**
-Execute `codex-review` skill:
-- Wait for `ok: true`
-- If blocking issues exist, fix and re-run checks
-- Max 5 iterations
+
+### Security: Gemini Review is Opt-In
+
+Gemini review sends diffs to Google's API. It is only active when:
+1. `gemini` CLI is installed and authenticated
+2. `gemini` CLI command is available in PATH
+
+Gemini review is **automatically available** when the CLI is installed.
+To **disable** Gemini review, uninstall or remove `gemini` from PATH.
+
+**Sensitive content protection**: gemini-review applies filename-based filtering
+(`.env`, `*.key`, `*.pem`, `*credentials*`, `*secret*`, `*.tfvars`, `*.tfstate`).
+However, secrets embedded in regular source files are NOT filtered.
+For repositories with embedded secrets, ensure Gemini CLI is not installed.
+
+If `gemini` CLI is not available, quality-gate proceeds with Codex-only review.
+
+### Parallel Execution
+
+Launch both reviews simultaneously using background Subagents:
+
+```
+┌──────────────────┐     ┌──────────────────┐
+│  Subagent 1:     │     │  Subagent 2:     │
+│  codex-review    │     │  gemini-review   │
+│  (primary)       │     │  (secondary)     │
+└──────────────────┘     └──────────────────┘
+         │                        │
+         └────────┬───────────────┘
+                  ↓
+         ┌──────────────────┐
+         │  Merge Results   │
+         └──────────────────┘
+```
+
+**Implementation:**
+- Launch `codex-review` as background Agent task
+- Launch `gemini-review` as background Agent task
+- Wait for both to complete (Gemini timeout: 5min, Codex timeout: 20min)
+- If Gemini times out, proceed with Codex result only
+
+### Step 4: Merge & Evaluate Results
+
+Codex と Gemini の結果は **それぞれ独立に保持** し、既存の review-schema.json には手を加えない。
+マージ結果は `codex_result` とは **別オブジェクト** として返す（review-schema.json を汚染しない）。
+
+```python
+def merge_reviews(codex_result, gemini_result, gemini_status):
+    """
+    Codex = primary reviewer (blocking authority)
+    Gemini = secondary reviewer (additional perspective)
+
+    Args:
+        codex_result: dict - codex-review result (review-schema.json)
+        gemini_result: dict or None - gemini-review result
+        gemini_status: str - "completed" | "timeout" | "error"
+
+    Returns:
+        dict with keys:
+          - "codex": codex_result (untouched, schema-valid)
+          - "gemini": gemini_result or None (untouched)
+          - "merge_meta": cross-check metadata (separate structure)
+    """
+
+    merge_meta = {
+        "gemini_status": gemini_status,
+        "cross_verified_files": [],
+        "gemini_only_issues": [],
+    }
+
+    if gemini_status == "completed" and gemini_result and isinstance(gemini_result, dict):
+        gemini_issues = gemini_result.get("issues", [])
+        if isinstance(gemini_issues, list):
+            for g_issue in gemini_issues:
+                if not isinstance(g_issue, dict):
+                    continue
+                # Match on file + lines + category for stronger identity
+                matched_codex = None
+                for c in codex_result.get("issues", []):
+                    if (c.get("file") == g_issue.get("file") and
+                        c.get("lines") == g_issue.get("lines") and
+                        c.get("category") == g_issue.get("category")):
+                        matched_codex = c
+                        break
+
+                if matched_codex:
+                    merge_meta["cross_verified_files"].append({
+                        "file": g_issue.get("file"),
+                        "lines": g_issue.get("lines"),
+                        "category": g_issue.get("category"),
+                    })
+                else:
+                    merge_meta["gemini_only_issues"].append({
+                        "severity": g_issue.get("severity", "advisory"),
+                        "category": g_issue.get("category", ""),
+                        "file": g_issue.get("file", ""),
+                        "lines": g_issue.get("lines", ""),
+                        "problem": g_issue.get("problem", ""),
+                        "recommendation": g_issue.get("recommendation", ""),
+                    })
+
+    # Return as separate objects — codex_result is never modified
+    return {
+        "codex": codex_result,
+        "gemini": gemini_result,
+        "merge_meta": merge_meta,
+    }
+```
+
+### Output Format (Merged)
+
+```markdown
+## レビュー結果
+
+### Codexレビュー ✅/⚠️
+- **ステータス**: ok / 未解決issue残存
+- **反復回数**: N/5
+- **指摘件数**: blocking: N件, advisory: M件
+
+### Geminiレビュー ✅/⚠️/⏰
+- **ステータス**: ok / 指摘あり / タイムアウト
+- **指摘件数**: blocking: N件, advisory: M件
+
+### クロスチェック
+- **両者一致の指摘** (信頼度: 高):
+  - `file.py:42` - [問題] (category/severity) ✅ cross-verified
+- **Gemini独自の指摘** (参考):
+  - `file.py:88` - [問題] (category/advisory) 🔍 gemini-only
+```
+
+### Iteration Behavior
+
+- **Codex blocking issues**: Claude Code fixes → re-run both reviews
+- **Gemini-only blocking**: Presented as elevated advisory, does NOT trigger fix iteration
+- **Both agree blocking**: Highest priority fix
+- Max 5 iterations (same as before)
 
 ## Important
 
 - NEVER skip this gate
-- ALWAYS wait for checks to complete
-- Fix ALL blocking issues before proceeding
+- ALWAYS launch both reviews in parallel
+- ALWAYS wait for at least Codex to complete
+- Gemini failure is non-blocking (proceed with Codex only)
+- Fix ALL Codex blocking issues before proceeding
 - Document any skipped checks with reason
