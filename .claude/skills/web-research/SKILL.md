@@ -1,20 +1,19 @@
 ---
 name: web-research
 description: |
-  Multi-source web research with cross-verification. Searches with Claude Code (WebSearch),
-  then cross-verifies findings with both Codex CLI and Gemini CLI in parallel.
-  Checks information freshness and flags contradictions.
+  Delegated web research: Gemini does primary search, Codex cross-verifies.
+  Claude Code only merges and presents results (zero context window consumption).
 metadata:
   context: research, documentation, library, api, investigation
   auto-trigger: false
 ---
 
-# Web Research with Cross-Verification
+# Web Research (Gemini + Codex)
 
 ## Purpose
 
-**外部2者検証リサーチ**: Claude Codeが一次調査を行い、その結果をCodexとGeminiの
-2つの外部サービスで独立に検証する。情報の最新性・正確性をクロスチェックする。
+**外部2者リサーチ**: Geminiが一次調査（Web検索）、Codexが検証。
+Claude Codeは結果のマージと提示のみ行い、コンテキストを消費しない。
 
 ## When to Use
 
@@ -25,10 +24,9 @@ metadata:
 - 技術選定の情報収集
 - 最新バージョン・変更点の確認
 
-## Verification Result Schema
+## Research Result Schema
 
-Codex と Gemini は同一のJSONスキーマで結果を返す。
-以下がスキーマ定義（両者共通）:
+Gemini と Codex は同一のJSONスキーマで結果を返す。
 
 ### Field Definitions
 
@@ -81,90 +79,16 @@ Codex と Gemini は同一のJSONスキーマで結果を返す。
 
 ## Execution Flow
 
-### Step 1: Claude Code Primary Search
+### Step 1: Gemini Primary Research (Background)
 
-WebSearchで主要な検索を実施:
+Gemini CLIでWeb検索による一次調査を実行。
+**Claude CodeはWebSearch/WebFetchを使わない。**
 
-```
-WebSearch: "[query] [current year]"
-WebSearch: "[query] latest version"
-WebSearch: "[query] official documentation"
-```
-
-検索結果から以下を抽出:
-- 主要な事実・情報
-- バージョン番号
-- 公式ドキュメントURL
-- 最終更新日（わかる場合）
-
-### Step 2: Parallel Cross-Verification
-
-**Codex と Gemini を並列でバックグラウンド実行**
-
-Claude Codeの検索結果と参照URLを含めて、それぞれ独立に検証させる。
-
-**Codex検証 (Subagent / Background Task):**
-
-```bash
-ROOT=$(git rev-parse --show-toplevel)
-CODEX_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-research.XXXXXX")
-FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Codex検証に失敗","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
-
-# macOS-compatible timeout (array for zsh compatibility)
-if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
-elif command -v timeout >/dev/null 2>&1; then TIMEOUT_CMD=(timeout 300)
-else TIMEOUT_CMD=(); fi
-
-"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only \
-  --output-schema "$ROOT/.claude/skills/web-research/verification-schema.json" \
-  -o "$CODEX_OUT" \
-  "$(cat <<PROMPT
-# Web Research Cross-Verification
-
-すべての出力は日本語で記述してください。
-
-## Claude Codeの調査結果
-[Claude Codeの検索結果をここに挿入]
-
-## 参照URL
-[Claude Codeが参照したURLリストをここに挿入]
-
-## あなたのタスク
-
-重要: Claude Codeの調査結果を鵜呑みにせず、参照URLを実際に開いて内容を確認してください。
-Codex sandboxではWeb閲覧はできませんが、提供された情報の論理的整合性と
-あなた自身の知識に基づいて独立に検証してください。
-
-1. 上記の調査結果の正確性を、あなた自身の知識と照合して検証してください
-2. 参照URLが信頼できるソースか確認してください
-3. 以下の観点でチェックしてください:
-   - 情報は最新か？（古い情報やdeprecatedな内容が含まれていないか）
-   - 事実関係は正確か？
-   - 重要な情報の欠落はないか？
-   - より良い代替案やアプローチはないか？
-PROMPT
-)"
-
-EXIT_CODE=$?
-
-if [ $EXIT_CODE -ne 0 ] || [ ! -s "$CODEX_OUT" ]; then
-  echo "$FALLBACK"
-else
-  # --output-schema guarantees valid JSON; validate with python3 as fallback
-  if python3 -c "import json; json.load(open('$CODEX_OUT'))" 2>/dev/null; then
-    cat "$CODEX_OUT"
-  else
-    echo "$FALLBACK"
-  fi
-fi
-rm -f "$CODEX_OUT"
-```
-
-**Gemini検証 (Subagent / Background Task):**
+Launch as background Agent task with Bash:
 
 ```bash
 GEMINI_OUT=$(mktemp "${TMPDIR:-/tmp}/gemini-research.XXXXXX")
-FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Gemini検証に失敗","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
+FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Gemini調査に失敗","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
 
 # macOS-compatible timeout (array for zsh compatibility)
 if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
@@ -173,28 +97,25 @@ else TIMEOUT_CMD=(); fi
 
 "${TIMEOUT_CMD[@]}" gemini -m gemini-3-pro-preview -o json \
   -p "$(cat <<PROMPT
-# Web Research Cross-Verification
+# Web Research: Primary Investigation
 
 すべての出力は日本語で記述してください。
 
 重要: あなたはGemini CLIとして実行されています。Web検索はデフォルトで有効です。
-プロンプト内の情報だけでなく、必ず独自にWeb検索を行い最新情報を取得してください。
+必ず独自にWeb検索を行い最新情報を取得してください。
 
-## Claude Codeの調査結果
-[Claude Codeの検索結果をここに挿入]
-
-## 参照URL
-[Claude Codeが参照したURLリストをここに挿入]
+## 調査トピック
+[ユーザーのリサーチクエリをここに挿入]
 
 ## あなたのタスク
 
-1. 上記の調査トピックについて、独自にWeb検索で最新情報を確認してください
-2. 参照URLの内容を直接確認してください
-3. Claude Codeの調査結果と突き合わせてください
-4. 以下の観点でチェックしてください:
-   - 情報は最新か？（公式サイトの最新情報と一致するか）
-   - バージョン番号は正確か？
-   - deprecatedなAPIやパターンが含まれていないか？
+1. 上記トピックについて、Web検索で最新の公式情報を収集してください
+2. 以下を重点的に調査:
+   - 最新バージョン・リリース情報
+   - 公式ドキュメントURL
+   - ベストプラクティス・推奨パターン
+   - deprecatedな機能・破壊的変更
+3. 情報の鮮度（いつの情報か）を明記してください
 
 以下のJSON形式で正確に出力してください（コードブロックなし、JSONのみ）。
 
@@ -240,7 +161,6 @@ def extract_json(text):
 
 try:
     if isinstance(data, dict) and 'response' in data:
-        # CLI v0.32+ format: {session_id, response (string), stats}
         resp = data['response']
         parsed = extract_json(resp) if isinstance(resp, str) else resp
         assert 'verification_status' in parsed
@@ -248,7 +168,6 @@ try:
     elif isinstance(data, dict) and 'verification_status' in data:
         print(json.dumps(data))
     elif isinstance(data, list):
-        # Legacy format: list of response objects
         for item in reversed(data):
             try:
                 text = item['response']['candidates'][0]['content']['parts'][0]['text']
@@ -268,14 +187,72 @@ echo "$PARSED"
 rm -f "$GEMINI_OUT"
 ```
 
+### Step 2: Codex Cross-Verification (Background)
+
+Geminiの調査結果を受け取り、Codexが独立に検証。
+**Step 1と並列実行。Geminiの結果が先に返った場合、その内容をCodexに渡す。**
+**Geminiがまだ返っていない場合は、トピックのみでCodexに独自調査させる。**
+
+Launch as background Agent task with Bash:
+
+```bash
+ROOT=$(git rev-parse --show-toplevel)
+CODEX_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-research.XXXXXX")
+FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Codex検証に失敗","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
+
+# macOS-compatible timeout (array for zsh compatibility)
+if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
+elif command -v timeout >/dev/null 2>&1; then TIMEOUT_CMD=(timeout 300)
+else TIMEOUT_CMD=(); fi
+
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only \
+  --output-schema "$ROOT/.claude/skills/web-research/verification-schema.json" \
+  -o "$CODEX_OUT" \
+  "$(cat <<PROMPT
+# Web Research Cross-Verification
+
+すべての出力は日本語で記述してください。
+
+## 調査トピック
+[ユーザーのリサーチクエリをここに挿入]
+
+## Geminiの調査結果（利用可能な場合）
+[Geminiの結果をここに挿入。まだ返っていない場合は「Gemini結果なし - 独自に調査してください」]
+
+## あなたのタスク
+
+1. 上記トピックについて、あなた自身の知識で独立に検証してください
+2. Geminiの調査結果がある場合は、その正確性を検証してください
+3. 以下の観点でチェックしてください:
+   - 情報は最新か？（古い情報やdeprecatedな内容が含まれていないか）
+   - 事実関係は正確か？
+   - 重要な情報の欠落はないか？
+   - より良い代替案やアプローチはないか？
+PROMPT
+)"
+
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ] || [ ! -s "$CODEX_OUT" ]; then
+  echo "$FALLBACK"
+else
+  if python3 -c "import json; json.load(open('$CODEX_OUT'))" 2>/dev/null; then
+    cat "$CODEX_OUT"
+  else
+    echo "$FALLBACK"
+  fi
+fi
+rm -f "$CODEX_OUT"
+```
+
 ### Step 3: Merge & Analyze Results
 
-Codex/Geminiの外部検証結果を統合して信頼度を判定。
-**全ての入力を正規化してからマージする。**
+Gemini/Codexの結果を統合して信頼度を判定。
+**Claude Codeはここで初めて結果を受け取る（要約のみ）。**
 
 ```python
 def normalize_result(result):
-    """None、error、不完全なJSONを安全なデフォルトに正規化。型を強制変換する。"""
+    """None、error、不完全なJSONを安全なデフォルトに正規化。"""
     FALLBACK = {
         "verification_status": "error",
         "freshness": "uncertain",
@@ -292,7 +269,6 @@ def normalize_result(result):
 
     normalized = {}
 
-    # Enum fields: validate against allowed values, fallback if invalid
     VALID_STATUS = {"confirmed", "partially_confirmed", "contradicted", "error"}
     VALID_FRESHNESS = {"current", "outdated", "uncertain"}
 
@@ -302,11 +278,9 @@ def normalize_result(result):
     freshness = result.get("freshness", "uncertain")
     normalized["freshness"] = freshness if freshness in VALID_FRESHNESS else "uncertain"
 
-    # String field
     detail = result.get("freshness_detail", "")
     normalized["freshness_detail"] = str(detail) if detail else ""
 
-    # Array of strings: ensure list type, filter non-strings
     for key in ["confirmed_facts", "missing_info", "additional_findings", "recommended_sources"]:
         val = result.get(key, [])
         if not isinstance(val, list):
@@ -314,7 +288,6 @@ def normalize_result(result):
         else:
             normalized[key] = [str(item) for item in val if isinstance(item, str)]
 
-    # Array of objects (contradictions): validate each item shape
     raw_contradictions = result.get("contradictions", [])
     if not isinstance(raw_contradictions, list):
         normalized["contradictions"] = []
@@ -335,23 +308,16 @@ def normalize_result(result):
     return normalized
 
 
-def merge_research(codex_result, gemini_result):
-    """Codex/Geminiの外部検証結果をマージし、信頼度を判定する。
-
-    Claude Codeの一次調査結果は呼び出し元が保持する（構造化されていないため）。
-    この関数は外部2者の検証結果のみを統合する。
-    """
-    # Normalize all inputs first
-    codex = normalize_result(codex_result)
+def merge_research(gemini_result, codex_result):
+    """Gemini(一次調査)/Codex(検証)の結果をマージし、信頼度を判定する。"""
     gemini = normalize_result(gemini_result)
+    codex = normalize_result(codex_result)
 
-    # Count available sources (non-error)
-    sources_available = sum(1 for r in [codex, gemini]
+    sources_available = sum(1 for r in [gemini, codex]
                            if r["verification_status"] != "error")
 
-    # Freshness assessment
     freshness_votes = [
-        r["freshness"] for r in [codex, gemini]
+        r["freshness"] for r in [gemini, codex]
         if r["verification_status"] != "error"
     ]
 
@@ -364,13 +330,11 @@ def merge_research(codex_result, gemini_result):
     else:
         freshness_assessment = "uncertain"
 
-    # Contradiction detection
     all_contradictions = (
-        codex.get("contradictions", []) +
-        gemini.get("contradictions", [])
+        gemini.get("contradictions", []) +
+        codex.get("contradictions", [])
     )
 
-    # Confidence level
     if sources_available == 0:
         confidence = "unverified"
     elif sources_available == 1:
@@ -378,7 +342,7 @@ def merge_research(codex_result, gemini_result):
     elif all_contradictions:
         confidence = "low"
     elif all(r["verification_status"] == "confirmed"
-             for r in [codex, gemini]
+             for r in [gemini, codex]
              if r["verification_status"] != "error"):
         confidence = "high"
     else:
@@ -389,8 +353,8 @@ def merge_research(codex_result, gemini_result):
         "sources_available": sources_available,
         "freshness_assessment": freshness_assessment,
         "contradictions": all_contradictions,
-        "codex_detail": codex.get("freshness_detail", ""),
-        "gemini_detail": gemini.get("freshness_detail", "")
+        "gemini_detail": gemini.get("freshness_detail", ""),
+        "codex_detail": codex.get("freshness_detail", "")
     }
 ```
 
@@ -402,35 +366,34 @@ def merge_research(codex_result, gemini_result):
 ## 調査結果: [トピック]
 
 ### 信頼度判定
-- **総合信頼度**: 高（2者確認済） / 中（1者確認 or 部分一致） / 低（矛盾あり） / 未検証（外部検証失敗）
+- **総合信頼度**: 高（2者確認済） / 中（1者確認 or 部分一致） / 低（矛盾あり） / 未検証（外部調査失敗）
 - **検証ソース数**: N/2
 - **情報鮮度**: 最新 / 古い可能性あり / 不明
 
-### 主要な調査結果
-[Claude Codeの検索結果ベースの情報]
+### 主要な調査結果（Gemini Web検索）
+[Geminiの一次調査結果]
 
-### クロスチェック結果
+### クロスチェック結果（Codex検証）
 
 #### 一致した情報（信頼度: 高）
-- [複数ソースが一致した事実]
+- [両者が一致した事実]
 
 #### 追加情報
+- **Gemini追加**: [Geminiのみが見つけた情報（Web検索ベース）]
 - **Codex追加**: [Codexのみが指摘した情報]
-- **Gemini追加**: [Geminiのみが指摘した情報（Web検索ベース）]
 
 #### 矛盾・相違点（要注意）
-| 項目 | Claude Code | Codex | Gemini |
-|------|------------|-------|--------|
-| [項目] | [主張] | [主張] | [主張] |
+| 項目 | Gemini | Codex |
+|------|--------|-------|
+| [項目] | [主張] | [主張] |
 
 #### 情報鮮度チェック
-- **Codex判定**: [詳細]
 - **Gemini判定**: [詳細]
-- **最新バージョン**: [Geminiが検索した最新バージョン情報]
+- **Codex判定**: [詳細]
 
 ### 推奨ドキュメント
-- [URL1] (source: Codex/Gemini)
-- [URL2] (source: Codex/Gemini)
+- [URL1] (source: Gemini/Codex)
+- [URL2] (source: Gemini/Codex)
 
 ### 注意事項
 - [矛盾がある場合の注意点]
@@ -441,32 +404,30 @@ def merge_research(codex_result, gemini_result):
 
 **全てのエラーケースでフォールバックJSONを返す。**
 
-### 1者成功 (Codex or Gemini片方のみ)
+### 2者成功 (Both Gemini and Codex)
+- 通常のマージ処理、信頼度は一致度に基づいて判定
+
+### 1者成功 (Gemini or Codex片方のみ)
 - 成功したソースの結果を採用
 - 信頼度を「中」に設定
-- 失敗したソースを明記: `⚠️ [Codex/Gemini]検証に失敗しました`
-
-### 2者成功 (Both Codex and Gemini)
-- 通常のマージ処理
-- 信頼度は一致度に基づいて判定
+- 失敗したソースを明記
 
 ### 0者成功 (Both failed)
-- Claude Codeの結果のみ提示
 - 信頼度を「未検証」と明記
-- ユーザーに手動確認を推奨: `⚠️ 外部検証に失敗しました。手動での確認を推奨します`
+- ユーザーに手動確認を推奨: `⚠️ 外部調査に失敗しました。手動での確認を推奨します`
 
 ## Integration with latest-docs
 
 `latest-docs` スキルから呼び出される場合:
-- Step 1の検索クエリにバージョン・deprecation関連を追加
+- Geminiの検索クエリにバージョン・deprecation関連を追加
 - 結果を `latest-docs` のフォーマットに合わせて返却
 
 ## Important Reminders
 
-1. **並列実行**: Codex と Gemini は必ず並列で実行する
-2. **Gemini の強み活用**: Gemini は WebSearch ツールが使えるため、最新情報の取得に特に有効
-3. **参照URL必須**: 検証対象のURLをCodex/Geminiの両方に渡す
-4. **矛盾は隠さない**: 3者の結果が矛盾する場合、すべて提示してユーザーに判断を委ねる
-5. **鮮度チェック必須**: 情報が最新かどうか必ず確認する
+1. **Claude CodeはWebSearch/WebFetchを使わない** - 全てGemini+Codexに委譲
+2. **並列実行**: Gemini と Codex は必ずバックグラウンドで並列実行
+3. **Gemini = 一次調査**: Web検索で最新情報を取得
+4. **Codex = 検証**: Geminiの結果を知識ベースで検証
+5. **矛盾は隠さない**: 結果が矛盾する場合、すべて提示してユーザーに判断を委ねる
 6. **フォールバック保証**: 全エラーケースで有効なJSONを返す
 7. **日本語出力**: すべてのユーザー向けテキストは日本語
