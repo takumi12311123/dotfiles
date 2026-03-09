@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "verification_status": {
+      "type": "string",
+      "enum": ["confirmed", "partially_confirmed", "contradicted", "error"]
+    },
+    "freshness": {
+      "type": "string",
+      "enum": ["current", "outdated", "uncertain"]
+    },
+    "freshness_detail": { "type": "string" },
+    "confirmed_facts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": { "type": "string" },
+          "correction": { "type": "string" },
+          "source": { "type": "string" }
+        },
+        "required": ["claim", "correction", "source"],
+        "additionalProperties": false
+      }
+    },
+    "missing_info": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "additional_findings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "recommended_sources": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": [
+    "verification_status",
+    "freshness",
+    "freshness_detail",
+    "confirmed_facts",
+    "contradictions",
+    "missing_info",
+    "additional_findings",
+    "recommended_sources"
+  ],
+  "additionalProperties": false
+}
