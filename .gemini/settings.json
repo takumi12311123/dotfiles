@@ -11,6 +11,18 @@
       "warningAcknowledged": true
     }
   },
+  "experimental": {
+    "plan": true,
+    "enableAgents": true
+  },
+  "contextFileName": ["GEMINI.md", "AGENTS.md", "CLAUDE.md"],
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "trust": false
+    }
+  },
   "modelConfigs": {
     "customOverrides": [
       {
