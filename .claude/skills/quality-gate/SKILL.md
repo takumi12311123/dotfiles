@@ -237,8 +237,8 @@ Launch both reviews simultaneously using background Subagents:
 
 ### Step 4: Merge & Evaluate Results
 
-Codex と Gemini の結果は **それぞれ独立に保持** し、既存の review-schema.json には手を加えない。
-マージ結果は `codex_result` とは **別オブジェクト** として返す（review-schema.json を汚染しない）。
+Codex and Gemini results are **kept independently** — do not modify the existing review-schema.json.
+Merge metadata is returned as a **separate object** (does not pollute review-schema.json).
 
 ```python
 def merge_reviews(codex_result, gemini_result, gemini_status):
@@ -305,23 +305,25 @@ def merge_reviews(codex_result, gemini_result, gemini_status):
 
 ### Output Format (Merged)
 
+**All user-facing output must be in Japanese.**
+
 ```markdown
-## レビュー結果
+## Review Results
 
-### Codexレビュー ✅/⚠️
-- **ステータス**: ok / 未解決issue残存
-- **反復回数**: N/5
-- **指摘件数**: blocking: N件, advisory: M件
+### Codex Review
+- **Status**: ok / unresolved issues remain
+- **Iterations**: N/5
+- **Issues**: blocking: N, advisory: M
 
-### Geminiレビュー ✅/⚠️/⏰
-- **ステータス**: ok / 指摘あり / タイムアウト
-- **指摘件数**: blocking: N件, advisory: M件
+### Gemini Review
+- **Status**: ok / issues found / timeout
+- **Issues**: blocking: N, advisory: M
 
-### クロスチェック
-- **両者一致の指摘** (信頼度: 高):
-  - `file.py:42` - [問題] (category/severity) ✅ cross-verified
-- **Gemini独自の指摘** (参考):
-  - `file.py:88` - [問題] (category/advisory) 🔍 gemini-only
+### Cross-check
+- **Agreed issues** (high confidence):
+  - `file.py:42` - [Problem] (category/severity) cross-verified
+- **Gemini-only issues** (reference):
+  - `file.py:88` - [Problem] (category/advisory) gemini-only
 ```
 
 ### Iteration Behavior

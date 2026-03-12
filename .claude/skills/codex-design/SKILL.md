@@ -6,12 +6,12 @@ description: |
 
 # Codex Design Consultation
 
-## 🎯 Purpose
+## Purpose
 
-**設計段階でのCodex相談**: Consult with Codex before making complex design decisions.
+**Design-phase Codex consultation**: Consult with Codex before making complex design decisions.
 Get expert validation, alternative approaches, and risk assessment early in the development process.
 
-## 📋 When to Use
+## When to Use
 
 ### Mandatory Triggers
 - Introducing implementation patterns NOT found in existing codebase
@@ -27,7 +27,7 @@ Get expert validation, alternative approaches, and risk assessment early in the 
 - Distributed system component design
 - Complex algorithm implementation
 
-## 🔄 Consultation Flow
+## Consultation Flow
 
 ### Step 1: Problem Analysis
 
@@ -73,63 +73,63 @@ Execute Codex in read-only sandbox for design review:
 codex exec --model gpt-5.4 --sandbox read-only "$(cat <<'EOF'
 # Design Consultation Request
 
+All string fields (reasoning, risks, recommendations, guidance) must be in Japanese.
+
 ## Context
-[プロジェクトの概要と現在の状況]
+[Project overview and current situation]
 
 ## Problem Statement
-[解決したい問題の詳細な説明]
+[Detailed description of the problem to solve]
 
 ## Constraints
-- Performance: [パフォーマンス要件]
-- Security: [セキュリティ要件]
-- Scalability: [スケーラビリティ要件]
-- Maintainability: [保守性要件]
-- Team: [チームのスキルセット]
-- Timeline: [スケジュール制約]
+- Performance: [Performance requirements]
+- Security: [Security requirements]
+- Scalability: [Scalability requirements]
+- Maintainability: [Maintainability requirements]
+- Team: [Team skillset]
+- Timeline: [Schedule constraints]
 
 ## Proposed Design Options
 
-### Option 1: [アプローチ名]
-[詳細な説明]
+### Option 1: [Approach name]
+[Detailed description]
 
 **Pros:**
-- [メリット1]
-- [メリット2]
+- [Advantage 1]
+- [Advantage 2]
 
 **Cons:**
-- [デメリット1]
-- [デメリット2]
+- [Drawback 1]
+- [Drawback 2]
 
-### Option 2: [アプローチ名]
-[詳細な説明]
+### Option 2: [Approach name]
+[Detailed description]
 ...
 
-### Option 3: [アプローチ名]
-[詳細な説明]
+### Option 3: [Approach name]
+[Detailed description]
 ...
 
 ## Existing Codebase Patterns
-[既存のコードベースで使用されているパターン]
+[Patterns used in existing codebase]
 
 ## Questions for Codex
 
-1. 各アプローチの妥当性評価
-2. 見落としている潜在的な問題点
-3. 推奨されるアプローチとその理由
-4. 実装時の注意点
-5. 類似プロジェクトでの成功/失敗事例
+1. Validity assessment for each approach
+2. Overlooked potential issues
+3. Recommended approach and reasoning
+4. Implementation considerations
+5. Success/failure cases from similar projects
 
-## Required Output Format (JSON in Japanese)
-
-以下のJSON形式で回答してください:
+## Required Output Format (JSON, values in Japanese)
 
 {
   "recommended_option": "Option 1|Option 2|Option 3|Alternative",
-  "reasoning": "推奨理由の詳細説明(日本語)",
+  "reasoning": "Detailed reasoning for recommendation (Japanese)",
   "risk_assessment": {
     "option_1": {
-      "technical_risks": ["リスク1", "リスク2"],
-      "mitigation": ["対策1", "対策2"]
+      "technical_risks": ["Risk 1", "Risk 2"],
+      "mitigation": ["Mitigation 1", "Mitigation 2"]
     },
     "option_2": { ... },
     "option_3": { ... }
@@ -137,27 +137,27 @@ codex exec --model gpt-5.4 --sandbox read-only "$(cat <<'EOF'
   "additional_considerations": [
     {
       "category": "performance|security|maintainability|scalability",
-      "point": "考慮すべき点(日本語)",
+      "point": "Consideration point (Japanese)",
       "importance": "critical|high|medium|low"
     }
   ],
   "alternative_approach": {
-    "description": "代替アプローチの説明(Option 1-3以外に良い方法があれば)",
-    "why_better": "なぜこちらが良いか"
+    "description": "Alternative approach description (if better than Options 1-3)",
+    "why_better": "Why this is better"
   },
   "implementation_guidance": [
-    "実装時のガイダンス1",
-    "実装時のガイダンス2"
+    "Implementation guidance 1",
+    "Implementation guidance 2"
   ],
   "similar_patterns": [
     {
-      "project": "類似プロジェクト名",
-      "approach": "採用されたアプローチ",
-      "outcome": "結果(成功/失敗とその理由)"
+      "project": "Similar project name",
+      "approach": "Adopted approach",
+      "outcome": "Result (success/failure and reasons)"
     }
   ],
   "confidence": "high|medium|low",
-  "caveats": ["注意事項1", "注意事項2"]
+  "caveats": ["Caveat 1", "Caveat 2"]
 }
 EOF
 )"
@@ -173,92 +173,94 @@ Claude Code analyzes Codex's response:
 
 ### Step 5: Present to User
 
+**All user-facing output must be in Japanese.**
+
 Present comprehensive analysis to user for final decision:
 
 ```markdown
-## 設計相談結果: [問題のタイトル]
+## Design Consultation Result: [Problem Title]
 
-### 問題概要
-[解決したい問題の簡潔な説明]
+### Problem Summary
+[Brief description of the problem]
 
-### 提案した設計オプション
-1. **Option 1**: [概要]
-2. **Option 2**: [概要]
-3. **Option 3**: [概要]
+### Proposed Design Options
+1. **Option 1**: [Summary]
+2. **Option 2**: [Summary]
+3. **Option 3**: [Summary]
 
-### Codex推奨
-- **推奨アプローチ**: Option 2
-- **信頼度**: High
-- **推奨理由**:
-  [Codexの推奨理由を日本語で説明]
+### Codex Recommendation
+- **Recommended approach**: Option 2
+- **Confidence**: High
+- **Reasoning**:
+  [Codex reasoning explained]
 
-### リスク評価
+### Risk Assessment
 
-#### Option 1: [名前]
-- **技術的リスク**:
-  - [リスク1]
-  - [リスク2]
-- **リスク軽減策**:
-  - [対策1]
-  - [対策2]
+#### Option 1: [Name]
+- **Technical risks**:
+  - [Risk 1]
+  - [Risk 2]
+- **Mitigations**:
+  - [Mitigation 1]
+  - [Mitigation 2]
 
-#### Option 2: [名前] ⭐ 推奨
-- **技術的リスク**:
-  - [リスク1]
-- **リスク軽減策**:
-  - [対策1]
+#### Option 2: [Name] (recommended)
+- **Technical risks**:
+  - [Risk 1]
+- **Mitigations**:
+  - [Mitigation 1]
 
-#### Option 3: [名前]
-- **技術的リスク**:
-  - [リスク1]
-  - [リスク2]
-- **リスク軽減策**:
-  - [対策1]
+#### Option 3: [Name]
+- **Technical risks**:
+  - [Risk 1]
+  - [Risk 2]
+- **Mitigations**:
+  - [Mitigation 1]
 
-### 追加考慮事項
+### Additional Considerations
 
 #### Critical
-- [重要な考慮点1]
+- [Critical consideration 1]
 
 #### High
-- [高優先度の考慮点1]
-- [高優先度の考慮点2]
+- [High priority consideration 1]
+- [High priority consideration 2]
 
 #### Medium
-- [中優先度の考慮点1]
+- [Medium priority consideration 1]
 
-### 代替アプローチ (Codex提案)
-[Codexが提案した代替案があれば]
+### Alternative Approach (Codex proposal)
+[Alternative proposed by Codex, if any]
 
-**なぜ良いか**: [理由]
+**Why better**: [Reasoning]
 
-### 実装ガイダンス
-1. [実装時の注意点1]
-2. [実装時の注意点2]
-3. [実装時の注意点3]
+### Implementation Guidance
+1. [Implementation note 1]
+2. [Implementation note 2]
+3. [Implementation note 3]
 
-### 類似プロジェクトの事例
-- **プロジェクト**: [名前]
-  - **アプローチ**: [採用手法]
-  - **結果**: [成功/失敗の理由]
+### Similar Project Examples
+- **Project**: [Name]
+  - **Approach**: [Adopted method]
+  - **Result**: [Success/failure reasons]
 
-### 注意事項
-- [注意事項1]
-- [注意事項2]
+### Caveats
+- [Caveat 1]
+- [Caveat 2]
 
-### Claude Codeの所見
-[Codexの推奨を踏まえた、プロジェクト固有の考察]
+### Claude Code Observations
+[Project-specific insights considering Codex recommendation]
 
-どのアプローチで進めますか? または、さらに詳細を検討しますか?
+Which approach should we proceed with? Or investigate further?
 ```
 
-## 🔍 Specific Use Cases
+## Specific Use Cases
 
 ### Use Case 1: Database Schema Design
 
 ```markdown
 ## Problem
-新しいマルチテナント機能のためのデータベース設計
+Database design for new multi-tenant feature
 
 ## Options
 1. Single database with tenant_id column
@@ -278,7 +280,7 @@ Option 3 (Schema per tenant) for this scale
 
 ```markdown
 ## Problem
-新しいマイクロサービス間のAPI設計
+API design for new microservice communication
 
 ## Options
 1. REST with JSON
@@ -298,7 +300,7 @@ Option 2 (gRPC) for internal services
 
 ```markdown
 ## Problem
-React アプリケーションの状態管理
+State management for React application
 
 ## Options
 1. Redux Toolkit
@@ -314,7 +316,7 @@ Option 2 (Zustand) for this project size
 - Mitigation: Keep state logic modular for easier migration
 ```
 
-## 🚨 Error Handling
+## Error Handling
 
 ### Codex Timeout
 - Wait up to 10 minutes (10 polls)
@@ -332,7 +334,7 @@ Option 2 (Zustand) for this project size
 - Provides reasoning for both perspectives
 - Lets user make informed decision
 
-## 📊 Output Quality Indicators
+## Output Quality Indicators
 
 ### High Confidence Output
 - Clear recommendation with strong reasoning
@@ -346,7 +348,7 @@ Option 2 (Zustand) for this project size
 - Suggests gathering more information
 - Recommends prototyping or spike
 
-## 🔧 Configuration Parameters
+## Configuration Parameters
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -356,16 +358,16 @@ Option 2 (Zustand) for this project size
 | require_risk_assessment | true | Require risk analysis for each option |
 | include_examples | true | Include similar project examples |
 
-## 🎯 Success Criteria
+## Success Criteria
 
 Consultation is successful when:
-- ✅ Codex provides clear recommendation
-- ✅ All options have risk assessment
-- ✅ Implementation guidance provided
-- ✅ User has sufficient information to decide
-- ✅ Potential pitfalls identified
+- Codex provides clear recommendation
+- All options have risk assessment
+- Implementation guidance provided
+- User has sufficient information to decide
+- Potential pitfalls identified
 
-## 📝 Best Practices
+## Best Practices
 
 ### Before Consultation
 1. Clearly define the problem and constraints
@@ -385,7 +387,7 @@ Consultation is successful when:
 3. Share decision with team
 4. Reference consultation in implementation
 
-## ⚠️ Important Reminders
+## Important Reminders
 
 1. **Use early** - Consult before writing code, not after
 2. **Be specific** - Provide detailed context and constraints

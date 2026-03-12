@@ -5,17 +5,17 @@ description: |
   Integrates with codex-review for automatic security checks.
   Covers OWASP Top 10, common vulnerabilities, and secure coding practices.
   Output: Japanese
-trigger_keywords: security, セキュリティ, vulnerability, 脆弱性, OWASP
+trigger_keywords: security, vulnerability, OWASP
 ---
 
 # Security Scan SKILL
 
-## 🎯 Purpose
+## Purpose
 
-**セキュリティ脆弱性の検出**: Identify security vulnerabilities and ensure secure coding practices.
+**Security vulnerability detection**: Identify security vulnerabilities and ensure secure coding practices.
 Automatically invoked during codex-review for security-sensitive code.
 
-## 📋 When to Use
+## When to Use
 
 ### Automatic Triggers (via codex-review)
 - Authentication/Authorization code
@@ -31,7 +31,7 @@ Automatically invoked during codex-review for security-sensitive code.
 - Before deploying security-critical features
 - After dependency updates
 
-## 🔐 Security Focus Areas
+## Security Focus Areas
 
 ### 1. Input Validation
 **Risks:**
@@ -44,10 +44,10 @@ Automatically invoked during codex-review for security-sensitive code.
 
 **Checks:**
 ```javascript
-// ❌ VULNERABLE
+// VULNERABLE
 const query = `SELECT * FROM users WHERE id = ${userId}`;
 
-// ✅ SECURE
+// SECURE
 const query = 'SELECT * FROM users WHERE id = ?';
 db.query(query, [userId]);
 ```
@@ -62,12 +62,12 @@ db.query(query, [userId]);
 
 **Checks:**
 ```javascript
-// ❌ VULNERABLE
+// VULNERABLE
 if (user.role === 'admin') {
   // No verification of user identity
 }
 
-// ✅ SECURE
+// SECURE
 if (authenticatedUser.id === user.id && user.role === 'admin') {
   // Verify both identity and role
 }
@@ -83,11 +83,11 @@ if (authenticatedUser.id === user.id && user.role === 'admin') {
 
 **Checks:**
 ```javascript
-// ❌ VULNERABLE
+// VULNERABLE
 const password = req.body.password; // Plaintext
 localStorage.setItem('token', token); // Insecure storage
 
-// ✅ SECURE
+// SECURE
 const hashedPassword = await bcrypt.hash(password, 10);
 // Use httpOnly, secure cookies instead
 ```
@@ -104,7 +104,7 @@ const hashedPassword = await bcrypt.hash(password, 10);
 - Dependency version analysis
 - Vulnerability database lookup
 
-## 🔍 Security Scan Process
+## Security Scan Process
 
 ### Step 1: Identify Security-Sensitive Code
 
@@ -145,61 +145,63 @@ Check against OWASP Top 10:
 
 Output with remediation guidance.
 
-## 📊 Output Format to User
+## Output Format to User
+
+**All user-facing output must be in Japanese.**
 
 ```markdown
-## セキュリティスキャン結果
+## Security Scan Results
 
-### 概要
-- **スキャンファイル**: 5ファイル
-- **検出された問題**: 3件
-  - Critical: 1件
-  - High: 1件
-  - Medium: 1件
+### Summary
+- **Scanned files**: 5 files
+- **Issues found**: 3
+  - Critical: 1
+  - High: 1
+  - Medium: 1
 
-### 🚨 Critical (即座に修正が必要)
+### Critical (immediate fix required)
 
-#### 1. SQL Injection 脆弱性
-- **ファイル**: `src/api/users.ts:45-48`
-- **問題**: ユーザー入力を直接SQLクエリに埋め込んでいます
-- **リスク**: データベース全体が侵害される可能性
+#### 1. SQL Injection vulnerability
+- **File**: `src/api/users.ts:45-48`
+- **Problem**: User input directly embedded in SQL query
+- **Risk**: Entire database could be compromised
 - **OWASP**: A03:2021 - Injection
 
-**脆弱なコード:**
+**Vulnerable code:**
 ```typescript
 const query = `SELECT * FROM users WHERE email = '${email}'`;
 db.query(query);
 ```
 
-**修正案:**
+**Fix:**
 ```typescript
 const query = 'SELECT * FROM users WHERE email = ?';
 db.query(query, [email]);
-// または ORMを使用
+// Or use ORM
 const user = await User.findOne({ where: { email } });
 ```
 
-**影響**: 攻撃者が任意のSQLを実行可能
-**修正優先度**: 最高
+**Impact**: Attacker can execute arbitrary SQL
+**Fix priority**: Highest
 
 ---
 
-### ⚠️ High (早急に修正を推奨)
+### High (urgent fix recommended)
 
-#### 2. 認証トークンの不適切な保存
-- **ファイル**: `src/auth/session.ts:23`
-- **問題**: JWTトークンがlocalStorageに保存されています
-- **リスク**: XSS攻撃でトークンが盗まれる可能性
+#### 2. Improper token storage
+- **File**: `src/auth/session.ts:23`
+- **Problem**: JWT token stored in localStorage
+- **Risk**: Token can be stolen via XSS attack
 - **OWASP**: A07:2021 - Identification and Authentication Failures
 
-**脆弱なコード:**
+**Vulnerable code:**
 ```typescript
 localStorage.setItem('authToken', token);
 ```
 
-**修正案:**
+**Fix:**
 ```typescript
-// httpOnly, secure cookieを使用
+// Use httpOnly, secure cookie
 res.cookie('authToken', token, {
   httpOnly: true,
   secure: true,
@@ -210,27 +212,25 @@ res.cookie('authToken', token, {
 
 ---
 
-### 📋 Medium
+### Medium
 
-#### 3. パスワードハッシュの不十分な強度
-- **ファイル**: `src/auth/password.ts:12`
-- **問題**: bcryptのsalt roundsが10未満
-- **推奨**: 12以上のsalt roundsを使用
-
----
-
-### ✅ セキュリティベストプラクティス
-
-検出された良好な実装:
-- ✅ CORS設定が適切に構成されています
-- ✅ CSRFトークン検証が実装されています
-- ✅ HTTPSが強制されています
+#### 3. Insufficient password hash strength
+- **File**: `src/auth/password.ts:12`
+- **Problem**: bcrypt salt rounds below 10
+- **Recommendation**: Use 12+ salt rounds
 
 ---
 
-### 📚 推奨される追加対策
+### Security best practices detected
+- CORS configuration properly set
+- CSRF token validation implemented
+- HTTPS enforced
 
-1. **セキュリティヘッダーの追加**
+---
+
+### Recommended additional measures
+
+1. **Add security headers**
 ```typescript
 app.use(helmet({
   contentSecurityPolicy: true,
@@ -239,7 +239,7 @@ app.use(helmet({
 }));
 ```
 
-2. **レート制限の実装**
+2. **Implement rate limiting**
 ```typescript
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -248,7 +248,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 ```
 
-3. **入力バリデーションライブラリの使用**
+3. **Use input validation library**
 ```typescript
 import { z } from 'zod';
 
@@ -260,15 +260,15 @@ const userSchema = z.object({
 
 ---
 
-### 🔗 参考リソース
+### References
 - [OWASP Top 10 2021](https://owasp.org/Top10/)
 - [CWE/SANS Top 25](https://cwe.mitre.org/top25/)
 - [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security/)
 
-これらの問題を修正してから進めますか?
+Fix these issues before proceeding?
 ```
 
-## 🛡️ Language-Specific Checks
+## Language-Specific Checks
 
 ### JavaScript/TypeScript
 ```javascript
@@ -315,7 +315,7 @@ const userSchema = z.object({
 - cryptography
 ```
 
-## 🔗 Integration with codex-review
+## Integration with codex-review
 
 Security scan runs automatically during codex-review:
 
@@ -331,7 +331,7 @@ codex-review triggers security-scan when detecting:
 
 **Security findings are included in codex-review output as blocking issues.**
 
-## 🔧 Configuration Parameters
+## Configuration Parameters
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -340,7 +340,7 @@ codex-review triggers security-scan when detecting:
 | owasp_checks | all | OWASP categories to check |
 | auto_fix_suggestions | true | Provide code fix examples |
 
-## ⚠️ Important Reminders
+## Important Reminders
 
 1. **Security is non-negotiable** - All Critical/High issues are blocking
 2. **Output in Japanese** for user-facing text
@@ -350,7 +350,7 @@ codex-review triggers security-scan when detecting:
 6. **Check dependencies** for known CVEs
 7. **Fail fast** - Don't allow insecure code to proceed
 
-## 📝 Security Checklist
+## Security Checklist
 
 Before marking code as secure:
 - [ ] All inputs validated and sanitized

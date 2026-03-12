@@ -14,7 +14,7 @@ Web-based Git diff viewer with AI prompt generation. Integrated into the `dev` c
 
 ## Primary Usage: dev command
 
-> `dev` は cmux ターミナル内でのみ実行可能です。通常のシェルから実行すると終了します。
+> `dev` can only be run inside a cmux terminal. It will exit if run from a regular shell.
 
 ```bash
 dev                    # Launch cmux split: difit (left) + claude (right)
