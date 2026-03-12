@@ -12,21 +12,21 @@ metadata:
 
 ## Purpose
 
-**外部2者リサーチ**: Geminiが一次調査（Web検索）、Codexが検証。
-Claude Codeは結果のマージと提示のみ行い、コンテキストを消費しない。
+**Dual-source research**: Gemini does primary investigation (web search), Codex cross-verifies.
+Claude Code only merges and presents results — zero context window consumption.
 
 ## When to Use
 
-- ライブラリ・フレームワークの調査
-- API仕様の確認
-- ベストプラクティスの調査
-- エラーの原因調査
-- 技術選定の情報収集
-- 最新バージョン・変更点の確認
+- Library/framework investigation
+- API specification verification
+- Best practices research
+- Error root cause investigation
+- Technology selection research
+- Latest version/changelog verification
 
 ## Research Result Schema
 
-Gemini と Codex は同一のJSONスキーマで結果を返す。
+Gemini and Codex return results in the same JSON schema.
 
 ### Field Definitions
 
@@ -34,12 +34,12 @@ Gemini と Codex は同一のJSONスキーマで結果を返す。
 |-------|------|--------|
 | verification_status | string | `"confirmed"`, `"partially_confirmed"`, `"contradicted"`, `"error"` |
 | freshness | string | `"current"`, `"outdated"`, `"uncertain"` |
-| freshness_detail | string | 自由記述（日本語） |
-| confirmed_facts | string[] | 確認できた事実のリスト |
+| freshness_detail | string | Free-form description (Japanese) |
+| confirmed_facts | string[] | List of confirmed facts |
 | contradictions | object[] | `{claim, correction, source}` |
-| missing_info | string[] | 欠落している重要情報 |
-| additional_findings | string[] | 追加で見つかった情報 |
-| recommended_sources | string[] | 推奨ドキュメントURL |
+| missing_info | string[] | Important missing information |
+| additional_findings | string[] | Additional discovered information |
+| recommended_sources | string[] | Recommended documentation URLs |
 
 ### Example (valid JSON)
 
@@ -47,17 +47,17 @@ Gemini と Codex は同一のJSONスキーマで結果を返す。
 {
   "verification_status": "partially_confirmed",
   "freshness": "current",
-  "freshness_detail": "公式ドキュメントの最新バージョンと一致することを確認",
-  "confirmed_facts": ["React 19がstable版としてリリース済み"],
+  "freshness_detail": "Confirmed match with latest official documentation",
+  "confirmed_facts": ["React 19 released as stable"],
   "contradictions": [
     {
-      "claim": "useEffectは非推奨",
-      "correction": "useEffectは非推奨ではなく、特定ケースでuseを推奨",
+      "claim": "useEffect is deprecated",
+      "correction": "useEffect is not deprecated; use hook is recommended for specific cases",
       "source": "https://react.dev/reference/react/use"
     }
   ],
-  "missing_info": ["Server Componentsに関する記述がない"],
-  "additional_findings": ["React Compilerが実験的に利用可能"],
+  "missing_info": ["No mention of Server Components"],
+  "additional_findings": ["React Compiler experimentally available"],
   "recommended_sources": ["https://react.dev/blog"]
 }
 ```
@@ -68,7 +68,7 @@ Gemini と Codex は同一のJSONスキーマで結果を返す。
 {
   "verification_status": "error",
   "freshness": "uncertain",
-  "freshness_detail": "検証に失敗しました",
+  "freshness_detail": "Verification failed",
   "confirmed_facts": [],
   "contradictions": [],
   "missing_info": [],
@@ -81,14 +81,14 @@ Gemini と Codex は同一のJSONスキーマで結果を返す。
 
 ### Step 1: Gemini Primary Research (Background)
 
-Gemini CLIでWeb検索による一次調査を実行。
-**Claude CodeはWebSearch/WebFetchを使わない。**
+Execute primary investigation via Gemini CLI web search.
+**Claude Code must NOT use WebSearch/WebFetch.**
 
 Launch as background Agent task with Bash:
 
 ```bash
 GEMINI_OUT=$(mktemp "${TMPDIR:-/tmp}/gemini-research.XXXXXX")
-FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Gemini調査に失敗","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
+FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Gemini research failed","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
 
 # macOS-compatible timeout (array for zsh compatibility)
 if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
@@ -99,35 +99,35 @@ else TIMEOUT_CMD=(); fi
   -p "$(cat <<PROMPT
 # Web Research: Primary Investigation
 
-すべての出力は日本語で記述してください。
+All output must be in Japanese.
 
-重要: あなたはGemini CLIとして実行されています。Web検索はデフォルトで有効です。
-必ず独自にWeb検索を行い最新情報を取得してください。
+Important: You are running as Gemini CLI. Web search is enabled by default.
+You MUST perform independent web searches to get the latest information.
 
-## 調査トピック
-[ユーザーのリサーチクエリをここに挿入]
+## Research Topic
+[Insert user's research query here]
 
-## あなたのタスク
+## Your Task
 
-1. 上記トピックについて、Web検索で最新の公式情報を収集してください
-2. 以下を重点的に調査:
-   - 最新バージョン・リリース情報
-   - 公式ドキュメントURL
-   - ベストプラクティス・推奨パターン
-   - deprecatedな機能・破壊的変更
-3. 情報の鮮度（いつの情報か）を明記してください
+1. Collect the latest official information via web search on the above topic
+2. Focus on:
+   - Latest version/release information
+   - Official documentation URLs
+   - Best practices/recommended patterns
+   - Deprecated features/breaking changes
+3. Note the freshness of information (when it was published)
 
-以下のJSON形式で正確に出力してください（コードブロックなし、JSONのみ）。
+Output exactly in the following JSON format (no code blocks, JSON only).
 
 ## Example Output
 {
   "verification_status": "confirmed",
   "freshness": "current",
-  "freshness_detail": "2026年3月時点の最新情報と一致",
-  "confirmed_facts": ["事実1", "事実2"],
+  "freshness_detail": "Matches latest information as of March 2026",
+  "confirmed_facts": ["Fact 1", "Fact 2"],
   "contradictions": [],
   "missing_info": [],
-  "additional_findings": ["Web検索で見つかった追加情報"],
+  "additional_findings": ["Additional info from web search"],
   "recommended_sources": ["https://example.com/docs"]
 }
 PROMPT
@@ -146,7 +146,7 @@ fi
 PARSED=$(python3 -c "
 import json, sys, re
 
-FALLBACK = '{\"verification_status\":\"error\",\"freshness\":\"uncertain\",\"freshness_detail\":\"Gemini出力のパース失敗\",\"confirmed_facts\":[],\"contradictions\":[],\"missing_info\":[],\"additional_findings\":[],\"recommended_sources\":[]}'
+FALLBACK = '{\"verification_status\":\"error\",\"freshness\":\"uncertain\",\"freshness_detail\":\"Failed to parse Gemini output\",\"confirmed_facts\":[],\"contradictions\":[],\"missing_info\":[],\"additional_findings\":[],\"recommended_sources\":[]}'
 
 try:
     data = json.load(open('$GEMINI_OUT'))
@@ -189,16 +189,16 @@ rm -f "$GEMINI_OUT"
 
 ### Step 2: Codex Cross-Verification (Background)
 
-Geminiの調査結果を受け取り、Codexが独立に検証。
-**Step 1と並列実行。Geminiの結果が先に返った場合、その内容をCodexに渡す。**
-**Geminiがまだ返っていない場合は、トピックのみでCodexに独自調査させる。**
+Receives Gemini's results and independently verifies.
+**Runs in parallel with Step 1. If Gemini returns first, pass its results to Codex.**
+**If Gemini hasn't returned yet, have Codex investigate independently with topic only.**
 
 Launch as background Agent task with Bash:
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
 CODEX_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-research.XXXXXX")
-FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Codex検証に失敗","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
+FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Codex verification failed","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
 
 # macOS-compatible timeout (array for zsh compatibility)
 if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
@@ -211,23 +211,23 @@ else TIMEOUT_CMD=(); fi
   "$(cat <<PROMPT
 # Web Research Cross-Verification
 
-すべての出力は日本語で記述してください。
+All output must be in Japanese.
 
-## 調査トピック
-[ユーザーのリサーチクエリをここに挿入]
+## Research Topic
+[Insert user's research query here]
 
-## Geminiの調査結果（利用可能な場合）
-[Geminiの結果をここに挿入。まだ返っていない場合は「Gemini結果なし - 独自に調査してください」]
+## Gemini's Research Results (if available)
+[Insert Gemini results here. If not yet returned: "Gemini results unavailable - investigate independently"]
 
-## あなたのタスク
+## Your Task
 
-1. 上記トピックについて、あなた自身の知識で独立に検証してください
-2. Geminiの調査結果がある場合は、その正確性を検証してください
-3. 以下の観点でチェックしてください:
-   - 情報は最新か？（古い情報やdeprecatedな内容が含まれていないか）
-   - 事実関係は正確か？
-   - 重要な情報の欠落はないか？
-   - より良い代替案やアプローチはないか？
+1. Independently verify the above topic using your own knowledge
+2. If Gemini results are available, verify their accuracy
+3. Check from the following perspectives:
+   - Is the information current? (Any outdated or deprecated content?)
+   - Are the facts accurate?
+   - Is important information missing?
+   - Are there better alternatives or approaches?
 PROMPT
 )"
 
@@ -247,16 +247,16 @@ rm -f "$CODEX_OUT"
 
 ### Step 3: Merge & Analyze Results
 
-Gemini/Codexの結果を統合して信頼度を判定。
-**Claude Codeはここで初めて結果を受け取る（要約のみ）。**
+Merge Gemini/Codex results and determine confidence level.
+**Claude Code receives results here for the first time (summary only).**
 
 ```python
 def normalize_result(result):
-    """None、error、不完全なJSONを安全なデフォルトに正規化。"""
+    """Normalize None, error, or incomplete JSON to safe defaults."""
     FALLBACK = {
         "verification_status": "error",
         "freshness": "uncertain",
-        "freshness_detail": "結果を取得できませんでした",
+        "freshness_detail": "Failed to retrieve results",
         "confirmed_facts": [],
         "contradictions": [],
         "missing_info": [],
@@ -309,7 +309,7 @@ def normalize_result(result):
 
 
 def merge_research(gemini_result, codex_result):
-    """Gemini(一次調査)/Codex(検証)の結果をマージし、信頼度を判定する。"""
+    """Merge Gemini (primary) and Codex (verification) results, determine confidence."""
     gemini = normalize_result(gemini_result)
     codex = normalize_result(codex_result)
 
@@ -362,72 +362,74 @@ def merge_research(gemini_result, codex_result):
 
 ## Output Format
 
+**All user-facing output must be in Japanese.**
+
 ```markdown
-## 調査結果: [トピック]
+## Research Results: [Topic]
 
-### 信頼度判定
-- **総合信頼度**: 高（2者確認済） / 中（1者確認 or 部分一致） / 低（矛盾あり） / 未検証（外部調査失敗）
-- **検証ソース数**: N/2
-- **情報鮮度**: 最新 / 古い可能性あり / 不明
+### Confidence Assessment
+- **Overall confidence**: High (2 sources confirmed) / Medium (1 source or partial match) / Low (contradictions) / Unverified (external research failed)
+- **Verification sources**: N/2
+- **Information freshness**: Current / Potentially outdated / Unknown
 
-### 主要な調査結果（Gemini Web検索）
-[Geminiの一次調査結果]
+### Primary Research Results (Gemini Web Search)
+[Gemini's primary research results]
 
-### クロスチェック結果（Codex検証）
+### Cross-check Results (Codex Verification)
 
-#### 一致した情報（信頼度: 高）
-- [両者が一致した事実]
+#### Agreed Information (high confidence)
+- [Facts both sources agree on]
 
-#### 追加情報
-- **Gemini追加**: [Geminiのみが見つけた情報（Web検索ベース）]
-- **Codex追加**: [Codexのみが指摘した情報]
+#### Additional Information
+- **Gemini additional**: [Information only Gemini found (web search based)]
+- **Codex additional**: [Information only Codex noted]
 
-#### 矛盾・相違点（要注意）
-| 項目 | Gemini | Codex |
+#### Contradictions (attention required)
+| Item | Gemini | Codex |
 |------|--------|-------|
-| [項目] | [主張] | [主張] |
+| [Item] | [Claim] | [Claim] |
 
-#### 情報鮮度チェック
-- **Gemini判定**: [詳細]
-- **Codex判定**: [詳細]
+#### Freshness Check
+- **Gemini assessment**: [Detail]
+- **Codex assessment**: [Detail]
 
-### 推奨ドキュメント
+### Recommended Documentation
 - [URL1] (source: Gemini/Codex)
 - [URL2] (source: Gemini/Codex)
 
-### 注意事項
-- [矛盾がある場合の注意点]
-- [情報が古い可能性がある項目]
+### Notes
+- [Notes about contradictions if any]
+- [Items that may be outdated]
 ```
 
 ## Error Handling
 
-**全てのエラーケースでフォールバックJSONを返す。**
+**All error cases return fallback JSON.**
 
-### 2者成功 (Both Gemini and Codex)
-- 通常のマージ処理、信頼度は一致度に基づいて判定
+### Both Succeed (Gemini and Codex)
+- Normal merge processing, confidence based on agreement level
 
-### 1者成功 (Gemini or Codex片方のみ)
-- 成功したソースの結果を採用
-- 信頼度を「中」に設定
-- 失敗したソースを明記
+### One Succeeds (Gemini or Codex only)
+- Use successful source's results
+- Set confidence to "medium"
+- Note which source failed
 
-### 0者成功 (Both failed)
-- 信頼度を「未検証」と明記
-- ユーザーに手動確認を推奨: `⚠️ 外部調査に失敗しました。手動での確認を推奨します`
+### Both Fail
+- Set confidence to "unverified"
+- Recommend manual verification: `Warning: External research failed. Manual verification recommended.`
 
 ## Integration with latest-docs
 
-`latest-docs` スキルから呼び出される場合:
-- Geminiの検索クエリにバージョン・deprecation関連を追加
-- 結果を `latest-docs` のフォーマットに合わせて返却
+When called from `latest-docs` skill:
+- Add version/deprecation keywords to Gemini search query
+- Return results in `latest-docs` format
 
 ## Important Reminders
 
-1. **Claude CodeはWebSearch/WebFetchを使わない** - 全てGemini+Codexに委譲
-2. **並列実行**: Gemini と Codex は必ずバックグラウンドで並列実行
-3. **Gemini = 一次調査**: Web検索で最新情報を取得
-4. **Codex = 検証**: Geminiの結果を知識ベースで検証
-5. **矛盾は隠さない**: 結果が矛盾する場合、すべて提示してユーザーに判断を委ねる
-6. **フォールバック保証**: 全エラーケースで有効なJSONを返す
-7. **日本語出力**: すべてのユーザー向けテキストは日本語
+1. **Claude Code must NOT use WebSearch/WebFetch** - Delegate everything to Gemini+Codex
+2. **Parallel execution**: Always run Gemini and Codex in background in parallel
+3. **Gemini = primary research**: Get latest information via web search
+4. **Codex = verification**: Verify Gemini's results with knowledge base
+5. **Don't hide contradictions**: Present all contradictions for user to judge
+6. **Fallback guarantee**: All error cases return valid JSON
+7. **Output in Japanese**: All user-facing text in Japanese

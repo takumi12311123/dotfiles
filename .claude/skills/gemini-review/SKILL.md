@@ -11,8 +11,8 @@ metadata:
 
 ## Purpose
 
-**独立セカンドオピニオンレビュー**: Codex-reviewと並列実行し、異なるモデル視点でのレビューを提供。
-両者の結果を突き合わせることで、見逃しを減らし信頼度を上げる。
+**Independent second-opinion review**: Runs in parallel with codex-review to provide a different model perspective.
+Cross-checking both results reduces missed issues and increases confidence.
 
 ## Execution Flow
 
@@ -20,21 +20,21 @@ metadata:
 
 **Critical: Gemini runs in non-interactive mode with -p flag**
 
-**重要: 機密ファイル除外**
-以下のパターンに一致するファイルはGeminiに送信しない:
-- `.env`, `.env.*` — 環境変数
-- `*.key`, `*.pem` — 鍵・証明書
-- `*credentials*`, `*secret*` — 認証情報
-- `*.tfvars`, `*.tfstate` — Terraform機密情報
+**Important: Sensitive file exclusion**
+Files matching the following patterns must NOT be sent to Gemini:
+- `.env`, `.env.*` — environment variables
+- `*.key`, `*.pem` — keys/certificates
+- `*credentials*`, `*secret*` — authentication data
+- `*.tfvars`, `*.tfstate` — Terraform sensitive data
 
-除外されたファイルがある場合、ユーザーに通知する:
-`⚠️ 以下のファイルは機密のためGeminiレビューから除外: [file list]`
+If files are excluded, notify user:
+`Warning: The following files were excluded from Gemini review due to sensitivity: [file list]`
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
 REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/gemini-review.XXXXXX")
-FALLBACK_JSON='{"ok": false, "phase": "detail", "summary": "Geminiレビュー失敗", "issues": [], "notes_for_next_review": ""}'
-SKIPPED_JSON='{"ok": true, "phase": "detail", "summary": "全ファイルが機密のためGeminiレビューをスキップ", "issues": [], "notes_for_next_review": ""}'
+FALLBACK_JSON='{"ok": false, "phase": "detail", "summary": "Gemini review failed", "issues": [], "notes_for_next_review": ""}'
+SKIPPED_JSON='{"ok": true, "phase": "detail", "summary": "All files sensitive - Gemini review skipped", "issues": [], "notes_for_next_review": ""}'
 
 # Build file lists (safe vs excluded)
 EXCLUDE_PATTERNS='\.env|\.key|\.pem|credentials|secret|\.tfvars|\.tfstate'
@@ -71,8 +71,8 @@ fi
   -p "$(cat <<EOF
 # Code Review Request
 
-あなたはコードレビューアーです。以下の変更を厳密にレビューしてください。
-すべての出力は日本語で記述してください。
+You are a code reviewer. Review the following changes strictly.
+All output must be in Japanese.
 
 ## Changed Files
 $(echo "$SAFE_FILES" | head -50)
@@ -81,19 +81,19 @@ $(echo "$SAFE_FILES" | head -50)
 $SAFE_DIFF
 
 ## Review Focus Areas
-- **Correctness**: ロジックエラー、エッジケース、null/undefinedハンドリング
-- **Security**: 脆弱性、入力バリデーション、認証・認可
-- **Performance**: ボトルネック、非効率なアルゴリズム、リソースリーク
-- **Maintainability**: 可読性、既存パターンとの一貫性
-- **Testing**: テストカバレッジ、テスト品質、不足テストケース
+- **Correctness**: Logic errors, edge cases, null/undefined handling
+- **Security**: Vulnerabilities, input validation, authentication/authorization
+- **Performance**: Bottlenecks, inefficient algorithms, resource leaks
+- **Maintainability**: Readability, consistency with existing patterns
+- **Testing**: Test coverage, test quality, missing test cases
 
 ## Output Format
 
-以下のJSON形式で正確に出力してください（コードブロックなし、JSONのみ）:
+Output exactly in the following JSON format (no code blocks, JSON only):
 
 ## Severity Definitions
-- "blocking": 必ず修正が必要。1つでもblockingがあればok: false
-- "advisory": 改善推奨。okステータスには影響しない
+- "blocking": Must be fixed. Any blocking issue → ok: false
+- "advisory": Improvement recommended. Does not affect ok status
 
 ## Category Values
 "correctness", "security", "perf", "maintainability", "testing", "style"
@@ -102,7 +102,7 @@ $SAFE_DIFF
 {
   "ok": true,
   "phase": "detail",
-  "summary": "変更に問題はありません",
+  "summary": "No issues found in changes",
   "issues": [],
   "notes_for_next_review": ""
 }
@@ -111,21 +111,21 @@ $SAFE_DIFF
 {
   "ok": false,
   "phase": "detail",
-  "summary": "セキュリティ上の問題が見つかりました",
+  "summary": "Security issues found",
   "issues": [
     {
       "severity": "blocking",
       "category": "security",
       "file": "src/auth.py",
       "lines": "42-45",
-      "problem": "SQLインジェクション脆弱性",
-      "recommendation": "パラメータ化クエリを使用してください"
+      "problem": "SQL injection vulnerability",
+      "recommendation": "Use parameterized queries"
     }
   ],
-  "notes_for_next_review": "認証周りの再確認が必要"
+  "notes_for_next_review": "Auth-related code needs re-review"
 }
 
-blockingがなければ ok: true としてください。
+If no blocking issues, set ok: true.
 EOF
 )" > "$REVIEW_OUT" 2>/dev/null
 
@@ -143,7 +143,7 @@ fi
 PARSED=$(python3 -c "
 import json, sys, re
 
-FALLBACK = '{\"ok\": false, \"phase\": \"detail\", \"summary\": \"Gemini出力のJSONパース失敗\", \"issues\": [], \"notes_for_next_review\": \"\"}'
+FALLBACK = '{\"ok\": false, \"phase\": \"detail\", \"summary\": \"Failed to parse Gemini output JSON\", \"issues\": [], \"notes_for_next_review\": \"\"}'
 
 try:
     data = json.load(open('$REVIEW_OUT'))
@@ -190,16 +190,16 @@ rm -f "$REVIEW_OUT"
 
 **Important: Wait for Gemini completion**
 
-- Gemini は通常 codex より高速（大規模コンテキスト処理が得意）
-- macOS互換タイムアウト（gtimeout/timeout/perlフォールバック）で最大5分に制限
-- Progress log: `[Geminiレビュー中] 実行中（最大5分）...`
-- On timeout: フォールバックJSONを返し、Codex結果のみで判定
+- Gemini is typically faster than Codex (good at large context processing)
+- macOS-compatible timeout (gtimeout/timeout fallback) limits to 5 minutes max
+- Progress log: `[Gemini review] Running (max 5min)...`
+- On timeout: Return fallback JSON, proceed with Codex result only
 
 ### Step 2: Result Handling
 
 Gemini review does NOT iterate independently. Results are passed back to quality-gate for merged evaluation.
 
-結果は常に以下のスキーマに従う（codex-review/review-schema.json と同一）:
+Results always follow this schema (same as codex-review/review-schema.json):
 ```json
 {
   "ok": true,
@@ -212,42 +212,44 @@ Gemini review does NOT iterate independently. Results are passed back to quality
 
 ## Error Handling
 
-**全てのエラーケースでフォールバックJSONを返す。** quality-gateが常に機械的に処理できることを保証する。
+**All error cases return fallback JSON.** This guarantees quality-gate can always process results mechanically.
 
 ### Gemini Timeout (exit code 124)
-- フォールバックJSON返却
-- Log: `⚠️ Geminiレビューがタイムアウトしました（5分超過）`
+- Return fallback JSON
+- Log: `Warning: Gemini review timed out (exceeded 5min)`
 
 ### Gemini API Failure (non-zero exit)
-- フォールバックJSON返却
-- Log: `⚠️ Gemini API呼び出しに失敗しました`
+- Return fallback JSON
+- Log: `Warning: Gemini API call failed`
 
 ### Empty Output
-- フォールバックJSON返却
-- Log: `⚠️ Geminiが空の出力を返しました`
+- Return fallback JSON
+- Log: `Warning: Gemini returned empty output`
 
 ### JSON Parse Failure
-- フォールバックJSON返却
-- Log: `⚠️ Geminiの出力をJSONとしてパースできませんでした`
+- Return fallback JSON
+- Log: `Warning: Failed to parse Gemini output as JSON`
 
 ## Output Format to User
+
+**All user-facing output must be in Japanese.**
 
 Gemini review results are shown alongside Codex results in quality-gate output:
 
 ```markdown
-### Geminiレビュー結果
-- **ステータス**: ✅ ok / ⚠️ 指摘あり / ❌ 失敗
-- **指摘件数**: blocking: N件, advisory: M件
+### Gemini Review Result
+- **Status**: ok / issues found / failed
+- **Issues**: blocking: N, advisory: M
 
-#### Gemini独自の指摘（Codexと一致しない項目）
-- `file.py:42` - [問題の説明] (category/severity)
+#### Gemini-only Issues (not found by Codex)
+- `file.py:42` - [Problem description] (category/severity)
 ```
 
 ## Important Reminders
 
-1. **並列実行**: Codex-reviewと必ず並列で実行する
-2. **機密ファイル除外**: `.env`, 鍵, 認証情報は送信前に必ず除外する
-3. **フォールバック保証**: 全エラーケースで有効なJSONを返す
-4. **非インタラクティブ**: `-p` フラグで実行、`timeout 300` で制限
-5. **日本語出力**: すべてのユーザー向けテキストは日本語
-6. **マージ判定**: 最終判定はquality-gateが行う
+1. **Parallel execution**: Always run in parallel with codex-review
+2. **Sensitive file exclusion**: Always exclude `.env`, keys, credentials before sending
+3. **Fallback guarantee**: All error cases return valid JSON
+4. **Non-interactive**: Run with `-p` flag, limit with `timeout 300`
+5. **Output in Japanese**: All user-facing text in Japanese
+6. **Merge decision**: Final decision is made by quality-gate

@@ -6,12 +6,12 @@ description: |
 
 # Test Generator SKILL
 
-## 🎯 Purpose
+## Purpose
 
-**TDD開発の第一歩**: Generate comprehensive test cases before implementation.
+**TDD first step**: Generate comprehensive test cases before implementation.
 Follows Test-Driven Development principles: Red → Green → Refactor.
 
-## 📋 When to Use
+## When to Use
 
 ### Automatic Triggers
 - User mentions "TDD" or "test first"
@@ -22,7 +22,7 @@ Follows Test-Driven Development principles: Red → Green → Refactor.
 - User explicitly asks for test generation
 - During code review if tests are missing
 
-## 🔄 TDD Workflow Integration
+## TDD Workflow Integration
 
 ```
 1. [THIS SKILL] Generate tests (Red phase)
@@ -33,7 +33,7 @@ Follows Test-Driven Development principles: Red → Green → Refactor.
 6. Refactor if needed
 ```
 
-## 🧪 Test Types
+## Test Types
 
 ### 1. Unit Tests
 - Test individual functions/methods in isolation
@@ -58,7 +58,7 @@ Follows Test-Driven Development principles: Red → Green → Refactor.
 - Failure recovery
 - Timeout scenarios
 
-## 📝 Test Generation Process
+## Test Generation Process
 
 ### Step 1: Analyze Target Code
 
@@ -122,7 +122,7 @@ describe('FunctionName', () => {
 **Go:**
 ```go
 func TestFunctionName(t *testing.T) {
-	t.Run("正常系: 有効な入力で正しい結果を返す", func(t *testing.T) {
+	t.Run("normal: returns correct result for valid input", func(t *testing.T) {
 		// Arrange
 		input := Input{ID: 1, Name: "test"}
 
@@ -134,13 +134,13 @@ func TestFunctionName(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 	})
 
-	t.Run("境界値: 空の入力を処理する", func(t *testing.T) {
+	t.Run("boundary: handles empty input", func(t *testing.T) {
 		result, err := FunctionName(Input{})
 		assert.Error(t, err)
 		assert.Nil(t, result)
 	})
 
-	t.Run("異常系: nilを処理する", func(t *testing.T) {
+	t.Run("error: handles nil input", func(t *testing.T) {
 		result, err := FunctionName(nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "input cannot be nil")
@@ -152,7 +152,7 @@ func TestFunctionName(t *testing.T) {
 ```python
 class TestFunctionName:
     def test_normal_case_valid_input(self):
-        """正常系: 有効な入力で正しい結果を返す"""
+        """Normal: returns correct result for valid input"""
         # Arrange
         input_data = {"id": 1, "name": "test"}
 
@@ -163,12 +163,12 @@ class TestFunctionName:
         assert result == {"success": True, "data": input_data}
 
     def test_edge_case_empty_input(self):
-        """境界値: 空の入力を処理する"""
+        """Boundary: handles empty input"""
         result = function_name({})
         assert result["success"] is False
 
     def test_error_case_invalid_type(self):
-        """異常系: 不正な型でエラーを発生させる"""
+        """Error: raises error for invalid type"""
         with pytest.raises(TypeError):
             function_name("invalid")
 ```
@@ -201,37 +201,39 @@ jest.mock('../api/userApi', () => ({
 }));
 ```
 
-## 📊 Output Format to User
+## Output Format to User
+
+**All user-facing output must be in Japanese.**
 
 ```markdown
-## テスト生成完了 ✅
+## Test Generation Complete
 
-### 生成したテスト
-- **ファイル**: `tests/user.test.ts`
-- **テストケース数**: 12件
-  - 正常系: 4件
-  - 境界値: 5件
-  - 異常系: 3件
+### Generated Tests
+- **File**: `tests/user.test.ts`
+- **Test cases**: 12
+  - Normal: 4
+  - Boundary: 5
+  - Error: 3
 
-### テストカバレッジ目標
-- 関数カバレッジ: 100%
-- 分岐カバレッジ: 95%+
-- 行カバレッジ: 90%+
+### Coverage Target
+- Function coverage: 100%
+- Branch coverage: 95%+
+- Line coverage: 90%+
 
-### 次のステップ (TDD)
-1. テストを実行: `npm test` または `go test`
-2. **失敗を確認** (Red phase - これが重要!)
-3. 実装を開始
-4. テストが通るまで実装
-5. codex-review で品質チェック
+### Next Steps (TDD)
+1. Run tests: `npm test` or `go test`
+2. **Confirm failures** (Red phase - this is critical!)
+3. Start implementation
+4. Implement until tests pass
+5. Quality check with codex-review
 
-### テストコード
-[生成されたテストコードを表示]
+### Test Code
+[Display generated test code]
 
-このテストでTDDを開始しますか?
+Start TDD with these tests?
 ```
 
-## 🔧 Test Coverage Strategy
+## Test Coverage Strategy
 
 ### Minimum Requirements
 - **All public methods**: 100% coverage
@@ -245,12 +247,11 @@ jest.mock('../api/userApi', () => ({
 - Python: pytest-cov
 - Rust: cargo-tarpaulin
 
-## 🎨 Best Practices
+## Best Practices
 
 ### 1. Test Naming
-- **English for test names**: `test_should_return_error_for_invalid_input`
-- **Japanese for descriptions**: `正常系: 有効な入力で正しい結果を返す`
-- Descriptive and specific
+- Use descriptive, specific names
+- Prefix with category: `normal:`, `boundary:`, `error:`
 - Follow AAA pattern (Arrange-Act-Assert)
 
 ### 2. Test Independence
@@ -269,25 +270,25 @@ jest.mock('../api/userApi', () => ({
 - Don't mock what you own (internal modules)
 - Use real implementations for critical paths
 
-## ⚠️ Common Pitfalls to Avoid
+## Common Pitfalls to Avoid
 
 1. **Testing implementation instead of behavior**
-   - ❌ Test internal function calls
-   - ✅ Test public API behavior
+   - Bad: Test internal function calls
+   - Good: Test public API behavior
 
 2. **Brittle tests**
-   - ❌ Tests break on refactoring
-   - ✅ Tests focus on contract, not implementation
+   - Bad: Tests break on refactoring
+   - Good: Tests focus on contract, not implementation
 
 3. **Incomplete coverage**
-   - ❌ Only testing happy path
-   - ✅ Test edge cases and errors
+   - Bad: Only testing happy path
+   - Good: Test edge cases and errors
 
 4. **Slow tests**
-   - ❌ Real database calls in unit tests
-   - ✅ Mock external dependencies
+   - Bad: Real database calls in unit tests
+   - Good: Mock external dependencies
 
-## 🔗 Integration with Other SKILLs
+## Integration with Other SKILLs
 
 ### With codex-review
 After implementation:
@@ -308,11 +309,11 @@ test-generator generates security tests
   └─ Authorization tests
 ```
 
-## 📌 Important Reminders
+## Important Reminders
 
 1. **Generate tests BEFORE implementation** (TDD principle)
 2. **Confirm tests fail initially** (Red phase)
-3. **Output all descriptions in Japanese** for user
+3. **Output in Japanese** for user-facing text
 4. **Include coverage requirements** in output
 5. **Provide clear next steps** for TDD workflow
 6. **Test behavior, not implementation**
