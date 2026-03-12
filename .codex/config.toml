@@ -1,39 +1,37 @@
 # Codex CLI Configuration File
 
-# Model reasoning effort - controls AI's reasoning depth
-# Options: "low", "medium", "high"
-# Recommended: "high" for more comprehensive responses
 model_reasoning_effort = "high"
-
-# Hide internal AI reasoning process to reduce verbose output
+plan_mode_reasoning_effort = "high"
 hide_agent_reasoning = true
-
-# Enable network access for web browsing and API calls
 network_access = true
+personality = "pragmatic"
+model = "gpt-5.4"
+
+# Project root detection and document auto-loading
+project_root_markers = [".git", ".hg"]
+project_doc_fallback_filenames = ["AGENTS.md", "CLAUDE.md"]
 
 # Tools configuration
 [tools]
-# Enable web search functionality
-web_search = true
 
-# Notification settings
-# Play sound when task completes (macOS specific)
+# Notification settings (macOS)
 notify = ["bash", "-lc", "afplay /System/Library/Sounds/Ping.aiff"]
 
-# MCP (Multi-Computational Platform) Servers
-# Add external service integrations here
+# Multi-agent support (experimental)
+[features]
+multi_agent = true
 
-# Example: Context7 MCP server
-# [mcp_servers.context7]
-# command = "npx"
-# args = ["-y", "@upstash/context7-mcp@latest"]
+[projects."/Users/takumiakasaka/Git-Project/github.com/eyday/proto"]
+trust_level = "trusted"
 
-# Example: Figma MCP server
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"
+
+# MCP Servers
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+
 # [mcp_servers.figma]
 # command = "npx"
 # args = ["-y", "mcp-remote", "http://127.0.0.1:3845/sse"]
-
-# Additional MCP servers can be added below
-# [mcp_servers.your_server_name]
-# command = "your_command"
-# args = ["your", "arguments"]

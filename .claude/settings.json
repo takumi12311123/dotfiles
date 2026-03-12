@@ -122,6 +122,25 @@
           {
             "type": "command",
             "command": "jq -r '.tool_input.file_path | select(endswith(\".ts\") or endswith(\".tsx\"))' | xargs -r -I {} sh -c 'npx prettier --write \"$1\"' _ {}"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".py\"))' | xargs -r -I {} sh -c 'command -v ruff >/dev/null && ruff format \"$1\" && ruff check --fix \"$1\" || command -v black >/dev/null && black -q \"$1\"' _ {}"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".tf\") or endswith(\".tfvars\"))' | xargs -r -I {} sh -c 'command -v terraform >/dev/null && terraform fmt \"$1\"' _ {}"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Task completed\" with title \"Claude Code\"' && afplay /System/Library/Sounds/Glass.aiff"
           }
         ]
       }
