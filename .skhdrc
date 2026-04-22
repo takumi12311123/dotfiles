@@ -35,8 +35,10 @@ meh - e : yabai -m window --toggle split
 # alt - t : yabai -m window --toggle float && /tmp/yabai-restore/$(yabai -m query --windows --window | jq -re '.id').restore 2>/dev/null || true
 meh - t : yabai -m window --toggle float && yabai -m window --grid 4:4:1:1:2:2
 
-# cmux (ghostty-based terminal)
-meh - return : osascript -e 'tell application "cmux" to run' \
+# cmux (ghostty-based terminal) - skip when Parsec is frontmost
+meh - return : frontapp=$(osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true' 2>/dev/null); \
+  [ "$frontapp" = "tv.parsec.www" ] && exit 0; \
+  osascript -e 'tell application "cmux" to run' \
   -e 'tell application "System Events"' \
   -e 'if application process "cmux" exists then' \
   -e 'if frontmost of application process "cmux" is true then' \
