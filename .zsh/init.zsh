@@ -8,20 +8,21 @@ export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ff00'
 
+## Cache brew prefix (avoid calling brew --prefix 3 times = ~1s overhead)
+_brew_prefix="/opt/homebrew"
+
 ## syntax-highlighting
-source "$(brew --prefix)/share/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" 2>/dev/null || \
+source "${_brew_prefix}/share/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" 2>/dev/null || \
   source ~/Git-Project/github.com/zdharma-continuum/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 ## zsh-completions and autosuggestions
-if type brew &>/dev/null; then
-  FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
-  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-fi
+FPATH="${_brew_prefix}/share/zsh-completions:$FPATH"
+source "${_brew_prefix}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 autoload -Uz compinit
-compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION-$HOST"
+compinit -i -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION-$HOST"
 
 ## docker desktop
-source /Users/takumiakasaka/.docker/init-zsh.sh || true
+[ -f /Users/takumiakasaka/.docker/init-zsh.sh ] && source /Users/takumiakasaka/.docker/init-zsh.sh
 
 ## starship
 eval "$(starship init zsh)"
