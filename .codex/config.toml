@@ -24,6 +24,9 @@ multi_agent = true
 [projects."/Users/takumiakasaka/Git-Project/github.com/eyday/proto"]
 trust_level = "trusted"
 
+[projects."/Users/takumiakasaka/Git-Project/github.com/takumi12311123/dotfiles"]
+trust_level = "trusted"
+
 [notice.model_migrations]
 "gpt-5.3-codex" = "gpt-5.4"
 
