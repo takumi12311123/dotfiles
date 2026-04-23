@@ -19,7 +19,7 @@
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
 
-  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :ghostty ["^com\\.mitchellh\\.ghostty$"] :cmux ["^com\\.cmuxterm\\.app$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"] :parsec ["^tv\\.parsec\\.www$"]}
+  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :ghostty ["^com\\.mitchellh\\.ghostty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"] :parsec ["^tv\\.parsec\\.www$"]}
 
   :main [
     {:des "Change right_command to command+control+option+shift"
@@ -38,14 +38,13 @@
       [:!TOSleft_arrow :!TStab :chrome]
     ]}
 
-    {:des "Chrome, Visual Studio Code, Cursor, alacritty, ghostty, cmux delete tab key bind"
+    {:des "Chrome, Visual Studio Code, Cursor, alacritty, ghostty delete tab key bind"
     :rules [
       [:!TOSw :!Cw :chrome]
       [:!TOSw :!Cw :vscode]
       [:!TOSw :!Cw :cursor]
       [:!TOSw :!Cw :alacritty]
       [:!TOSw :!Cw :ghostty]
-      [:!TOSw :!Cw :cmux]
       [:!TOSw :!Cw :parsec]
     ]}
 
@@ -75,42 +74,18 @@
       [:!!w :!Whyphen :cursor]
     ]}
 
-    {:des "cmux move pane key bind"
-    :rules [
-      [:!Sleft_arrow :!COleft_arrow :cmux]
-      [:!Rleft_arrow :!COleft_arrow :cmux]
-      [:!Sright_arrow :!COright_arrow :cmux]
-      [:!Rright_arrow :!COright_arrow :cmux]
-    ]}
-
-    {:des "cmux move workspace key bind"
-    :rules [
-      [:!TOSup_arrow :!TCopen_bracket :cmux]
-      [:!TOSdown_arrow :!TCclose_bracket :cmux]
-    ]}
-
-    {:des "alacritty, ghostty, cmux move tab key bind"
+    {:des "alacritty, ghostty move tab key bind"
     :rules [
       [:!TOSright_arrow :!Ttab :alacritty]
       [:!TOSleft_arrow :!TStab :alacritty]
       [:!TOSright_arrow :!Ttab :ghostty]
       [:!TOSleft_arrow :!TStab :ghostty]
-      [:!TOSright_arrow :!Ttab :cmux]
-      [:!TOSleft_arrow :!TStab :cmux]
     ]}
 
-    {:des "Parsec: cmux key binds (transform locally before sending to remote)"
+    {:des "Parsec: ghostty key binds (transform locally before sending to remote)"
     :rules [
       ;; tab move
       [:!TOSright_arrow :!Ttab :parsec]
       [:!TOSleft_arrow :!TStab :parsec]
-      ;; pane move
-      [:!Sleft_arrow :!COleft_arrow :parsec]
-      [:!Rleft_arrow :!COleft_arrow :parsec]
-      [:!Sright_arrow :!COright_arrow :parsec]
-      [:!Rright_arrow :!COright_arrow :parsec]
-      ;; workspace move
-      [:!TOSup_arrow :!TCopen_bracket :parsec]
-      [:!TOSdown_arrow :!TCclose_bracket :parsec]
     ]}
 ]}
