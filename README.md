@@ -29,7 +29,7 @@
 
 # dotfiles
 
-macOS向けの開発環境設定ファイル一式。シェル、ターミナル（cmux）、ウィンドウマネージャ、AIツールの設定を管理。
+macOS向けの開発環境設定ファイル一式。シェル、ターミナル（Ghostty）、ウィンドウマネージャ、AIツールの設定を管理。
 
 ## 前提条件
 
@@ -64,16 +64,16 @@ chmod 600 ~/.zsh/secrets.zsh
 ├── .claude/          # Claude Code設定（skills, commands, plugins）
 ├── .codex/           # Codex CLI設定
 ├── .config/          # アプリケーション設定
-│   ├── alacritty/    # ターミナルエミュレータ（レガシー）
-│   ├── ghostty/      # ターミナルエミュレータ（cmuxベース）
+│   ├── alacritty/    # ターミナルエミュレータ
+│   ├── ghostty/      # ターミナルエミュレータ（メイン）
 │   ├── gokurakujoudo/# Karabiner設定（EDN形式）
 │   ├── karabiner/    # Karabiner-Elements設定
 │   ├── prr/          # PRレビューツール設定
 │   └── starship/     # プロンプトテーマ
 ├── .homebrew/        # Brewfile（パッケージ一覧）
 ├── .script/          # カスタムスクリプト
-│   ├── dev.sh        # cmux開発環境（difit + Claude Code）
-│   ├── ide.sh        # tmux IDE風レイアウト（レガシー）
+│   ├── dev.sh        # tmux開発環境（lazygit + Claude Code）
+│   ├── ide.sh        # tmux IDE風レイアウト
 │   └── review-pr.sh  # 複数AIでPRレビュー
 ├── .zsh/             # Zsh設定（モジュール分割）
 ├── .skhdrc           # キーボードショートカット
@@ -98,10 +98,9 @@ chmod 600 ~/.zsh/secrets.zsh
 
 | ツール | 用途 |
 |--------|------|
-| [cmux](https://cmux.dev) | ターミナルマルチプレクサ（メイン、Ghosttyベース） |
-| [Ghostty](https://ghostty.org) | ターミナルエミュレータ |
-| [tmux](https://github.com/tmux/tmux) | ターミナルマルチプレクサ（レガシー） |
-| [Alacritty](https://github.com/alacritty/alacritty) | ターミナルエミュレータ（レガシー） |
+| [Ghostty](https://ghostty.org) | ターミナルエミュレータ（メイン） |
+| [Alacritty](https://github.com/alacritty/alacritty) | ターミナルエミュレータ |
+| [tmux](https://github.com/tmux/tmux) | ターミナルマルチプレクサ |
 
 ### エディタ
 
@@ -139,23 +138,21 @@ chmod 600 ~/.zsh/secrets.zsh
 
 ## 開発ワークフロー
 
-メインのターミナル環境はcmux。`dev` コマンドでdifit（diffビューア）とClaude Codeを左右分割で起動する。
+メインのターミナル環境はGhostty + tmux。`dev` コマンドでlazygitとClaude Codeを左右分割で起動する。
 
 ```
-+----------+----------+
-|  difit   |  claude  |
-|  (50%)   |  (50%)   |
-+----------+----------+
++---------+------------------+
+| lazygit |   claude code    |
+|  (33%)  |      (67%)       |
++---------+------------------+
 ```
 
 ```bash
-# cmuxターミナル内で実行
 dev           # カレントディレクトリで起動
 dev ~/project # 指定ディレクトリで起動
 ```
 
-- difitはブランチのdiffを自動検出してWeb UIで表示
-- `meh + return`（Alt+Cmd+Shift+Return）でcmuxの表示/非表示を切り替え
+- `meh + return`（Ctrl+Option+Shift+Return）でGhosttyの表示/非表示を切り替え
 
 ## カスタムコマンド/エイリアス
 
@@ -177,8 +174,8 @@ dev ~/project # 指定ディレクトリで起動
 
 ### その他
 
-- `dev` - cmuxでdifit + Claude Code分割レイアウトを起動
-- `ide` - tmuxでIDE風レイアウトを構築（レガシー）
+- `dev` - tmuxでlazygit + Claude Code分割レイアウトを起動
+- `ide` - tmuxでIDE風レイアウトを構築
 - `review-pr` - 複数AIでPRレビュー
 
 ## シークレット管理
