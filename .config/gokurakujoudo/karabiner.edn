@@ -19,7 +19,7 @@
     :moonlander [{:vendor_id 12951 :product_id 6505}]
   }
 
-  :applications {:chrome ["^com\\.google\\.Chrome$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :ghostty ["^com\\.mitchellh\\.ghostty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"] :parsec ["^tv\\.parsec\\.www$"]}
+  :applications {:chrome ["^com\\.google\\.Chrome$"] :firefox ["^org\\.mozilla\\.firefox$"] :alacritty ["^io\\.alacritty$", "^org\\.alacritty$"] :ghostty ["^com\\.mitchellh\\.ghostty$"] :vscode ["^com\\.microsoft\\.VSCode$"] :cursor ["^com\\.todesktop\\.230313mzl4w4u92$"] :parsec ["^tv\\.parsec\\.www$"]}
 
   :main [
     {:des "Change right_command to command+control+option+shift"
@@ -32,15 +32,18 @@
       [:caps_lock :!TOleft_shift :macbook {:alone :!Tspacebar}]
     ]}
 
-    {:des "Chrome move tab key bind"
+    {:des "Chrome, Firefox move tab key bind"
     :rules [
       [:!TOSright_arrow :!Ttab :chrome]
       [:!TOSleft_arrow :!TStab :chrome]
+      [:!TOSright_arrow :!Ttab :firefox]
+      [:!TOSleft_arrow :!TStab :firefox]
     ]}
 
-    {:des "Chrome, Visual Studio Code, Cursor, alacritty, ghostty delete tab key bind"
+    {:des "Chrome, Firefox, Visual Studio Code, Cursor, alacritty, ghostty delete tab key bind"
     :rules [
       [:!TOSw :!Cw :chrome]
+      [:!TOSw :!Cw :firefox]
       [:!TOSw :!Cw :vscode]
       [:!TOSw :!Cw :cursor]
       [:!TOSw :!Cw :alacritty]
