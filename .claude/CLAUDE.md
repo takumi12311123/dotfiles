@@ -36,5 +36,3 @@
 | security-scan | Security vulnerability scanning |
 | codex-design | Design consultation for complex decisions |
 | date-check | Verify current date from system |
-
-@RTK.md
