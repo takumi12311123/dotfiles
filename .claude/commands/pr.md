@@ -113,6 +113,25 @@ git push -u origin $(git branch --show-current)
 gh pr view --json number 2>/dev/null
 ```
 
+**Detect PR template (run via Bash tool BEFORE generating PR body):**
+
+Check the following paths in order and use the first one that exists:
+```bash
+ls -1 .github/PULL_REQUEST_TEMPLATE.md \
+      .github/pull_request_template.md \
+      PULL_REQUEST_TEMPLATE.md \
+      pull_request_template.md \
+      docs/PULL_REQUEST_TEMPLATE.md \
+      docs/pull_request_template.md 2>/dev/null | head -n 1
+```
+
+Also check for multiple templates:
+```bash
+ls -1 .github/PULL_REQUEST_TEMPLATE/ 2>/dev/null
+```
+
+If a template file is found, read its contents with the Read tool.
+
 **If PR does NOT exist (create new):**
 
 1. Generate PR title (English, conventional format):
@@ -120,26 +139,44 @@ gh pr view --json number 2>/dev/null
    - Keep under 50 characters
    - Examples: `feat: add user authentication`, `fix: resolve token expiration`
 
-2. Generate PR body (Japanese):
-   ```markdown
-   ## 概要
-   [変更内容の概要を日本語で]
+2. Generate PR body — **PR templates take priority**:
 
-   ## 変更点
-   - [具体的な変更1]
-   - [具体的な変更2]
-   - [具体的な変更3]
+   **Priority order:**
+   1. **Project PR template exists** (`.github/PULL_REQUEST_TEMPLATE.md`, `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE.md`, `pull_request_template.md`, `docs/PULL_REQUEST_TEMPLATE.md`, or `docs/pull_request_template.md`):
+      - **MUST use the project template as-is** (structure, sections, headings, language)
+      - Fill in each section based on the actual changes
+      - Preserve comments (`<!-- -->`), checkboxes (`- [ ]`), and section order from the template
+      - Do NOT translate section headings or restructure the template
+      - Append Claude Code attribution at the end:
+        ```
+        🤖 Generated with [Claude Code](https://claude.com/claude-code)
+        ```
 
-   ## テスト
-   - [テスト内容]
+   2. **Multiple PR templates exist** (`.github/PULL_REQUEST_TEMPLATE/*.md`):
+      - Pick the template that best matches the change type (e.g., `feature.md` for `feat:`, `bugfix.md` for `fix:`)
+      - If unclear, ask the user which template to use
+      - Fill in and follow the same rules as above
 
-   ## 注意点
-   [破壊的変更や注意事項があれば]
+   3. **No PR template** (fallback to default Japanese body):
+      ```markdown
+      ## 概要
+      [変更内容の概要を日本語で]
 
-   issue: #[issue-number]
+      ## 変更点
+      - [具体的な変更1]
+      - [具体的な変更2]
+      - [具体的な変更3]
 
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-   ```
+      ## テスト
+      - [テスト内容]
+
+      ## 注意点
+      [破壊的変更や注意事項があれば]
+
+      issue: #[issue-number]
+
+      🤖 Generated with [Claude Code](https://claude.com/claude-code)
+      ```
 
 3. Create PR:
    ```bash
@@ -153,9 +190,10 @@ gh pr view --json number 2>/dev/null
 
 1. Analyze new changes since last commit
 2. Update PR body to reflect all changes (not just new ones):
-   - Keep the same structure
-   - Update 変更点 section with ALL changes in the PR
-   - Add any new 注意点 if applicable
+   - **Preserve the existing PR body's structure** (whether it follows a project template or the default Japanese body)
+   - If the existing body follows a project PR template, keep its sections, headings, and language as-is
+   - Update all sections with the latest content (not just append)
+   - Add any new notes/caveats if applicable
 
 3. Update PR:
    ```bash
@@ -233,7 +271,7 @@ chore: update dependencies → chore/update-dependencies
 
 1. **Always use HEREDOC for commit messages and PR bodies** to handle multi-line content
 2. **Always add Claude Code attribution** to commits and PRs
-3. **Keep PR body in Japanese** for better readability for Japanese teams
+3. **PR template priority**: If a project PR template exists, follow it exactly (structure, language, sections). The default Japanese body is only a fallback when no template exists.
 4. **Keep PR title in English** following conventional commit format
 5. **Update existing PR body completely**, not just append
 6. **Use kebab-case** for branch names (lowercase with hyphens)
