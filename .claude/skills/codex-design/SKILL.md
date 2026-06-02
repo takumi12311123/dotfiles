@@ -67,10 +67,27 @@ Claude Code proposes 2-3 viable approaches:
 
 ### Step 3: Codex Consultation
 
-Execute Codex in read-only sandbox for design review:
+Execute Codex in read-only sandbox for design review.
+
+> **Invariants — see codex-review/SKILL.md Step 2 for full rationale:**
+> 1. **`< /dev/null`** — `codex exec` probes stdin even when prompt is passed as an argument;
+>    inherited open pipes from Claude Code's Bash will hang the call indefinitely.
+> 2. **Portable timeout** — macOS has no `timeout` by default; use the TIMEOUT_CMD fallback chain.
+> 3. **`--ephemeral`** — avoids session-file contention in parallel runs.
 
 ```bash
-codex exec --model gpt-5.4 --sandbox read-only "$(cat <<'EOF'
+# Portable timeout (gtimeout → timeout → perl alarm → none).
+if command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(gtimeout 1200)
+elif command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(timeout 1200)
+elif command -v perl >/dev/null 2>&1; then
+  TIMEOUT_CMD=(perl -e 'my $t=shift; my $pid=fork; if(!defined $pid){die "fork: $!"} if($pid==0){exec @ARGV; exit 127} $SIG{ALRM}=sub{kill "TERM",$pid; sleep 2; kill "KILL",$pid; exit 124}; alarm $t; waitpid $pid,0; my $st=$?; exit($st & 127 ? 128 + ($st & 127) : $st >> 8)' 1200)
+else
+  TIMEOUT_CMD=()
+fi
+
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral "$(cat <<'EOF'
 # Design Consultation Request
 
 All string fields (reasoning, risks, recommendations, guidance) must be in Japanese.
@@ -160,7 +177,7 @@ All string fields (reasoning, risks, recommendations, guidance) must be in Japan
   "caveats": ["Caveat 1", "Caveat 2"]
 }
 EOF
-)"
+)" < /dev/null
 ```
 
 ### Step 4: Analysis and Synthesis

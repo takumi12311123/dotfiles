@@ -36,11 +36,32 @@ git diff HEAD --name-status --find-renames
 
 **Critical: Codex runs in read-only sandbox for safety**
 
+> **Three invariants — violate any of these and the run hangs or silently fails:**
+> 1. **Redirect stdin from `/dev/null`** (`< /dev/null`). `codex exec` always probes stdin
+>    (you'll see `Reading additional input from stdin...` in output) and will block on the pipe
+>    EOF inherited from Claude Code's Bash/Subagent execution. Without this redirect, the call
+>    hangs indefinitely — this is the #1 cause of "codex CLI hangs on stdin" failures.
+> 2. **Wrap with a portable timeout.** macOS has no `timeout` by default — use the `TIMEOUT_CMD`
+>    array below, which falls back through `gtimeout` → `timeout` → `perl alarm` shim.
+> 3. **Pass `--ephemeral`** to avoid `~/.codex/history.jsonl` / session-file contention when
+>    running in parallel with other codex invocations (quality-gate's codex+gemini fan-out).
+
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
 REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-review.XXXXXX")
 
-codex exec --model gpt-5.4 --sandbox read-only \
+# Portable timeout (zsh-safe array form). Falls back to perl alarm shim on macOS.
+if command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(gtimeout 1200)
+elif command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(timeout 1200)
+elif command -v perl >/dev/null 2>&1; then
+  TIMEOUT_CMD=(perl -e 'my $t=shift; my $pid=fork; if(!defined $pid){die "fork: $!"} if($pid==0){exec @ARGV; exit 127} $SIG{ALRM}=sub{kill "TERM",$pid; sleep 2; kill "KILL",$pid; exit 124}; alarm $t; waitpid $pid,0; my $st=$?; exit($st & 127 ? 128 + ($st & 127) : $st >> 8)' 1200)
+else
+  TIMEOUT_CMD=()
+fi
+
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
   --output-schema "$ROOT/.claude/skills/codex-review/review-schema.json" \
   -o "$REVIEW_OUT" \
   "$(cat <<'EOF'
@@ -76,12 +97,18 @@ All string fields (summary, problem, recommendation, notes_for_next_review) must
 - testing: Missing tests, inadequate coverage
 - style: Code style, naming conventions (usually advisory)
 EOF
-)"
+)" < /dev/null
+CODEX_EXIT=$?
 
-# Verify result (fail-closed on error)
-if [ $? -ne 0 ] || [ ! -s "$REVIEW_OUT" ]; then
+# Verify result (fail-closed on error). Exit 124 = timeout from gtimeout/timeout/perl shim.
+if [ "$CODEX_EXIT" -eq 124 ]; then
   rm -f "$REVIEW_OUT"
-  echo "ERROR: codex exec failed or produced empty output" >&2
+  echo "ERROR: codex exec timed out after 1200s — split files and retry" >&2
+  exit 124
+fi
+if [ "$CODEX_EXIT" -ne 0 ] || [ ! -s "$REVIEW_OUT" ]; then
+  rm -f "$REVIEW_OUT"
+  echo "ERROR: codex exec failed (exit=$CODEX_EXIT) or produced empty output" >&2
   exit 1
 fi
 
@@ -398,7 +425,19 @@ When triggered from **ExitPlanMode** (via quality-gate Step 1), Codex reviews th
 ROOT=$(git rev-parse --show-toplevel)
 PLAN_REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-plan-review.XXXXXX")
 
-codex exec --model gpt-5.4 --sandbox read-only \
+# Portable timeout (see Step 2 invariants — `< /dev/null`, `--ephemeral`, and TIMEOUT_CMD
+# are all required to prevent stdin hangs and session-file contention).
+if command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(gtimeout 1200)
+elif command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(timeout 1200)
+elif command -v perl >/dev/null 2>&1; then
+  TIMEOUT_CMD=(perl -e 'my $t=shift; my $pid=fork; if(!defined $pid){die "fork: $!"} if($pid==0){exec @ARGV; exit 127} $SIG{ALRM}=sub{kill "TERM",$pid; sleep 2; kill "KILL",$pid; exit 124}; alarm $t; waitpid $pid,0; my $st=$?; exit($st & 127 ? 128 + ($st & 127) : $st >> 8)' 1200)
+else
+  TIMEOUT_CMD=()
+fi
+
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
   --output-schema "$ROOT/.claude/skills/codex-review/plan-review-schema.json" \
   -o "$PLAN_REVIEW_OUT" \
   "$(cat <<'EOF'
@@ -421,12 +460,18 @@ All string fields (summary, section, problem, recommendation, suggestions) must 
 - **blocking**: Fatal issue in plan. Fix required → ok: false
 - **advisory**: Improvement recommended but plan can proceed
 EOF
-)"
+)" < /dev/null
+CODEX_EXIT=$?
 
-# Verify result (fail-closed on error)
-if [ $? -ne 0 ] || [ ! -s "$PLAN_REVIEW_OUT" ]; then
+# Verify result (fail-closed on error). Exit 124 = timeout.
+if [ "$CODEX_EXIT" -eq 124 ]; then
   rm -f "$PLAN_REVIEW_OUT"
-  echo "ERROR: codex exec failed or produced empty output" >&2
+  echo "ERROR: codex plan-review timed out after 1200s" >&2
+  exit 124
+fi
+if [ "$CODEX_EXIT" -ne 0 ] || [ ! -s "$PLAN_REVIEW_OUT" ]; then
+  rm -f "$PLAN_REVIEW_OUT"
+  echo "ERROR: codex exec failed (exit=$CODEX_EXIT) or produced empty output" >&2
   exit 1
 fi
 
