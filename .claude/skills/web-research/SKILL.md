@@ -200,12 +200,22 @@ ROOT=$(git rev-parse --show-toplevel)
 CODEX_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-research.XXXXXX")
 FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Codex verification failed","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
 
-# macOS-compatible timeout (array for zsh compatibility)
-if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
-elif command -v timeout >/dev/null 2>&1; then TIMEOUT_CMD=(timeout 300)
-else TIMEOUT_CMD=(); fi
+# macOS-compatible timeout (array for zsh compatibility).
+# `perl alarm` shim ensures a hard cap even when coreutils is not installed.
+if command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(gtimeout 300)
+elif command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_CMD=(timeout 300)
+elif command -v perl >/dev/null 2>&1; then
+  TIMEOUT_CMD=(perl -e 'my $t=shift; my $pid=fork; if(!defined $pid){die "fork: $!"} if($pid==0){exec @ARGV; exit 127} $SIG{ALRM}=sub{kill "TERM",$pid; sleep 2; kill "KILL",$pid; exit 124}; alarm $t; waitpid $pid,0; my $st=$?; exit($st & 127 ? 128 + ($st & 127) : $st >> 8)' 300)
+else
+  TIMEOUT_CMD=()
+fi
 
-"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only \
+# `< /dev/null` and `--ephemeral` are mandatory:
+# - codex exec probes stdin even when prompt is passed as arg → would hang on inherited pipes
+# - --ephemeral avoids ~/.codex/history.jsonl contention with parallel codex invocations
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
   --output-schema "$ROOT/.claude/skills/web-research/verification-schema.json" \
   -o "$CODEX_OUT" \
   "$(cat <<PROMPT
@@ -229,7 +239,7 @@ All output must be in Japanese.
    - Is important information missing?
    - Are there better alternatives or approaches?
 PROMPT
-)"
+)" < /dev/null
 
 EXIT_CODE=$?
 
