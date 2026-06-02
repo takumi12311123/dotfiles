@@ -34,8 +34,16 @@ Ensure code quality through automated checks before any user-facing action.
 └─────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────┐
+│  2.5. Design Sanity Check (Necessity Audit)         │
+│     → Compare against main: extra lines / defensive │
+│       code / self-patch (throw+catch own throw)     │
+│     → Surface concerns for the reviewer to evaluate │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
 │  3. Run codex-review + gemini-review IN PARALLEL    │
 │     → Launch both as background tasks               │
+│     → Inject necessity-audit prompts                │
 │     → Wait for both to complete                     │
 │     → Merge results                                 │
 └─────────────────────────────────────────────────────┘
@@ -46,6 +54,14 @@ Ensure code quality through automated checks before any user-facing action.
 │     → Codex blocking: must fix                      │
 │     → Gemini-only blocking: present as advisory+    │
 │     → Contradictions: flag to user                  │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│  5. Behavior Verification (Runtime Smoke)           │
+│     → Format/lint/unit tests verify CODE, not       │
+│       FEATURE correctness. Run an actual smoke      │
+│       based on what changed (E2E / dev server /     │
+│       curl). Declare honestly if impossible.        │
 └─────────────────────────────────────────────────────┘
                         ↓
           ┌─────────────────────────┐
@@ -185,6 +201,63 @@ Format, build, and test checks typically need full runs:
 5. Verify target/script exists before running
 6. Skip unavailable commands gracefully (no error)
 7. If no checks found, proceed to codex-review
+
+## Step 2.5: Design Sanity Check (Necessity Audit)
+
+**The single most common quality failure: locally-optimal but globally-wasteful defensive code.**
+Reviewers (including LLM reviewers) tend to optimize *the diff you handed them* rather than ask
+"is this diff necessary at all?" — so we inject that question explicitly.
+
+Run BEFORE dispatching review subagents.
+
+### Mechanics
+
+1. **Compute diff vs main** (or the PR base branch):
+   ```bash
+   BASE=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main)
+   git diff --stat "$BASE"..HEAD
+   ```
+2. **For each touched file, fetch the main-side version** to give the reviewer a baseline:
+   ```bash
+   git show "$BASE":<file>   # save as context for review subagents
+   ```
+3. **Scan for red-flag patterns** in the diff (`git diff "$BASE"..HEAD`):
+   - Newly-introduced `try`/`catch` blocks
+   - New `throw` statements
+   - New null/undefined guards (`if (!x)`, `x?.`, `x ?? fallback`)
+   - New early returns guarding hypothetical states
+   - New fallback paths / "safety nets"
+4. **For every match, formulate a necessity question** and bundle it into the codex-review prompt:
+   - "Does main's behavior already handle this case implicitly?"
+   - "Is this catching an error introduced *by this same diff*? (self-patch anti-pattern)"
+   - "Would removing this construct break a real scenario, or only a hypothetical one?"
+   - "Is there an alternative implementation closer to main with fewer added lines?"
+5. **Coarse heuristic**: If a single function gained **5+ defensive lines vs main**, escalate it
+   to the reviewer with explicit "justify each defensive line" instruction.
+
+### What to inject into the review prompt
+
+When dispatching to `codex-review` / `gemini-review` in Step 3, the prompt MUST include:
+
+```
+## Necessity audit (mandatory)
+
+The following file(s) gained defensive code (try/catch, throw, null guard, fallback, early return)
+relative to <BASE>. For EACH new defensive construct, answer:
+
+  1. Is it load-bearing? Would removing it break a real (not hypothetical) scenario?
+  2. Is it a "self-patch" — i.e. catching/guarding against an error this same diff introduced?
+  3. Does main's simpler shape already handle the case implicitly?
+  4. Propose at least one alternative implementation closer to main. Compare line count + clarity.
+
+If you find a self-patch or unjustified defense, classify as BLOCKING — not advisory.
+
+main-side baseline for context:
+<paste output of `git show <BASE>:<file>` for each touched file>
+```
+
+This is the single most impactful change. It addresses the failure mode where reviewers say
+"ok looks good, just tighten this throw" instead of "wait, why is this throw here at all?"
 
 ## Step 3: Run codex-review + gemini-review IN PARALLEL
 
@@ -333,11 +406,57 @@ def merge_reviews(codex_result, gemini_result, gemini_status):
 - **Both agree blocking**: Highest priority fix
 - Max 5 iterations (same as before)
 
+## Step 5: Behavior Verification (Runtime Smoke)
+
+**Format/lint/unit tests verify CODE correctness, NOT FEATURE correctness.**
+A PR that compiles, lints, and has all unit tests green can still ship a broken feature
+(e.g. a `throw` that fires on the mock path, or a `process.env.E2E` that's undefined in the
+client bundle). Catch these by running the actual feature once.
+
+### Verification matrix
+
+Pick at least one verification step matching the largest scope of change:
+
+| Change scope | Verification | Cost |
+|---|---|---|
+| **E2E spec** changed | Run the spec: `yarn e2e:integration --project=chromium` (or relevant subset) | ~1min |
+| **UI / React component** | Start dev server, open the page, click through the changed flow | manual ~2min |
+| **API route / Server Action** | `curl` the endpoint or run integration test | ~30s |
+| **Build config / next.config** | Full `yarn build` (already in Step 2) — verify build output | included |
+| **Runtime env flag (e.g. NEXT_PUBLIC_*)** | Run with the env actually set and confirm the branch fires | ~1min |
+| **Pure utility (no I/O)** | Unit tests in Step 2 are sufficient | — |
+| **Docs / comments only** | Skip | — |
+
+### Self-honesty rule
+
+If verification **cannot** be run in this environment (no browser, slow CI hardware,
+needs a credential), the user MUST be told explicitly:
+
+> "Type-check / lint / unit tests pass. Feature-level behavior was NOT verified
+> because <reason>. Recommend running `<command>` before merging."
+
+**Do NOT** claim "all checks pass" when only the code-level checks passed. This was the
+exact failure mode that caused a self-patch (a throw firing on the E2E mock path) to ship
+past two review rounds — the reviewers approved the code, but nobody ran it.
+
+### When to insist
+
+For PRs touching:
+- A `getTrace` / `getPerformance` / DI-injected mock surface
+- A `process.env.*` flag that gates runtime behavior
+- Anything where the mock and the real path diverge in error semantics
+
+→ Runtime smoke is **mandatory**, not optional. The class of bug that hides in these
+surfaces is exactly the class that lint/type/unit cannot catch.
+
 ## Important
 
 - NEVER skip this gate
+- ALWAYS run Step 2.5 (necessity audit) and inject its findings into the review prompt
 - ALWAYS launch both reviews in parallel
 - ALWAYS wait for at least Codex to complete
 - Gemini failure is non-blocking (proceed with Codex only)
 - Fix ALL Codex blocking issues before proceeding
+- ALWAYS run Step 5 (behavior verification) before declaring done — and if you cannot,
+  say so explicitly rather than implying success
 - Document any skipped checks with reason
