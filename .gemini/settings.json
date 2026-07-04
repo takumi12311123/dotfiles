@@ -50,5 +50,57 @@
   },
   "agents": {
     "overrides": {}
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" || true"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$SUPERSET_HOME_DIR\" ] && [ -x \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" ] && \"$SUPERSET_HOME_DIR/hooks/gemini-hook.sh\" || true"
+          }
+        ]
+      }
+    ]
   }
 }

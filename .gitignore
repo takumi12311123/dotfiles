@@ -13,5 +13,8 @@
 .claude/plugins/known_marketplaces.json
 .claude/plugins/marketplaces/
 
+# Codex-managed system skills (auto-installed)
+.claude/skills/.system/
+
 # Karabiner auto-generated (managed by GokuRakuJoudo)
 .config/karabiner/
