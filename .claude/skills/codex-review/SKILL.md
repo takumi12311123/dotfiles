@@ -50,6 +50,18 @@ git diff HEAD --name-status --find-renames
 ROOT=$(git rev-parse --show-toplevel)
 REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-review.XXXXXX")
 
+# Resolve schema path. In a git worktree, $ROOT is the worktree root (not the main
+# repo) — non-dotfiles projects won't have .claude/skills/ under it, so fall back
+# to $HOME/.claude/skills where the user-global skills live.
+if [ -f "$ROOT/.claude/skills/codex-review/review-schema.json" ]; then
+  SCHEMA_PATH="$ROOT/.claude/skills/codex-review/review-schema.json"
+elif [ -f "$HOME/.claude/skills/codex-review/review-schema.json" ]; then
+  SCHEMA_PATH="$HOME/.claude/skills/codex-review/review-schema.json"
+else
+  echo "ERROR: codex-review schema not found under \$ROOT or \$HOME/.claude/skills" >&2
+  exit 1
+fi
+
 # Portable timeout (zsh-safe array form). Falls back to perl alarm shim on macOS.
 if command -v gtimeout >/dev/null 2>&1; then
   TIMEOUT_CMD=(gtimeout 1200)
@@ -62,7 +74,7 @@ else
 fi
 
 "${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
-  --output-schema "$ROOT/.claude/skills/codex-review/review-schema.json" \
+  --output-schema "$SCHEMA_PATH" \
   -o "$REVIEW_OUT" \
   "$(cat <<'EOF'
 # Review Request
@@ -81,6 +93,16 @@ All string fields (summary, problem, recommendation, notes_for_next_review) must
 - **Performance**: Bottlenecks, inefficient algorithms, resource leaks
 - **Maintainability**: Code readability, consistency with existing patterns, comments
 - **Testing**: Test coverage, test quality, missing test cases
+- **YAGNI / Simplicity** (critical — flag aggressively; AI-generated diffs routinely over-engineer):
+  - Unused features, config options, feature flags, or abstractions added "for future use"
+  - Defensive validation between internal callers (validate only at system boundaries: user input, external APIs). Trust internal code and framework guarantees.
+  - Unreachable error handling, fallbacks for states that cannot occur, catch blocks that hide bugs
+  - Comments that explain WHAT the code does (well-named identifiers already do that), TODO comments for hypothetical futures, "// added for X", caller references ("// used by Y"), "// removed" markers for deleted code
+  - Refactoring, renaming, or cleanup unrelated to the task's core purpose
+  - Helper functions abstracted from a single caller; premature DRY (three similar lines is fine)
+  - Backwards-compat shims, unused re-exports, renamed-but-unused `_var` placeholders left after deletion
+  - Any code that would be silently deleted without changing behavior
+  - Category: `maintainability`. Severity: `blocking` for clearly dead/unused code and clear defensive-coding violations; `advisory` for judgment calls where the extra code has borderline value.
 
 ## Previous Review Notes
 [Notes from previous iteration, if any]
@@ -397,7 +419,7 @@ Claude Code constructs the prompt dynamically based on:
 ### Result Parsing
 - `--output-schema` guarantees JSON schema compliance via OpenAI structured output
 - `-o` outputs result to a unique temp file (via `mktemp`) — avoids stale reads and parallel conflicts
-- Schema paths use `$(git rev-parse --show-toplevel)` for location-independent execution
+- Schema paths resolve `$ROOT/.claude/skills/` first, then fall back to `$HOME/.claude/skills/` — required for git worktrees, where `$ROOT` points to the worktree root and typically lacks `.claude/skills/`
 - Always verify `codex exec` exit code and file non-emptiness before parsing (fail-closed)
 - `mktemp`, `codex exec`, verification, `jq` parse, and `rm -f` cleanup all run in the same shell block
 - Extract issues by severity for fixing
@@ -425,6 +447,16 @@ When triggered from **ExitPlanMode** (via quality-gate Step 1), Codex reviews th
 ROOT=$(git rev-parse --show-toplevel)
 PLAN_REVIEW_OUT=$(mktemp "${TMPDIR:-/tmp}/codex-plan-review.XXXXXX")
 
+# Resolve schema path — same worktree fallback rationale as Step 2.
+if [ -f "$ROOT/.claude/skills/codex-review/plan-review-schema.json" ]; then
+  PLAN_SCHEMA_PATH="$ROOT/.claude/skills/codex-review/plan-review-schema.json"
+elif [ -f "$HOME/.claude/skills/codex-review/plan-review-schema.json" ]; then
+  PLAN_SCHEMA_PATH="$HOME/.claude/skills/codex-review/plan-review-schema.json"
+else
+  echo "ERROR: codex-review plan-review schema not found under \$ROOT or \$HOME/.claude/skills" >&2
+  exit 1
+fi
+
 # Portable timeout (see Step 2 invariants — `< /dev/null`, `--ephemeral`, and TIMEOUT_CMD
 # are all required to prevent stdin hangs and session-file contention).
 if command -v gtimeout >/dev/null 2>&1; then
@@ -438,7 +470,7 @@ else
 fi
 
 "${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
-  --output-schema "$ROOT/.claude/skills/codex-review/plan-review-schema.json" \
+  --output-schema "$PLAN_SCHEMA_PATH" \
   -o "$PLAN_REVIEW_OUT" \
   "$(cat <<'EOF'
 # Plan Review Request
