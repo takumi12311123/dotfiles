@@ -43,7 +43,98 @@ Check current branch:
   4. Execute: `git checkout -b {prefix}/{description}`
 
 - If already on a feature branch:
-  - Continue with that branch
+  - Continue with that branch, but **validate the name in Step 1.5**
+
+### Step 1.5: Branch Name Validation (when already on a feature branch)
+
+Some editors (e.g., Superset) auto-generate arbitrary branch names like
+`cursor/xyz-abc123`, `codex/1234567890`, or `branch-tmp-42`. These break the
+convention and make PR history hard to scan. Validate before pushing — but
+lean conservative: only flag names that are clearly editor-generated or
+convention-violating, so continuing work on a legitimate branch is never
+disrupted.
+
+**Preflight checks** (skip Step 1.5 entirely if any of these are true):
+
+1. **Detached HEAD** — If `git branch --show-current` is empty, stop and
+   tell the user to check out or create a branch first. Do NOT attempt rename.
+2. **On `main`/`master`** — Already handled by Step 1.
+3. **PR already attached** — Run `gh pr view --json number 2>/dev/null` and
+   check exit status:
+   - exit 0 with a number → PR exists, skip rename (would break PR reference)
+   - exit ≠ 0 → **unconfirmable** (auth failure, network, non-GitHub remote,
+     etc.). Treat as unsafe: also skip rename by default and tell the user
+     "PR 状態を確認できなかったため rename を保留しました" so they can rerun after
+     `gh auth login` or handle manually.
+
+**Failure conditions** — flag the branch as needing rename ONLY when at least
+one of the following is objectively true (do NOT rename on soft signals alone):
+
+1. **No valid prefix** — Branch does NOT start with one of:
+   `feature/`, `fix/`, `hotfix/`, `docs/`, `style/`, `refactor/`, `test/`, `chore/`.
+   This alone is a hard flag.
+2. **Obvious editor-generated pattern** — e.g. `cursor/…`, `codex/…`,
+   `copilot/…`, `agent-…`, `tmp-…`, `branch-<digits>`, or a description that
+   looks like a random hash / timestamp (`abc123`, `1234567890`).
+3. **Non-kebab-case description** — camelCase / snake_case / spaces in the
+   part after the prefix (e.g. `feature/AddUserAuth`, `fix/bug_report`).
+
+**Advisory only (do NOT auto-rename)** — mention but let the user decide:
+
+- **Prefix ↔ change-type mismatch** — the branch prefix and the current diff's
+  dominant change type disagree (e.g. `feature/…` branch making a docs-only
+  commit). This is often legitimate mid-flight work, so surface it as a note,
+  not a rename trigger. Only propose a prefix change if the user explicitly
+  asks to normalize.
+- **Too generic description** — `feature/update`, `fix/bug`. Point it out
+  once; still let the user proceed.
+
+**If the branch is flagged (a failure condition matched):**
+
+1. Propose an appropriate name based on the actual diff (same rules as Step 1).
+2. Ask the user:
+
+   > "現在のブランチ名 `{current}` は規約に合っていません（理由: `{reason}`）。
+   > 提案: `{proposed}`
+   > リネームしますか？ (yes / no / other name)"
+
+3. On `yes` — execute rename safely:
+
+   ```bash
+   CURRENT=$(git branch --show-current)
+   PROPOSED={proposed}
+
+   # Detect upstream (do NOT hardcode `origin`)
+   UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)
+
+   # Local rename first — always safe
+   git branch -m "$PROPOSED"
+
+   if [ -n "$UPSTREAM" ]; then
+     # Upstream exists (branch was already pushed). Order matters:
+     # 1) push the NEW name to the SAME remote and set upstream
+     # 2) only after that succeeds, delete the OLD remote branch
+     # Never delete-then-push — a failed push leaves the remote with nothing.
+     REMOTE="${UPSTREAM%%/*}"       # e.g. "origin", "upstream", "fork"
+     git push -u "$REMOTE" "$PROPOSED" || {
+       echo "❌ Push of $PROPOSED to $REMOTE failed. Old remote branch $CURRENT is untouched."
+       exit 1
+     }
+     # Extra confirm before destroying the old remote branch
+     echo "旧リモートブランチ $REMOTE/$CURRENT を削除してよいですか？ (yes/no)"
+     # On yes:
+     # git push "$REMOTE" --delete "$CURRENT"
+   fi
+   ```
+
+4. On `no`: keep the current name, continue with Step 2.
+5. On `other`: use the user-provided name — but **re-run ALL failure
+   conditions above** (missing prefix, editor-generated pattern, non-kebab-case).
+   Reject and re-prompt if any still fail. Prevents `feature/1234567890` and
+   similar hash/timestamp names from slipping through on retry.
+
+**Do NOT rename silently.** Always confirm before executing `git branch -m`.
+**Never delete a remote branch before the replacement push succeeds.**
 
 ### Step 2: Commit Changes (Fine-Grained)
 
@@ -112,6 +203,12 @@ git push -u origin $(git branch --show-current)
 ```bash
 gh pr view --json number 2>/dev/null
 ```
+
+Apply the same disambiguation as Step 1.5: exit 0 → PR exists (go to update
+path); exit ≠ 0 → **unconfirmable** (auth, network, non-GitHub remote). Do
+NOT silently treat unconfirmable as "no PR" — stop and tell the user
+"PR 状態を確認できませんでした。`gh auth status` を確認してから再実行してください。"
+so we never create a duplicate PR against an already-open one.
 
 **Detect PR template (run via Bash tool BEFORE generating PR body):**
 
@@ -276,6 +373,7 @@ chore: update dependencies → chore/update-dependencies
 5. **Update existing PR body completely**, not just append
 6. **Use kebab-case** for branch names (lowercase with hyphens)
 7. **Determine branch prefix from commit type**, not manually specified
+8. **Validate arbitrary branch names** from editors like Superset in Step 1.5 — propose a rename before push when the name doesn't follow convention (never rename silently)
 
 ## Output Format to User
 
