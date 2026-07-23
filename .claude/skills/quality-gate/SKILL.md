@@ -57,6 +57,13 @@ Ensure code quality through automated checks before any user-facing action.
 └─────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────┐
+│  4.7. PR Spec Digest (via pr-comprehend)            │
+│     → commit trigger: light digest (Claude only)    │
+│     → PR trigger:     full digest (Gemini + Codex)  │
+│     → Report → .claude/pr-review/ (git-excluded)    │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
 │  5. Behavior Verification (Runtime Smoke)           │
 │     → Format/lint/unit tests verify CODE, not       │
 │       FEATURE correctness. Run an actual smoke      │
@@ -406,6 +413,82 @@ def merge_reviews(codex_result, gemini_result, gemini_status):
 - **Both agree blocking**: Highest priority fix
 - Max 5 iterations (same as before)
 
+## Step 4.7: PR Spec Digest (via pr-comprehend)
+
+Review 結果評価と behavior verification の間に **仕様把握レポート** を生成する。
+これは quality (何を直すか) ではなく comprehension (何が変わったか) を担う。
+
+**目的**:
+- AI が書いた PR を人間がレビューする際の認知負荷を下げる
+- 「AI が指示逸脱していないか」「hallucination がないか」を機械的に検出
+- レポートはローカル worktree に保存し、必要に応じて PR body に添付
+
+### Trigger 判定
+
+quality-gate は呼び出しコンテキストに応じて digest の重さを変える:
+
+| quality-gate の起点 | pr-comprehend trigger | digest weight |
+|---|---|---|
+| commit 直前 | `commit` | light (Claude 内部要約のみ) |
+| PR 作成/更新 直前 | `pr` | full (Gemini 要約 + Codex AI-risk scan) |
+| ExitPlanMode | — | 実行しない (まだコードが無い) |
+| user confirmation | 通常 skip | full を明示要求された場合のみ |
+
+**Rationale**: commit ごとに Gemini/Codex を叩くとトークン浪費が大きい。commit 時は軽い記録のみ、
+PR 時にフル分析する。ただし「commit も PR も自動発火」というユーザー要求は満たす。
+
+### 実行手順
+
+```bash
+# 1. .git/info/exclude に登録 (初回のみ、以降は no-op)
+GIT_DIR=$(git rev-parse --git-dir)
+EXCLUDE_FILE="$GIT_DIR/info/exclude"
+mkdir -p "$(dirname "$EXCLUDE_FILE")" && touch "$EXCLUDE_FILE"
+grep -qxF '.claude/pr-review/' "$EXCLUDE_FILE" || echo '.claude/pr-review/' >> "$EXCLUDE_FILE"
+mkdir -p .claude/pr-review
+
+# 2. pr-comprehend skill を呼び出し
+#    Trigger は quality-gate の起点から自動判定
+case "$QUALITY_GATE_TRIGGER" in
+  commit) TRIGGER=commit ;;
+  pr)     TRIGGER=pr ;;
+  *)      TRIGGER=manual ;;
+esac
+
+# Skill 呼び出し (実装: pr-comprehend/SKILL.md 参照)
+# quality-gate 側では skill=pr-comprehend を Skill tool 経由で呼ぶ
+```
+
+Skill invocation (Claude が実行):
+```
+Skill(skill="pr-comprehend", args="--mode=author --trigger=<TRIGGER>")
+```
+
+### 結果の扱い
+
+- **light digest (commit trigger)**:
+  - 1 行報告のみユーザーに提示: `📝 commit digest: <one_liner>`
+  - 詳細確認プロンプトは出さない (割り込み最小化)
+  - `.claude/pr-review/local-<branch>-<hash>.md` に保存されている
+
+- **full digest (pr trigger)**:
+  - 全体像 + セクション選択プロンプトをユーザーに提示
+  - ユーザーが選んだセクションを深掘り
+  - `pr` skill と連携: 生成した digest のパスを PR body 末尾に `<!-- pr-comprehend: <path> -->` として追記可能
+
+### エラー時の挙動
+
+- `pr-comprehend` が失敗しても quality-gate は blocking しない (Step 5 へ進む)
+- 失敗理由をユーザーに通知: `⚠️ PR digest 生成に失敗: <reason>`
+- 後で `pr-comprehend` を手動再実行できるよう案内
+
+### 除外条件
+
+以下の場合 Step 4.7 はスキップ:
+- diff が空
+- `.claude/`, `docs/`, `*.md` のみの変更 (レビュー観点が薄い)
+- ユーザーが `QUALITY_GATE_NO_DIGEST=1` を設定
+
 ## Step 5: Behavior Verification (Runtime Smoke)
 
 **Format/lint/unit tests verify CODE correctness, NOT FEATURE correctness.**
@@ -457,6 +540,7 @@ surfaces is exactly the class that lint/type/unit cannot catch.
 - ALWAYS wait for at least Codex to complete
 - Gemini failure is non-blocking (proceed with Codex only)
 - Fix ALL Codex blocking issues before proceeding
+- ALWAYS run Step 4.7 (PR spec digest) — light for commit, full for PR. Non-blocking on failure
 - ALWAYS run Step 5 (behavior verification) before declaring done — and if you cannot,
   say so explicitly rather than implying success
 - Document any skipped checks with reason
