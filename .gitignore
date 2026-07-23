@@ -16,5 +16,8 @@
 # Codex-managed system skills (auto-installed)
 .claude/skills/.system/
 
+# pr-comprehend skill output (local-only, per-worktree)
+.claude/pr-review/
+
 # Karabiner auto-generated (managed by GokuRakuJoudo)
 .config/karabiner/

@@ -1,0 +1,207 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PR Comprehend Digest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "blast_radius", "risks", "ai_risks", "review_checklist", "open_questions"],
+  "properties": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["one_liner", "changes", "before_after"],
+      "properties": {
+        "one_liner": {
+          "type": "string",
+          "description": "1行での変更サマリ (日本語)"
+        },
+        "changes": {
+          "type": "array",
+          "description": "カテゴリ別の変更一覧",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category", "description"],
+            "properties": {
+              "category": {
+                "type": "string",
+                "enum": ["api", "ui", "db", "config", "cli", "docs", "test", "infra", "other"]
+              },
+              "description": {
+                "type": "string",
+                "description": "変更内容 (日本語)"
+              },
+              "files": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "before_after": {
+          "type": "array",
+          "description": "振る舞いの Before → After 差分",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["before", "after"],
+            "properties": {
+              "before": {"type": "string"},
+              "after": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "blast_radius": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["callers", "breaking_changes", "migration_required"],
+      "properties": {
+        "callers": {
+          "type": "array",
+          "description": "変更ファイルの主な呼び出し元",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["changed_file", "called_from"],
+            "properties": {
+              "changed_file": {"type": "string"},
+              "called_from": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "breaking_changes": {
+          "type": "array",
+          "description": "破壊的変更 (API shape / DB schema / env var など)",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "detail"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["api_shape", "db_schema", "env_var", "cli_flag", "config_key", "other"]
+              },
+              "detail": {"type": "string"}
+            }
+          }
+        },
+        "migration_required": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "detail"],
+          "properties": {
+            "required": {"type": "boolean"},
+            "detail": {
+              "type": "string",
+              "description": "必要な場合はマイグレーション手順、不要な場合は空文字"
+            }
+          }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "一般的なリスク評価 (security/perf/data/observability)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["axis", "level", "detail"],
+        "properties": {
+          "axis": {
+            "type": "string",
+            "enum": ["security", "performance", "data_integrity", "observability"]
+          },
+          "level": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "ai_risks": {
+      "type": "array",
+      "description": "AI が書いた PR に特有のリスクパターン",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pattern", "file", "line", "problem", "severity"],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "enum": [
+              "hallucination",
+              "self_patch",
+              "over_abstraction",
+              "spec_deviation",
+              "test_water_filling",
+              "dead_code",
+              "premature_dry",
+              "unjustified_defensive"
+            ]
+          },
+          "file": {"type": "string"},
+          "line": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "integer"}
+            ]
+          },
+          "problem": {
+            "type": "string",
+            "description": "何が問題か (日本語)"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["blocking", "advisory"]
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "推奨対応 (日本語、任意)"
+          }
+        }
+      }
+    },
+    "review_checklist": {
+      "type": "array",
+      "description": "人間のレビュアーが確認すべき観点",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["axis", "item"],
+        "properties": {
+          "axis": {
+            "type": "string",
+            "enum": [
+              "correctness",
+              "security",
+              "performance",
+              "error_handling",
+              "testing",
+              "docs",
+              "ops"
+            ]
+          },
+          "item": {"type": "string"}
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "description": "人間が判断すべき残課題",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question"],
+        "properties": {
+          "question": {"type": "string"},
+          "context": {"type": "string"}
+        }
+      }
+    }
+  }
+}
