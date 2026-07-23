@@ -19,7 +19,8 @@
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + codex-review + gemini-review (parallel) |
+| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + codex-review + gemini-review (parallel) + pr-comprehend digest |
+| pr-comprehend | Auto via quality-gate on commit (light) / PR (full) | 仕様/影響範囲/AI特有リスク digest を .claude/pr-review/ に保存 |
 | latest-docs | Before implementation | Verify latest documentation |
 | backend-go | Go implementation | Go backend best practices |
 | frontend-design | Figma implementation | Figma to code implementation |
@@ -31,6 +32,7 @@
 |-------|-------------|
 | codex-review | Code review via Codex |
 | gemini-review | Code review via Gemini (parallel with codex-review) |
+| pr-comprehend | 他人PRの digest (`pr-comprehend <PR番号>`) / ローカルブランチ振り返り (引数なし) |
 | web-research | 3者裏取りリサーチ (Claude + Codex + Gemini) |
 | test-generator | TDD: Generate tests before implementation |
 | security-scan | Security vulnerability scanning |
