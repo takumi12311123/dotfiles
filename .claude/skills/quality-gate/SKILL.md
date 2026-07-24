@@ -41,6 +41,14 @@ Ensure code quality through automated checks before any user-facing action.
 └─────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────┐
+│  2.6. Comment Hygiene Audit (Ephemeral Comments)    │
+│     → Scan added comment lines for session/PR        │
+│       narration ("対応", "今回変更", "as requested") │
+│     → BLOCKING: remove or move to /prr PR comment    │
+│     → Only permanent (WHY) comments may survive      │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
 │  3. Run codex-review + gemini-review IN PARALLEL    │
 │     → Launch both as background tasks               │
 │     → Inject necessity-audit prompts                │
@@ -265,6 +273,107 @@ main-side baseline for context:
 
 This is the single most impactful change. It addresses the failure mode where reviewers say
 "ok looks good, just tighten this throw" instead of "wait, why is this throw here at all?"
+
+## Step 2.6: Comment Hygiene Audit (Ephemeral Comment Detection)
+
+**Second most common AI quality failure: comments that narrate the *session* instead of documenting the *code*.**
+An AI assistant tends to leave breadcrumbs of the conversation in comments — "対応しました", "今回の変更で",
+"as requested", "レビュー指摘を反映", "changed X to Y", "この修正は…". These make sense *during the PR* but are
+noise once merged: they reference a moment in time that no future reader shares. **Only comments that would still
+help a stranger reading the file in a year may survive.** Everything else must be removed, or — if it's genuinely
+useful context for *this* review — moved to a `/prr` PR comment where transient explanation belongs.
+
+Run AFTER the necessity audit, BEFORE dispatching review subagents. This is **BLOCKING**.
+
+### The rule
+
+| Comment intent | Belongs in | Verdict |
+|---|---|---|
+| **WHY** the code is this way (non-obvious rationale, constraint, gotcha, edge case) | Code | ✅ keep |
+| Public API contract (godoc / JSDoc / docstring) | Code | ✅ keep |
+| License / legal header, `TODO`/`FIXME` with a tracked reason | Code | ✅ keep |
+| Narrating the diff ("changed to…", "now returns…", "previously…", "renamed") | — | ❌ remove |
+| Session / conversation references ("as requested", "対応", "指摘反映", "今回", "先ほど") | `/prr` if useful | ❌ remove from code |
+| Explaining the change *to the reviewer* (not to a future maintainer) | `/prr` PR comment | ➡️ move to `/prr` |
+| Restating what the code literally does ("increment i" over `i++`) | — | ❌ remove |
+| Commented-out / dead code | — | ❌ remove |
+| Apology / meta ("I added this because…", "TODO(claude)") | — | ❌ remove |
+
+**Litmus test for each added comment:** *"Would this comment make sense to someone who never saw this PR or our
+conversation?"* If no → it's ephemeral → remove it or move it to `/prr`.
+
+### Mechanics
+
+1. **Collect newly-added comment lines** from the diff vs base:
+   ```bash
+   BASE=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main)
+
+   # Added lines only (leading '+', excluding the '+++' file header)
+   ADDED=$(git diff "$BASE"..HEAD | grep -E '^\+' | grep -Ev '^\+\+\+')
+
+   # Keep lines that look like comments (common single/inline comment markers)
+   ADDED_COMMENTS=$(echo "$ADDED" | grep -E '^\+[[:space:]]*(//|#|--|/\*|\*|<!--|"""|'"'''"')|(//|#)[[:space:]]')
+   ```
+
+2. **Flag ephemeral red-flag patterns** (case-insensitive; English + Japanese). These are the phrases that
+   almost always signal session/PR narration rather than durable documentation:
+   ```bash
+   EPHEMERAL_RE='(as (requested|discussed|mentioned|per)|per (your|the user|review|feedback|codex|gemini)|you (asked|requested|mentioned|wanted)|we (changed|added|discussed|decided|now)|this (pr|change|commit|fix|diff|addresses)|now (returns|uses|handles|does)|changed (to|from)|updated to|modified to|switched to|replaced with|renamed to|moved to|previously|used to|no longer|instead of the old|to address the|fixes the (issue|bug) (where|we)|todo\(claude\)|対応(しました|した|です)?|反映|指摘|今回|先ほど|さっき|修正しました|変更しました|レビュー(で|の指摘)|要望どおり|依頼どおり)'
+
+   echo "$ADDED_COMMENTS" | grep -iE "$EPHEMERAL_RE" || echo "(no obvious ephemeral comments)"
+   ```
+
+3. **Comment-density sanity check** (量の適切さ). Over-commenting is itself a smell — AI tends to annotate every
+   line. Flag files where added comment lines are a large fraction of added code lines:
+   ```bash
+   for f in $(git diff --name-only "$BASE"..HEAD --diff-filter=ACMR); do
+     add=$(git diff "$BASE"..HEAD -- "$f" | grep -cE '^\+' )
+     cmt=$(git diff "$BASE"..HEAD -- "$f" | grep -E '^\+' | grep -cE '(//|#|--|/\*|\*)')
+     [ "$add" -gt 0 ] && ratio=$(( cmt * 100 / add )) || ratio=0
+     [ "$ratio" -ge 40 ] && echo "⚠️  $f: comments = ${ratio}% of added lines (>40% → review for redundancy)"
+   done
+   ```
+   A high ratio is not automatically wrong (a config file may be all comments) — it's a prompt to look, not a hard fail.
+
+4. **For every flagged comment, decide and act — do NOT just report:**
+   - Pure narration / restatement / dead code → **delete the line** in-place.
+   - Genuinely useful explanation of the change for the reviewer → **remove from code**, and tell the user it
+     can be posted as a `/prr` comment instead (see redirect below).
+   - Rewrite a WHY-worthy comment that happens to use ephemeral phrasing into timeless form
+     (e.g. `// changed to 30s because the upstream API times out at 25s` → `// 30s: upstream API times out at 25s`).
+
+### Redirect to `/prr` (this is the mechanism the user asked for)
+
+When a comment exists only to explain the change *to a reviewer* (not to a future maintainer), it must not live in
+the code. Surface it to the user like this, in Japanese:
+
+> このコメントはコード解説（レビュー向け）なので、コードには残しません。PR で伝えたい場合は `/prr` で
+> 該当行に PR コメントとして投稿してください:
+> - `<file>:<line>` — 「<元コメントの趣旨>」
+
+Do not auto-post to `/prr` — the user drives PR review. Just remove it from the code and hand them the text.
+
+### What to inject into the review prompt
+
+Append to the codex-review / gemini-review prompt in Step 3:
+
+```
+## Comment hygiene audit (mandatory, BLOCKING)
+
+For every comment ADDED in this diff, classify it:
+  - KEEP: documents WHY (non-obvious rationale / constraint / edge case), public API doc, license, tracked TODO.
+  - REMOVE: narrates the diff ("changed to", "now returns", "previously"), references our session/PR
+    ("as requested", "対応", "指摘反映", "今回"), restates the code, is dead/commented-out code, or is meta/apology.
+  - MOVE: explains the change to a reviewer rather than a future maintainer → belongs in a PR comment, not code.
+
+Litmus test: would the comment make sense to someone who never saw this PR or the authoring conversation?
+If not, it is ephemeral → classify REMOVE or MOVE, and mark BLOCKING. Also flag over-commenting (comment lines
+that merely echo adjacent code). Only durable, WHY-oriented comments may remain.
+```
+
+### Exclusions
+
+Skip this audit when the diff adds no comment lines, or touches only `*.md` / docs (prose files are all "comment").
 
 ## Step 3: Run codex-review + gemini-review IN PARALLEL
 
@@ -536,6 +645,8 @@ surfaces is exactly the class that lint/type/unit cannot catch.
 
 - NEVER skip this gate
 - ALWAYS run Step 2.5 (necessity audit) and inject its findings into the review prompt
+- ALWAYS run Step 2.6 (comment hygiene audit) — remove ephemeral/session comments, keep only
+  durable WHY comments; redirect reviewer-facing explanation to `/prr`. This is BLOCKING
 - ALWAYS launch both reviews in parallel
 - ALWAYS wait for at least Codex to complete
 - Gemini failure is non-blocking (proceed with Codex only)
