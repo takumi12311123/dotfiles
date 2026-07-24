@@ -19,7 +19,7 @@
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + codex-review + gemini-review (parallel) + pr-comprehend digest |
+| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + comment hygiene (一時的コメント検出→/prr誘導) + codex-review + gemini-review (parallel) + pr-comprehend digest |
 | pr-comprehend | Auto via quality-gate on commit (light) / PR (full) | 仕様/影響範囲/AI特有リスク digest を .claude/pr-review/ に保存 |
 | latest-docs | Before implementation | Verify latest documentation |
 | backend-go | Go implementation | Go backend best practices |
