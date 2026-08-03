@@ -275,12 +275,18 @@ If a template file is found, read its contents with the Read tool.
       🤖 Generated with [Claude Code](https://claude.com/claude-code)
       ```
 
-3. Create PR:
+3. Create PR (always self-assign with `--assignee @me`):
    ```bash
-   gh pr create --title "{title}" --body "$(cat <<'EOF'
+   gh pr create --assignee @me --title "{title}" --body "$(cat <<'EOF'
    {body content}
    EOF
    )"
+   ```
+
+   If `--assignee @me` fails (e.g. the account can't be resolved), create the
+   PR without it and then self-assign as a follow-up:
+   ```bash
+   gh pr edit {pr-number} --add-assignee @me
    ```
 
 **If PR already exists (update):**
@@ -292,9 +298,9 @@ If a template file is found, read its contents with the Read tool.
    - Update all sections with the latest content (not just append)
    - Add any new notes/caveats if applicable
 
-3. Update PR:
+3. Update PR (also ensure self-assignment — no-op if already assigned):
    ```bash
-   gh pr edit {pr-number} --body "$(cat <<'EOF'
+   gh pr edit {pr-number} --add-assignee @me --body "$(cat <<'EOF'
    {updated body content}
    EOF
    )"
@@ -374,6 +380,7 @@ chore: update dependencies → chore/update-dependencies
 6. **Use kebab-case** for branch names (lowercase with hyphens)
 7. **Determine branch prefix from commit type**, not manually specified
 8. **Validate arbitrary branch names** from editors like Superset in Step 1.5 — propose a rename before push when the name doesn't follow convention (never rename silently)
+9. **Always self-assign the PR** with `--assignee @me` on create (and `--add-assignee @me` on update) so the PR is owned by the author automatically
 
 ## Output Format to User
 
