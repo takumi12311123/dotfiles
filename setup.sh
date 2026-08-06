@@ -156,6 +156,158 @@ verify_setup() {
     info "All symlinks verified successfully!"
 }
 
+# Install Homebrew if it is not already present
+install_homebrew() {
+    step "Setting up Homebrew..."
+    if command -v brew &>/dev/null; then
+        info "Homebrew already installed"
+    else
+        info "Installing Homebrew..."
+        # Download and run separately so a curl failure is not masked by the
+        # command substitution (an empty script would otherwise exit 0).
+        local installer
+        if ! installer="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+            warn "Homebrew installer download failed. Skipping package installation."
+            return 0
+        fi
+        if ! /bin/bash -c "$installer"; then
+            warn "Homebrew install failed. Skipping package installation."
+            return 0
+        fi
+    fi
+
+    # Ensure brew is on PATH for the rest of this script (Apple Silicon / Intel)
+    if [ -x /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -x /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+}
+
+# Install every package declared in the Brewfile
+brew_bundle() {
+    step "Installing packages from Brewfile..."
+    if ! command -v brew &>/dev/null; then
+        warn "brew not available. Skipping brew bundle."
+        return 0
+    fi
+
+    local brewfile="$DOTFILES_DIR/.homebrew/Brewfile"
+    if [ ! -f "$brewfile" ]; then
+        warn "Brewfile not found at $brewfile. Skipping."
+        return 0
+    fi
+
+    info "Running brew bundle (this may take a while)..."
+    brew bundle --file="$brewfile" || warn "brew bundle reported failures (continuing)."
+}
+
+# Install language runtimes declared in .tool-versions via asdf
+install_asdf_tools() {
+    step "Installing runtimes from .tool-versions..."
+    if ! command -v asdf &>/dev/null; then
+        warn "asdf not found. Skipping runtime installation."
+        return 0
+    fi
+
+    local tool_versions="$DOTFILES_DIR/.tool-versions"
+    if [ ! -f "$tool_versions" ]; then
+        warn ".tool-versions not found. Skipping."
+        return 0
+    fi
+
+    # Add each required plugin (skip ones already installed; keep stderr visible
+    # so genuine failures such as a typo'd plugin name remain diagnosable)
+    local plugin _rest installed
+    installed="$(asdf plugin list 2>/dev/null || true)"
+    while read -r plugin _rest; do
+        [ -z "$plugin" ] && continue
+        case "$plugin" in \#*) continue ;; esac
+        grep -qxF "$plugin" <<<"$installed" && continue
+        asdf plugin add "$plugin" || warn "asdf plugin add $plugin failed (continuing)."
+    done <"$tool_versions"
+
+    # Install the pinned versions from $HOME (where .tool-versions is symlinked)
+    (cd "$HOME" && asdf install) || warn "asdf install reported issues (continuing)."
+}
+
+# Generate the Karabiner config from the GokuRakuJoudo .edn source
+generate_karabiner() {
+    step "Generating Karabiner config with goku..."
+    if ! command -v goku &>/dev/null; then
+        warn "goku not found. Skipping Karabiner generation."
+        return 0
+    fi
+
+    GOKU_EDN_CONFIG_FILE="$HOME/.config/gokurakujoudo/karabiner.edn" goku ||
+        warn "goku generation failed (continuing)."
+}
+
+# Set sensible global git defaults (aligned with existing zsh aliases)
+# Each config is non-fatal so a failure never triggers the EXIT-trap rollback.
+configure_git() {
+    step "Configuring global git settings..."
+    git config --global init.defaultBranch main || warn "git config init.defaultBranch failed"
+    git config --global push.autoSetupRemote true || warn "git config push.autoSetupRemote failed"
+    git config --global pull.ff only || warn "git config pull.ff failed"
+    git config --global fetch.prune true || warn "git config fetch.prune failed"
+    git config --global rerere.enabled true || warn "git config rerere.enabled failed"
+    info "Global git settings applied."
+}
+
+# Apply a standard developer set of macOS system preferences
+configure_macos_defaults() {
+    if [[ "$(uname)" != "Darwin" ]]; then
+        info "Not macOS. Skipping system defaults."
+        return 0
+    fi
+
+    step "Applying macOS system defaults..."
+
+    # Absorb any single-key failure (e.g. an unsupported key on a different macOS
+    # version) so it never escapes to `set -e` and fires the EXIT-trap rollback.
+    local d="defaults write"
+    {
+        # Keyboard: fastest key repeat + disable press-and-hold accent popup
+        $d NSGlobalDomain KeyRepeat -int 2
+        $d NSGlobalDomain InitialKeyRepeat -int 15
+        $d NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+        # Trackpad: disable natural scroll direction
+        $d NSGlobalDomain com.apple.swipescrolldirection -bool false
+
+        # Dock: auto-hide instantly, no recents
+        $d com.apple.dock autohide -bool true
+        $d com.apple.dock autohide-delay -float 0
+        $d com.apple.dock autohide-time-modifier -float 0
+        $d com.apple.dock show-recents -bool false
+
+        # Screenshots: save to ~/Screenshots as shadowless PNGs
+        mkdir -p "$HOME/Screenshots"
+        $d com.apple.screencapture location -string "$HOME/Screenshots"
+        $d com.apple.screencapture disable-shadow -bool true
+        $d com.apple.screencapture type -string "png"
+
+        # Finder: show extensions, hidden files, path/status bars, list view, POSIX path
+        $d NSGlobalDomain AppleShowAllExtensions -bool true
+        $d com.apple.finder AppleShowAllFiles -bool true
+        $d com.apple.finder ShowPathbar -bool true
+        $d com.apple.finder ShowStatusBar -bool true
+        $d com.apple.finder FXPreferredViewStyle -string "Nlsv"
+        $d com.apple.finder _FXShowPosixPathInTitle -bool true
+        $d com.apple.finder FXEnableExtensionChangeWarning -bool false
+
+        # Misc: no .DS_Store on network volumes, always show scrollbars
+        $d com.apple.desktopservices DSDontWriteNetworkStores -bool true
+        $d NSGlobalDomain AppleShowScrollBars -string "Always"
+    } || warn "Some macOS defaults could not be applied (continuing)."
+
+    # Restart affected apps so changes take effect immediately
+    killall Dock Finder SystemUIServer &>/dev/null || true
+
+    info "macOS system defaults applied."
+}
+
 echo "======================================"
 echo "  Dotfiles Setup"
 echo "  Source: $DOTFILES_DIR"
@@ -164,6 +316,12 @@ echo ""
 
 # Run pre-flight checks
 preflight_check
+
+# Install phase: Homebrew + every package in the Brewfile (goku, asdf, etc.)
+install_homebrew
+brew_bundle
+
+echo ""
 
 # Root dotfiles
 step "Setting up root dotfiles..."
@@ -226,6 +384,14 @@ verify_setup
 
 echo ""
 
+# Post-symlink provisioning (needs symlinked configs + installed tools)
+install_asdf_tools
+generate_karabiner
+configure_git
+configure_macos_defaults
+
+echo ""
+
 # Post-install: AI tool setup
 step "Setting up AI tools..."
 
@@ -253,7 +419,10 @@ echo ""
 echo "Notes:"
 echo "  - Backup files created with .bak extension (timestamped if exists)"
 echo "  - Local secrets stay in ~/.zsh/secrets.zsh (not symlinked)"
-echo "  - Run 'goku' to generate Karabiner config from .edn"
+echo "  - Packages installed from .homebrew/Brewfile via 'brew bundle'"
+echo "  - Runtimes installed from .tool-versions via 'asdf install'"
+echo "  - Karabiner config generated from .edn via 'goku'"
+echo "  - macOS system defaults applied (some need a logout/restart)"
 echo "  - RTK: Restart Claude Code for hook to take effect"
 echo "  - agent-browser: Run 'agent-browser install' if Chromium was not installed"
 echo ""
