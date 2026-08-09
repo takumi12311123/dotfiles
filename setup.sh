@@ -54,7 +54,8 @@ preflight_check() {
     step "Running pre-flight checks..."
     local failed=0
 
-    # Check for required commands
+    # Check for required commands (list kept as a loop for easy extension)
+    # shellcheck disable=SC2043
     for cmd in git; do
         if ! command -v "$cmd" &>/dev/null; then
             error "Required command not found: $cmd"
@@ -429,6 +430,7 @@ echo ""
 
 # Check if secrets.zsh exists
 if [ ! -f "$HOME/.zsh/secrets.zsh" ]; then
+    # shellcheck disable=SC2088  # literal path shown to the user, not expanded
     warn "~/.zsh/secrets.zsh not found."
     if [ -f "$DOTFILES_DIR/.zsh/secrets.zsh.template" ]; then
         echo "  Run: cp $DOTFILES_DIR/.zsh/secrets.zsh.template ~/.zsh/secrets.zsh"
