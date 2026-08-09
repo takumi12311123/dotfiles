@@ -11,7 +11,7 @@ for file in "${ZSH_DIR}"/*.zsh; do
 done
 
 # Added by Windsurf
-export PATH="/Users/takumiakasaka/.codeium/windsurf/bin:$PATH"
+export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
 

@@ -1,0 +1,26 @@
+name: ShellCheck
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck on bash scripts
+        shell: bash
+        run: |
+          # Lint only bash scripts. zsh is unsupported by shellcheck, so the
+          # sourced .zsh fragments, .zshrc/.zprofile, review-pr.sh (#!/bin/zsh)
+          # and the shebang-less ide.sh are intentionally excluded by matching
+          # on a bash shebang.
+          mapfile -t files < <(grep -rlE '^#!.*\bbash\b' --include='*.sh' . | sort)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No bash scripts found."; exit 0
+          fi
+          printf 'Linting:\n'; printf '  %s\n' "${files[@]}"
+          shellcheck --severity=warning "${files[@]}"
