@@ -22,7 +22,7 @@ autoload -Uz compinit
 compinit -i -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION-$HOST"
 
 ## docker desktop
-[ -f /Users/takumiakasaka/.docker/init-zsh.sh ] && source /Users/takumiakasaka/.docker/init-zsh.sh
+[ -f "$HOME/.docker/init-zsh.sh" ] && source "$HOME/.docker/init-zsh.sh"
 
 ## starship
 eval "$(starship init zsh)"
