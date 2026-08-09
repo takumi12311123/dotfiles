@@ -11,13 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@2.0.0
-        env:
-          SHELLCHECK_OPTS: -e SC1090 -e SC1091
-        with:
-          severity: warning
-          # zsh scripts are not supported by ShellCheck:
-          #   review-pr.sh -> #!/bin/zsh
-          #   ide.sh       -> sourced zsh helper (no shebang)
-          ignore_names: review-pr.sh ide.sh
+      - name: Run ShellCheck on bash scripts
+        shell: bash
+        run: |
+          # Lint only bash scripts. zsh is unsupported by shellcheck, so the
+          # sourced .zsh fragments, .zshrc/.zprofile, review-pr.sh (#!/bin/zsh)
+          # and the shebang-less ide.sh are intentionally excluded by matching
+          # on a bash shebang.
+          mapfile -t files < <(grep -rlE '^#!.*\bbash\b' --include='*.sh' . | sort)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No bash scripts found."; exit 0
+          fi
+          printf 'Linting:\n'; printf '  %s\n' "${files[@]}"
+          shellcheck --severity=warning "${files[@]}"
