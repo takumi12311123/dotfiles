@@ -203,6 +203,38 @@ brew_bundle() {
     brew bundle --file="$brewfile" || warn "brew bundle reported failures (continuing)."
 }
 
+# Keep Homebrew up to date automatically via the official autoupdate tap
+enable_brew_autoupdate() {
+    step "Enabling brew autoupdate..."
+    if ! command -v brew &>/dev/null; then
+        warn "brew not available. Skipping autoupdate."
+        return 0
+    fi
+
+    brew tap domt4/autoupdate &>/dev/null || warn "Could not tap domt4/autoupdate."
+    # Homebrew 6+ refuses to run commands from third-party taps until trusted.
+    brew trust domt4/autoupdate &>/dev/null || warn "Could not trust domt4/autoupdate tap."
+
+    # Idempotent: the tool writes this LaunchAgent plist when configured, so its
+    # presence means a schedule already exists — leave it as-is.
+    local plist="$HOME/Library/LaunchAgents/com.github.domt4.homebrew-autoupdate.plist"
+    if [ -f "$plist" ]; then
+        info "brew autoupdate already configured."
+        return 0
+    fi
+
+    # --ac-only avoids draining the battery; --notify-on-error surfaces failures
+    # only. `--cleanup` is intentionally omitted so old versions stay in the
+    # Cellar and a bad upgrade can be rolled back with `brew unlink`/`brew link`.
+    # Pinned formulae (brew pin) are never upgraded — use those to freeze
+    # anything you don't want bumped automatically.
+    if brew autoupdate start --upgrade --ac-only --notify-on-error; then
+        info "brew autoupdate started (24h interval, AC power only)."
+    else
+        warn "brew autoupdate failed to start (continuing)."
+    fi
+}
+
 # Install language runtimes declared in .tool-versions via asdf
 install_asdf_tools() {
     step "Installing runtimes from .tool-versions..."
@@ -321,6 +353,7 @@ preflight_check
 # Install phase: Homebrew + every package in the Brewfile (goku, asdf, etc.)
 install_homebrew
 brew_bundle
+enable_brew_autoupdate
 
 echo ""
 
