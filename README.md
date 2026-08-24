@@ -198,6 +198,43 @@ vim ~/.zsh/secrets.zsh
 goku
 ```
 
+## Homebrew 自動アップデート
+
+Homebrew 公式タップ [`brew autoupdate`](https://github.com/DomT4/homebrew-autoupdate)
+で定期自動更新します（launchd で background 実行）。`setup.sh` の実行時に自動で
+有効化されます。
+
+```bash
+# setup.sh が内部で実行する内容（手動で実行する場合）
+brew tap domt4/autoupdate
+brew trust domt4/autoupdate   # Homebrew 6+ はサードパーティ tap に trust が必要
+brew autoupdate start --upgrade --ac-only --notify-on-error
+
+# 状態確認 / ログ / 停止
+brew autoupdate status
+brew autoupdate logs
+brew autoupdate stop
+```
+
+- `--upgrade`: formula/cask を実際にアップグレード（付けないと `brew update` の
+  メタデータ更新のみ）
+- `--ac-only`: 電源接続時のみ実行（バッテリー消費を避ける）
+- `--notify-on-error`: 失敗時のみ通知
+- `--cleanup` は**あえて付けていない**（旧バージョンを Cellar に残し、壊れた時に
+  `brew unlink`/`brew link` で戻せるようにするため）。ディスクを掃除したい場合のみ
+  `brew autoupdate start --upgrade --cleanup ...` で付け直す。
+
+### 特定 formula を自動更新から除外したい場合
+
+`brew autoupdate` に除外リストは無いため、凍結したいものは `brew pin` します
+（`brew autoupdate --upgrade` は pin された formula を上げません）。
+
+```bash
+brew pin asdf openjdk   # 例: 勝手に上げたくないツールを凍結
+brew unpin asdf         # 解除
+brew list --pinned      # 現在の凍結一覧
+```
+
 ## トラブルシューティング
 
 ### setup.shが失敗する
