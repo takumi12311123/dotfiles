@@ -63,7 +63,7 @@ chmod 600 ~/.zsh/secrets.zsh
 
 ```
 .
-├── .claude/          # Claude Code設定（skills, commands, plugins）
+├── .claude/          # Claude Code設定（skills, commands, rules, plugins）
 ├── .codex/           # Codex CLI設定
 ├── .config/          # アプリケーション設定
 │   ├── alacritty/    # ターミナルエミュレータ
