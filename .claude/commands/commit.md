@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git diff:*), Bash(git log:*)
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git diff:*), Bash(git log:*), Bash(git ls-files:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(mkdir:*), Bash(cat:*), Bash(rm:*), Bash(touch:*), Bash(printf:*), Bash(echo:*), Bash(grep:*), Bash(awk:*), Bash(sed:*), Bash(jq:*), Bash(dirname:*), Bash(ls:*), Read, Write, Edit, Skill
 description: Create a git commit with proper message formatting
 argument-hint: [message] (optional - if not provided, will analyze changes and suggest)
 ---
@@ -43,16 +43,26 @@ Group changes by these criteria (in priority order):
 
 For each logical group:
 
-```bash
-# 1. Stage specific files for this group
-git add path/to/file1 path/to/file2
-
-# 2. Commit with appropriate message
-git commit -m "$(cat <<'EOF'
-<type>: <subject>
-EOF
-)"
-```
+1. Stage specific files for this group:
+   ```bash
+   git add path/to/file1 path/to/file2
+   ```
+2. Write the draft message — **never `git commit -m` inline**, it bypasses the gate:
+   ```bash
+   mkdir -p .claude/pr-review
+   cat > .claude/pr-review/commit-msg-draft.txt <<'EOF'
+   <type>: <subject>
+   EOF
+   ```
+3. Run the mandatory gate (see Context Hygiene below) and fix whatever it flags:
+   ```
+   Skill(skill="context-hygiene", args="--trigger=commit")
+   ```
+4. Commit from the audited file:
+   ```bash
+   git commit -F .claude/pr-review/commit-msg-draft.txt
+   rm -f .claude/pr-review/commit-msg-draft.txt
+   ```
 
 **Order commits logically:**
 - Infrastructure/config changes first
@@ -60,23 +70,54 @@ EOF
 - Implementation before documentation
 - Base features before features that depend on them
 
-### Commit Message Format
+### Context Hygiene (BLOCKING, before every commit)
 
-**Always use HEREDOC format** for consistency with PR workflow:
+The code and the message are read by people who were not in this session. For **each** commit,
+write the draft message to a file first, then run the gate, then commit from that file:
 
 ```bash
-git commit -m "$(cat <<'EOF'
+mkdir -p .claude/pr-review
+cat > .claude/pr-review/commit-msg-draft.txt <<'MSG'
+{draft subject}
+
+{draft body}
+MSG
+```
+
+```
+Skill(skill="context-hygiene", args="--trigger=commit")
+```
+
+It audits the **working tree** (staged + unstaged + untracked — the commit does not exist yet) and
+the **draft message file**, rewriting what fails. Criteria: `.claude/rules/comment-policy.md`.
+
+Then commit from the audited file (do NOT re-type the message inline — that bypasses the gate):
+
+```bash
+git commit -F .claude/pr-review/commit-msg-draft.txt
+rm -f .claude/pr-review/commit-msg-draft.txt
+```
+
+Explanations that belong to the reviewer rather than to a future maintainer are moved out of the
+code into `.claude/pr-review/prr-draft-<branch>.md` for posting via `prr` — never auto-posted.
+
+### Commit Message Format
+
+**Always write the message to the draft file** (`git commit -m` inline bypasses the
+context-hygiene gate and is not allowed):
+
+```bash
+cat > .claude/pr-review/commit-msg-draft.txt <<'EOF'
 <type>: <subject>
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
-)"
 ```
 
 **Multi-line format (when detailed explanation needed):**
 
 ```bash
-git commit -m "$(cat <<'EOF'
+cat > .claude/pr-review/commit-msg-draft.txt <<'EOF'
 <type>: <subject>
 
 Detailed explanation of changes and reasoning.
@@ -84,8 +125,9 @@ Additional context or breaking changes if applicable.
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
-)"
 ```
+
+Then run the gate and `git commit -F .claude/pr-review/commit-msg-draft.txt`.
 
 ### Commit Types
 

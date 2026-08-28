@@ -397,8 +397,14 @@ Light digest の場合は Section 3-6 を **「full digest 時に生成」** の
 
 ### `--comment` オプション (reviewer mode のみ)
 
-`pr-comprehend <PR番号> --comment` の場合、Section 1 (仕様サマリ) と Section 4 (AI特有リスク) を
-`gh pr comment <PR番号> --body-file <抜粋>` で GitHub PR に投稿。
+`pr-comprehend <PR番号> --comment` は **Section 1 (仕様サマリ) のみ** を
+`gh pr comment <PR番号> --body-file <抜粋>` で投稿する。
+
+**Section 4 (AI 特有リスク) を含む「指摘」は投稿しない。**
+未裁定のモデル指摘を PR に出すのは、レビューフローの裁定フェーズ (`model-consensus`) を
+迂回することになるため（`.claude/rules/flow-gates.md` の Phase 5-6）。
+リスクや疑わしい点を PR に出したい場合は `/review-flow` を通し、
+`model-consensus` の裁定を経てから `prr` で出す。
 
 **投稿前に必ずユーザー確認**。自動投稿はしない (blast radius 大)。
 
