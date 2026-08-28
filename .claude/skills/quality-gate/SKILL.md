@@ -37,6 +37,8 @@ Ensure code quality through automated checks before any user-facing action.
 │  2.5. Design Sanity Check (Necessity Audit)         │
 │     → Compare against main: extra lines / defensive │
 │       code / self-patch (throw+catch own throw)     │
+│     → Reuse audit: did this diff reimplement code   │
+│       that already exists in the repo?              │
 │     → Surface concerns for the reviewer to evaluate │
 └─────────────────────────────────────────────────────┘
                         ↓
@@ -217,11 +219,15 @@ Format, build, and test checks typically need full runs:
 6. Skip unavailable commands gracefully (no error)
 7. If no checks found, proceed to codex-review
 
-## Step 2.5: Design Sanity Check (Necessity Audit)
+## Step 2.5: Design Sanity Check (Necessity + Reuse Audit)
 
 **The single most common quality failure: locally-optimal but globally-wasteful defensive code.**
 Reviewers (including LLM reviewers) tend to optimize *the diff you handed them* rather than ask
 "is this diff necessary at all?" — so we inject that question explicitly.
+
+**The second: new code that duplicates something the repo already has.** A plan-time reuse survey
+exists (`spec-agree` Step 2 / Gate A), but implementation drifts. This step re-checks the *actual*
+diff, not the plan.
 
 Run BEFORE dispatching review subagents.
 
@@ -250,6 +256,61 @@ Run BEFORE dispatching review subagents.
 5. **Coarse heuristic**: If a single function gained **5+ defensive lines vs main**, escalate it
    to the reviewer with explicit "justify each defensive line" instruction.
 
+### Reuse scan (mandatory, runs alongside the above)
+
+Find what this diff **newly introduces**, then check whether the repo already had it.
+
+```bash
+# 1. Files added by this diff (awk, not `grep '^A'` — grep exits 1 when there are none)
+git diff --name-status "$BASE"..HEAD | awk '$1=="A" {print $2}'
+
+# 2. New dependencies
+# Any added manifest line, not only dependency additions — read the output, don't trust the count
+git diff "$BASE"..HEAD -- package.json go.mod Cargo.toml pyproject.toml requirements.txt \
+  | grep -E '^\+' | grep -v '^+++' || true   # no dependency change is a normal result
+```
+
+**Symbol extraction — use the accurate path first.** For each file added or heavily modified,
+get its declared symbols via `serena` (`get_symbols_overview`), or the language's own tooling.
+Then `find_referencing_symbols` on each new symbol: **zero references outside its own file
+is a signal it duplicates something already reachable elsewhere.**
+
+Only when no symbol tooling is available, fall back to this **coarse heuristic** — it is
+line-based and misses methods, `interface`/`enum`/`struct`, renames, and nested helpers,
+so a clean result here is **not** evidence of no duplication:
+
+```bash
+git diff "$BASE"..HEAD | grep -E '^\+.*(func |function |class |const |def |type )' | head -40
+```
+
+For each new symbol name and its core keywords, search the repo excluding the new file.
+Use `-F` so names containing `.` `+` `[` are matched literally, and exclude by **exact path**
+(a substring filter would also drop `foo.tsx` while excluding `foo.ts`):
+
+```bash
+NEW_FILE='path/to/new_file.ts'
+grep -rnF -- '<symbol-or-keyword>' --include='*.<ext>' . \
+  | awk -F: -v skip="./$NEW_FILE" '$1 != skip' | head -20
+```
+
+Escalate to the reviewer when any of these hold:
+
+| Signal | Question to raise |
+|--------|-------------------|
+| A new file was added | Could this have lived in an existing file? Which one, and why not? |
+| A new helper matches an existing symbol's name or purpose | Why not call the existing one? |
+| A new dependency was added | Does an already-installed dependency cover this? |
+| A new pattern appears that no other file in the repo uses | Why diverge from the codebase's shape? |
+| The diff is large relative to the stated scope | Which parts are essential vs incidental? |
+
+If a spec exists for this branch, read its `## 既存資産の調査` section and **compare against the
+actual diff**. A row that said `再利用` but produced a fresh implementation is a BLOCKING mismatch —
+either the implementation drifted, or the survey was wrong. Report which.
+
+Resolve which spec applies via the procedure in `.claude/rules/flow-gates.md`
+(「共通: 成果物のキーと再入性」— the `current-task` cache must be re-validated, not trusted).
+No spec on this branch → skip this comparison; the reuse scan above still runs.
+
 ### What to inject into the review prompt
 
 When dispatching to `codex-review` / `gemini-review` in Step 3, the prompt MUST include:
@@ -269,6 +330,28 @@ If you find a self-patch or unjustified defense, classify as BLOCKING — not ad
 
 main-side baseline for context:
 <paste output of `git show <BASE>:<file>` for each touched file>
+```
+
+And, when the reuse scan raised any signal, append:
+
+```
+## Reuse audit (mandatory)
+
+This diff introduces the following new files / symbols / dependencies:
+<list from the reuse scan>
+
+For EACH one, answer:
+
+  1. Does the repo already contain something that does this? Name the file and symbol if so.
+  2. If a similar thing exists but was not reused, is the divergence justified — or is this
+     duplication that will now need to be maintained twice?
+  3. Could this new code live in an existing file instead of a new one? Which file?
+  4. Does this follow the shape of the surrounding codebase, or introduce a pattern nothing else uses?
+
+Repo-side search results for each new symbol (searched excluding this diff):
+<paste the grep output from the reuse scan>
+
+Duplication of existing behavior is BLOCKING, not advisory.
 ```
 
 This is the single most impactful change. It addresses the failure mode where reviewers say
@@ -578,7 +661,7 @@ surfaces is exactly the class that lint/type/unit cannot catch.
 ## Important
 
 - NEVER skip this gate
-- ALWAYS run Step 2.5 (necessity audit) and inject its findings into the review prompt
+- ALWAYS run Step 2.5 (necessity + reuse audit) and inject its findings into the review prompt
 - ALWAYS run Step 2.6 by invoking the `context-hygiene` skill — it strips session-dependent text from
   code comments, commit messages, and the PR description, and drafts the moved explanations for `prr`.
   This is BLOCKING. Judgment rules live in `.claude/rules/comment-policy.md`, not here
