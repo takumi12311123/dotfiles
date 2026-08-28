@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git:*), Bash(gh:*)
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(mkdir:*), Bash(cat:*), Bash(rm:*), Bash(touch:*), Bash(printf:*), Bash(echo:*), Bash(grep:*), Bash(awk:*), Bash(sed:*), Bash(jq:*), Bash(dirname:*), Bash(ls:*), Read, Write, Edit, Skill
 description: Push current branch and verify PR description ↔ diff consistency
 argument-hint: "(optional - no args; behavior is automatic)"
 ---
@@ -20,7 +20,7 @@ publish commits without touching PR creation logic.
 - Upstream: !`git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "no upstream"`
 - Status: !`git status --short`
 - Unpushed commits: !`git log @{u}..HEAD --oneline 2>/dev/null || git log -10 --oneline`
-- Existing PR: !`gh pr view --json number,title,body,baseRefName 2>/dev/null || echo "No PR exists"`
+- Existing PR: !`gh pr view --json number,title,body,baseRefName 2>&1 | head -20`  (エラー文が出た場合は Step 3 で PR 無し / 確認不能を切り分ける)
 
 ## Your Task
 
@@ -53,15 +53,24 @@ Surface the resulting `remote → branch` line for the user.
 
 ### Step 3: PR existence check
 
+Distinguish "no PR" from "could not check" — collapsing them hides an unaudited PR.
+
 ```bash
-PR_JSON=$(gh pr view --json number,title,body,baseRefName 2>/dev/null || true)
+PR_JSON=$(gh pr view --json number,title,body,baseRefName 2>"${TMPDIR:-/tmp}/gh-err.txt")
+GH_STATUS=$?
 ```
 
-If empty: no PR yet. Tell the user:
+| 結果 | 扱い |
+|------|------|
+| `GH_STATUS = 0` | PR あり → Step 4 へ |
+| `GH_STATUS ≠ 0` かつ stderr が "no pull requests found" 相当 | PR 無し（正常） |
+| `GH_STATUS ≠ 0` かつそれ以外（auth / network / 非 GitHub remote） | **確認不能** |
 
-> "Push complete. No PR attached yet — run `/pr` to create one."
+- PR 無し: `"Push complete. No PR attached yet — run /pr to create one."` と伝えて終了
+- **確認不能**: ✅ を出さない。次を伝えて終了する:
 
-Then exit (skip Steps 4-5).
+  > "Push は完了しましたが、PR の状態を確認できませんでした（`gh auth status` を確認してください）。
+  > PR title / description の context hygiene 監査は **未実施** です。"
 
 ### Step 4: Consistency audit (PR description ↔ diff)
 
@@ -94,12 +103,29 @@ Compute two sets:
 
 Show both. The first is usually more important (it implies the description is *wrong*).
 
+### Step 4.5: Context hygiene audit (PR title / description)
+
+File-level consistency is not enough — the title and description must also be readable by someone
+who was never in the authoring session. Run:
+
+```
+Skill(skill="context-hygiene", args="--trigger=push")
+```
+
+**The criteria live in `.claude/rules/comment-policy.md`** — do not restate them here. The skill
+audits the existing PR title/body plus any added code comments, and drafts reviewer-facing context
+into `.claude/pr-review/prr-draft-<branch>.md` for posting via `prr`.
+
+**Never auto-post and never auto-edit** — fold the proposed fixes into the Step 5 confirmation.
+If `gh` is unreachable, the skill reports the PR surfaces as 未実施; report that to the user rather
+than printing ✅.
+
 ### Step 5: Offer to update
 
-If discrepancies are found, present them clearly and ask:
+If discrepancies are found (Step 4) or the hygiene gate proposed fixes (Step 4.5), present them
+clearly and ask:
 
-> "PR description appears out of sync. Want me to draft an updated body and run
-> `gh pr edit $PR_NUMBER --body ...`?"
+> "PR の description / title を更新しますか？（差分との不一致 + context hygiene の修正案）"
 
 **Do not auto-edit**. The user must confirm. When confirmed:
 
@@ -107,8 +133,23 @@ If discrepancies are found, present them clearly and ask:
    - Preserves the original structure (PR template sections, headings, language)
    - Removes mentions of files no longer in the diff
    - Adds mentions for files in the diff but missing from the description
-   - Keeps any unrelated narrative (rationale, screenshots, test notes)
-2. Apply with `gh pr edit $PR_NUMBER --body "$(cat <<'EOF' ... EOF)"`.
+   - Keeps rationale / screenshots / test notes — but **rewrites session-dependent phrasing**
+     into context-free form per Step 4.5 (「ご要望どおり対応」→ 実際に何をなぜ変えたか)
+2. Apply body **and title** — the gate may have rewritten the title too, so never apply body alone:
+
+   ```bash
+   printf '%s\n' "{audited title}" > .claude/pr-review/pr-title-draft.txt
+   cat > .claude/pr-review/pr-body-draft.md <<'BODY'
+   {audited body}
+   BODY
+
+   gh pr edit "$PR_NUMBER" \
+     --title "$(cat .claude/pr-review/pr-title-draft.txt)" \
+     --body-file .claude/pr-review/pr-body-draft.md
+   rm -f .claude/pr-review/pr-title-draft.txt .claude/pr-review/pr-body-draft.md
+   ```
+
+   Omit `--title` only when the title was already clean and unchanged.
 
 If everything matches: print a short ✅ and stop.
 
@@ -131,7 +172,11 @@ If everything matches: print a short ✅ and stop.
 - ⚠ Diff contains but description doesn't mention:
   - `src/lib/newHelper.ts`
 
-→ Update PR description? (yes/no)
+### Context hygiene
+- ❌ title: `fix: address review feedback` → `fix: handle expired refresh token`
+- ❌ body: 「ご要望どおり対応しました」→ 背景を PR 単体で読める内容に差し替え
+
+→ Update PR title / description? (yes/no)
 ```
 
 Or when clean:
