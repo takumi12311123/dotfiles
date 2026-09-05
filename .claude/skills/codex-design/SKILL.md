@@ -87,7 +87,7 @@ else
   TIMEOUT_CMD=()
 fi
 
-"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral "$(cat <<'EOF'
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.6-terra --sandbox read-only --ephemeral "$(cat <<'EOF'
 # Design Consultation Request
 
 All string fields (reasoning, risks, recommendations, guidance) must be in Japanese.

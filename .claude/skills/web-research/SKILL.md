@@ -95,7 +95,7 @@ if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
 elif command -v timeout >/dev/null 2>&1; then TIMEOUT_CMD=(timeout 300)
 else TIMEOUT_CMD=(); fi
 
-"${TIMEOUT_CMD[@]}" gemini -m gemini-3-pro-preview -o json \
+"${TIMEOUT_CMD[@]}" gemini -m gemini-3.1-pro-preview --skip-trust -o json \
   -p "$(cat <<PROMPT
 # Web Research: Primary Investigation
 
@@ -215,7 +215,7 @@ fi
 # `< /dev/null` and `--ephemeral` are mandatory:
 # - codex exec probes stdin even when prompt is passed as arg → would hang on inherited pipes
 # - --ephemeral avoids ~/.codex/history.jsonl contention with parallel codex invocations
-"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.6-terra --sandbox read-only --ephemeral \
   --output-schema "$ROOT/.claude/skills/web-research/verification-schema.json" \
   -o "$CODEX_OUT" \
   "$(cat <<PROMPT

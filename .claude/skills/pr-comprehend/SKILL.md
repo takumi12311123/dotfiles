@@ -226,7 +226,7 @@ else
   TIMEOUT_CMD=()
 fi
 
-"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.4 --sandbox read-only --ephemeral \
+"${TIMEOUT_CMD[@]}" codex exec --model gpt-5.6-terra --sandbox read-only --ephemeral \
   --output-schema "$SCHEMA_PATH" \
   -o "$DIGEST_OUT" \
   "$(cat prompts/codex-ai-risk.md)
