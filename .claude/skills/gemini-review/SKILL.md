@@ -67,7 +67,7 @@ else
   TIMEOUT_CMD=()
 fi
 
-"${TIMEOUT_CMD[@]}" gemini -m gemini-3-pro-preview -o json \
+"${TIMEOUT_CMD[@]}" gemini -m gemini-3.1-pro-preview --skip-trust -o json \
   -p "$(cat <<EOF
 # Code Review Request
 

@@ -1,7 +1,7 @@
 {
   "security": {
     "auth": {
-      "selectedType": "oauth-personal"
+      "selectedType": "gemini-api-key"
     }
   },
   "general": {
@@ -36,7 +36,7 @@
     "customOverrides": [
       {
         "match": {
-          "model": "gemini-3-pro-preview"
+          "model": "gemini-3.1-pro-preview"
         },
         "modelConfig": {
           "generateContentConfig": {

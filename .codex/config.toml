@@ -5,7 +5,7 @@ plan_mode_reasoning_effort = "high"
 hide_agent_reasoning = true
 network_access = true
 personality = "pragmatic"
-model = "gpt-5.4"
+model = "gpt-5.6-terra"
 
 # Project root detection and document auto-loading
 project_root_markers = [".git", ".hg"]
