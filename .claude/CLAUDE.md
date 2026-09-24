@@ -23,6 +23,7 @@
 | pr-comprehend | Auto via quality-gate on commit (light) / PR (full) | 仕様/影響範囲/AI特有リスク digest を .claude/pr-review/ に保存 |
 | context-hygiene | Auto via quality-gate / `/commit` / `/pr` / `/push` | セッション文脈依存テキストの排除 (コードコメント / commit message / PR description) + prr 移送下書き。基準は `.claude/rules/comment-policy.md` |
 | latest-docs | Before implementation | Verify latest documentation |
+| error-diagnosis | 手動依頼 / 原因不明のエラー遭遇時 | logging とコードから原因を確定 (確定と仮説を区別)。不足情報は目的 + 取得コマンド例つきでユーザーへ依頼 |
 | backend-go | Go implementation | Go backend best practices |
 | frontend-design | Figma implementation | Figma to code implementation |
 | infra-terraform | Terraform implementation | Terraform best practices |
