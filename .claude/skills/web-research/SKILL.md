@@ -1,18 +1,18 @@
 ---
 name: web-research
 description: |
-  Delegated web research: Gemini does primary search, Codex cross-verifies.
+  Delegated web research: agy does primary search, Codex cross-verifies.
   Claude Code only merges and presents results (zero context window consumption).
 metadata:
   context: research, documentation, library, api, investigation
   auto-trigger: false
 ---
 
-# Web Research (Gemini + Codex)
+# Web Research (agy + Codex)
 
 ## Purpose
 
-**Dual-source research**: Gemini does primary investigation (web search), Codex cross-verifies.
+**Dual-source research**: agy does primary investigation (web search), Codex cross-verifies.
 Claude Code only merges and presents results — zero context window consumption.
 
 ## When to Use
@@ -26,7 +26,7 @@ Claude Code only merges and presents results — zero context window consumption
 
 ## Research Result Schema
 
-Gemini and Codex return results in the same JSON schema.
+agy and Codex return results in the same JSON schema.
 
 ### Field Definitions
 
@@ -79,29 +79,22 @@ Gemini and Codex return results in the same JSON schema.
 
 ## Execution Flow
 
-### Step 1: Gemini Primary Research (Background)
+### Step 1: agy Primary Research (Background)
 
-Execute primary investigation via Gemini CLI web search.
+Execute primary investigation via Antigravity CLI (`agy`) web search.
 **Claude Code must NOT use WebSearch/WebFetch.**
 
-Launch as background Agent task with Bash:
+Launch as background Agent task with Bash (one command; the script runs agy in an empty
+temp directory and applies agy's own `--print-timeout`):
 
 ```bash
-GEMINI_OUT=$(mktemp "${TMPDIR:-/tmp}/gemini-research.XXXXXX")
-FALLBACK='{"verification_status":"error","freshness":"uncertain","freshness_detail":"Gemini research failed","confirmed_facts":[],"contradictions":[],"missing_info":[],"additional_findings":[],"recommended_sources":[]}'
-
-# macOS-compatible timeout (array for zsh compatibility)
-if command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout 300)
-elif command -v timeout >/dev/null 2>&1; then TIMEOUT_CMD=(timeout 300)
-else TIMEOUT_CMD=(); fi
-
-"${TIMEOUT_CMD[@]}" gemini -m gemini-3.1-pro-preview --skip-trust -o json \
-  -p "$(cat <<PROMPT
+~/.claude/skills/agy-review/scripts/agy-exec.sh --timeout 300s \
+  --schema ~/.claude/skills/web-research/verification-schema.json \
+  --prompt "$(cat <<'PROMPT'
 # Web Research: Primary Investigation
 
 All output must be in Japanese.
 
-Important: You are running as Gemini CLI. Web search is enabled by default.
 You MUST perform independent web searches to get the latest information.
 
 ## Research Topic
@@ -116,82 +109,23 @@ You MUST perform independent web searches to get the latest information.
    - Best practices/recommended patterns
    - Deprecated features/breaking changes
 3. Note the freshness of information (when it was published)
-
-Output exactly in the following JSON format (no code blocks, JSON only).
-
-## Example Output
-{
-  "verification_status": "confirmed",
-  "freshness": "current",
-  "freshness_detail": "Matches latest information as of March 2026",
-  "confirmed_facts": ["Fact 1", "Fact 2"],
-  "contradictions": [],
-  "missing_info": [],
-  "additional_findings": ["Additional info from web search"],
-  "recommended_sources": ["https://example.com/docs"]
-}
+4. Put the URLs you relied on in recommended_sources
 PROMPT
-)" > "$GEMINI_OUT" 2>/dev/null
-
-EXIT_CODE=$?
-
-if [ $EXIT_CODE -ne 0 ] || [ ! -s "$GEMINI_OUT" ]; then
-  echo "$FALLBACK"
-  rm -f "$GEMINI_OUT"
-  exit 0
-fi
-
-# Parse Gemini JSON output
-# Gemini CLI -o json returns: {"session_id": ..., "response": "<json-string>", "stats": ...}
-PARSED=$(python3 -c "
-import json, sys, re
-
-FALLBACK = '{\"verification_status\":\"error\",\"freshness\":\"uncertain\",\"freshness_detail\":\"Failed to parse Gemini output\",\"confirmed_facts\":[],\"contradictions\":[],\"missing_info\":[],\"additional_findings\":[],\"recommended_sources\":[]}'
-
-try:
-    data = json.load(open('$GEMINI_OUT'))
-except Exception:
-    print(FALLBACK); sys.exit(0)
-
-def extract_json(text):
-    match = re.search(r'\x60\x60\x60json?\s*(\{.*?\})\s*\x60\x60\x60', text, re.DOTALL)
-    if match:
-        return json.loads(match.group(1))
-    return json.loads(text.strip())
-
-try:
-    if isinstance(data, dict) and 'response' in data:
-        resp = data['response']
-        parsed = extract_json(resp) if isinstance(resp, str) else resp
-        assert 'verification_status' in parsed
-        print(json.dumps(parsed))
-    elif isinstance(data, dict) and 'verification_status' in data:
-        print(json.dumps(data))
-    elif isinstance(data, list):
-        for item in reversed(data):
-            try:
-                text = item['response']['candidates'][0]['content']['parts'][0]['text']
-                parsed = extract_json(text)
-                assert 'verification_status' in parsed
-                print(json.dumps(parsed)); break
-            except: continue
-        else:
-            print(FALLBACK)
-    else:
-        print(FALLBACK)
-except Exception:
-    print(FALLBACK)
-" 2>/dev/null) || PARSED="$FALLBACK"
-
-echo "$PARSED"
-rm -f "$GEMINI_OUT"
+)"
 ```
+
+The command prints one envelope line: `{"status": ..., "detail": ..., "result": ...}`.
+
+- `status: "completed"` → `result` is the research JSON (Research Result Schema above)
+- any other status (`timeout` / `quota` / `error`) → agy did not research. Use the Error Fallback
+  JSON as agy's result for Step 3 and tell the user "agy research unavailable (<status>: <detail>)".
+  Do not present the fallback as a research result
 
 ### Step 2: Codex Cross-Verification (Background)
 
-Receives Gemini's results and independently verifies.
-**Runs in parallel with Step 1. If Gemini returns first, pass its results to Codex.**
-**If Gemini hasn't returned yet, have Codex investigate independently with topic only.**
+Receives agy's results and independently verifies.
+**Runs in parallel with Step 1. If agy returns first, pass its results to Codex.**
+**If agy hasn't returned yet, have Codex investigate independently with topic only.**
 
 Launch as background Agent task with Bash:
 
@@ -226,13 +160,13 @@ All output must be in Japanese.
 ## Research Topic
 [Insert user's research query here]
 
-## Gemini's Research Results (if available)
-[Insert Gemini results here. If not yet returned: "Gemini results unavailable - investigate independently"]
+## agy's Research Results (if available)
+[Insert agy results here. If not yet returned: "agy results unavailable - investigate independently"]
 
 ## Your Task
 
 1. Independently verify the above topic using your own knowledge
-2. If Gemini results are available, verify their accuracy
+2. If agy results are available, verify their accuracy
 3. Check from the following perspectives:
    - Is the information current? (Any outdated or deprecated content?)
    - Are the facts accurate?
@@ -257,7 +191,7 @@ rm -f "$CODEX_OUT"
 
 ### Step 3: Merge & Analyze Results
 
-Merge Gemini/Codex results and determine confidence level.
+Merge agy/Codex results and determine confidence level.
 **Claude Code receives results here for the first time (summary only).**
 
 ```python
@@ -318,16 +252,16 @@ def normalize_result(result):
     return normalized
 
 
-def merge_research(gemini_result, codex_result):
-    """Merge Gemini (primary) and Codex (verification) results, determine confidence."""
-    gemini = normalize_result(gemini_result)
+def merge_research(agy_result, codex_result):
+    """Merge agy (primary) and Codex (verification) results, determine confidence."""
+    agy = normalize_result(agy_result)
     codex = normalize_result(codex_result)
 
-    sources_available = sum(1 for r in [gemini, codex]
+    sources_available = sum(1 for r in [agy, codex]
                            if r["verification_status"] != "error")
 
     freshness_votes = [
-        r["freshness"] for r in [gemini, codex]
+        r["freshness"] for r in [agy, codex]
         if r["verification_status"] != "error"
     ]
 
@@ -341,7 +275,7 @@ def merge_research(gemini_result, codex_result):
         freshness_assessment = "uncertain"
 
     all_contradictions = (
-        gemini.get("contradictions", []) +
+        agy.get("contradictions", []) +
         codex.get("contradictions", [])
     )
 
@@ -352,7 +286,7 @@ def merge_research(gemini_result, codex_result):
     elif all_contradictions:
         confidence = "low"
     elif all(r["verification_status"] == "confirmed"
-             for r in [gemini, codex]
+             for r in [agy, codex]
              if r["verification_status"] != "error"):
         confidence = "high"
     else:
@@ -363,7 +297,7 @@ def merge_research(gemini_result, codex_result):
         "sources_available": sources_available,
         "freshness_assessment": freshness_assessment,
         "contradictions": all_contradictions,
-        "gemini_detail": gemini.get("freshness_detail", ""),
+        "agy_detail": agy.get("freshness_detail", ""),
         "codex_detail": codex.get("freshness_detail", "")
     }
 ```
@@ -382,8 +316,8 @@ def merge_research(gemini_result, codex_result):
 - **Verification sources**: N/2
 - **Information freshness**: Current / Potentially outdated / Unknown
 
-### Primary Research Results (Gemini Web Search)
-[Gemini's primary research results]
+### Primary Research Results (agy Web Search)
+[agy's primary research results]
 
 ### Cross-check Results (Codex Verification)
 
@@ -391,21 +325,21 @@ def merge_research(gemini_result, codex_result):
 - [Facts both sources agree on]
 
 #### Additional Information
-- **Gemini additional**: [Information only Gemini found (web search based)]
+- **agy additional**: [Information only agy found (web search based)]
 - **Codex additional**: [Information only Codex noted]
 
 #### Contradictions (attention required)
-| Item | Gemini | Codex |
+| Item | agy | Codex |
 |------|--------|-------|
 | [Item] | [Claim] | [Claim] |
 
 #### Freshness Check
-- **Gemini assessment**: [Detail]
+- **agy assessment**: [Detail]
 - **Codex assessment**: [Detail]
 
 ### Recommended Documentation
-- [URL1] (source: Gemini/Codex)
-- [URL2] (source: Gemini/Codex)
+- [URL1] (source: agy/Codex)
+- [URL2] (source: agy/Codex)
 
 ### Notes
 - [Notes about contradictions if any]
@@ -416,10 +350,10 @@ def merge_research(gemini_result, codex_result):
 
 **All error cases return fallback JSON.**
 
-### Both Succeed (Gemini and Codex)
+### Both Succeed (agy and Codex)
 - Normal merge processing, confidence based on agreement level
 
-### One Succeeds (Gemini or Codex only)
+### One Succeeds (agy or Codex only)
 - Use successful source's results
 - Set confidence to "medium"
 - Note which source failed
@@ -431,15 +365,15 @@ def merge_research(gemini_result, codex_result):
 ## Integration with latest-docs
 
 When called from `latest-docs` skill:
-- Add version/deprecation keywords to Gemini search query
+- Add version/deprecation keywords to agy search query
 - Return results in `latest-docs` format
 
 ## Important Reminders
 
-1. **Claude Code must NOT use WebSearch/WebFetch** - Delegate everything to Gemini+Codex
-2. **Parallel execution**: Always run Gemini and Codex in background in parallel
-3. **Gemini = primary research**: Get latest information via web search
-4. **Codex = verification**: Verify Gemini's results with knowledge base
+1. **Claude Code must NOT use WebSearch/WebFetch** - Delegate everything to agy+Codex
+2. **Parallel execution**: Always run agy and Codex in background in parallel
+3. **agy = primary research**: Get latest information via web search
+4. **Codex = verification**: Verify agy's results with knowledge base
 5. **Don't hide contradictions**: Present all contradictions for user to judge
 6. **Fallback guarantee**: All error cases return valid JSON
 7. **Output in Japanese**: All user-facing text in Japanese

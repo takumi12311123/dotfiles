@@ -19,7 +19,7 @@
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + context-hygiene (BLOCKING) + codex-review + gemini-review (parallel) + pr-comprehend digest |
+| quality-gate | After Edit/Write, before commit/PR | Format/lint/build + context-hygiene (BLOCKING) + codex-review + agy-review (parallel) + pr-comprehend digest |
 | pr-comprehend | Auto via quality-gate on commit (light) / PR (full) | 仕様/影響範囲/AI特有リスク digest を .claude/pr-review/ に保存 |
 | context-hygiene | Auto via quality-gate / `/commit` / `/pr` / `/push` | セッション文脈依存テキストの排除 (コードコメント / commit message / PR description) + prr 移送下書き。基準は `.claude/rules/comment-policy.md` |
 | latest-docs | Before implementation | Verify latest documentation |
@@ -33,13 +33,13 @@
 | Skill | Description |
 |-------|-------------|
 | codex-review | Code review via Codex |
-| gemini-review | Code review via Gemini (parallel with codex-review) |
+| agy-review | Code review via agy (parallel with codex-review) |
 | pr-comprehend | 他人PRの digest (`pr-comprehend <PR番号>`) / ローカルブランチ振り返り (引数なし) |
-| web-research | 3者裏取りリサーチ (Claude + Codex + Gemini) |
+| web-research | 3者裏取りリサーチ (Claude + Codex + agy) |
 | test-generator | TDD: Generate tests before implementation |
 | security-scan | Security vulnerability scanning |
 | spec-agree | 依頼 → 開発案 → 合意済み仕様 (`.claude/specs/<branch>.md`)。実装前の Gate A |
-| model-consensus | Codex/Gemini の指摘を突合し、割れたら実コードで裁定。レビュー指摘を出す前に |
+| model-consensus | Codex/agy の指摘を突合し、割れたら実コードで裁定。レビュー指摘を出す前に |
 | codex-design | Design consultation for complex decisions |
 | date-check | Verify current date from system |
 
@@ -74,7 +74,7 @@
 | 1-2 | PR 受領 → 把握 | `pr-comprehend <PR番号>` | — |
 | 3 | 機械チェック | `gh pr checks` / ローカル実行 | **Gate C**: 実行結果が残っていること（モデルの指摘は Gate C ではない） |
 | 4 | 内部実装の読解支援 | `explain-impl <PR番号>`（`eli5` / `user-scenario` / `grill-me`） | **Gate B'**: `pr-head` 基準の理解確認記録 |
-| 5 | 指摘の裁定 | `codex-review` + `gemini-review` → `model-consensus` | **Gate D**: 全指摘に行き先が付く（UNRESOLVED はユーザーが決める） |
+| 5 | 指摘の裁定 | `codex-review` + `agy-review` → `model-consensus` | **Gate D**: 全指摘に行き先が付く（UNRESOLVED はユーザーが決める） |
 | 6 | 終端分岐 | `prr`（approve / comment / change request） | 投稿はユーザー |
 
 **ゲートを飛ばせるのはユーザーだけ。** 「軽微だから」と AI が判断して緩めるのは違反。

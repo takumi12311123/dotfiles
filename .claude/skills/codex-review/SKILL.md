@@ -44,7 +44,7 @@ git diff HEAD --name-status --find-renames
 > 2. **Wrap with a portable timeout.** macOS has no `timeout` by default — use the `TIMEOUT_CMD`
 >    array below, which falls back through `gtimeout` → `timeout` → `perl alarm` shim.
 > 3. **Pass `--ephemeral`** to avoid `~/.codex/history.jsonl` / session-file contention when
->    running in parallel with other codex invocations (quality-gate's codex+gemini fan-out).
+>    running in parallel with other codex invocations (quality-gate's codex+agy fan-out).
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)

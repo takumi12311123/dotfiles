@@ -89,7 +89,7 @@ Severity: `blocking` (this is the exact anti-pattern the codebase-wide YAGNI rul
 
 Beyond `ai_risks[]`, produce best-effort content for:
 
-- `summary`: If Gemini summary is available in context, echo/refine it. Otherwise, derive from diff.
+- `summary`: If agy summary is available in context, echo/refine it. Otherwise, derive from diff.
 - `blast_radius`: Callers you can identify, breaking changes, migration needs.
 - `risks`: General risk axes (security / performance / data_integrity / observability).
 - `review_checklist`: 7-15 items a human reviewer should verify, tailored to what the diff touches.

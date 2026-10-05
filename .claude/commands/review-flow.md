@@ -26,7 +26,7 @@ PR コメントに何を書くかは `.claude/rules/comment-policy.md` が単一
 2. 把握        pr-comprehend <PR番号> (reviewer mode)
 3. 機械チェック gh pr checks / ローカル実行        ── Gate C
 4. 読解支援    explain-impl <PR番号>               ── Gate B'
-5. 裁定        codex-review + gemini-review → model-consensus
+5. 裁定        codex-review + agy-review → model-consensus
 6. 終端分岐    prr で approve / comment / change request（投稿はユーザー）
 ```
 
@@ -87,7 +87,13 @@ Gate B' の成立条件は `.claude/rules/flow-gates.md`（`pr-head` 基準、�
 まず 2 モデルを PR diff に対して並列実行する（`quality-gate` と同じ並列要領）:
 
 ```
-codex-review / gemini-review（対象: gh pr diff <PR番号>）
+codex-review / agy-review（対象: gh pr diff <PR番号>）
+```
+
+agy-review は PR 番号を渡す（`gh` の実行と秘匿ファイルの除外はスクリプトが行う）:
+
+```bash
+~/.claude/skills/agy-review/scripts/agy-review.sh --pr <PR番号>
 ```
 
 続いて突合と裁定:
@@ -99,7 +105,7 @@ Skill(skill="model-consensus")
 `AGREED` / `ADJUDICATED: real` / `ADJUDICATED: false` / `UNRESOLVED` に分類される。
 裁定は多数決ではなく **実コードの根拠**（詳細は model-consensus の SKILL.md）。
 
-- Gemini が使えない場合は「Codex 単独」と明示する。合意していないものを合意と書かない
+- agy-review の封筒が `status: "completed"` でない場合は「Codex 単独（agy: <status>）」と明示する。合意していないものを合意と書かない
 - `UNRESOLVED` はユーザーに判断材料つきで提示する。**AI が結論を出さない**
 
 **Gate D** — 全指摘に行き先が付くまで Phase 6 に進まない。`UNRESOLVED` の行き先
@@ -145,6 +151,6 @@ null を返すため、`handler.go:88` の空リスト経路で nil 参照にな
 1. **裁定 (Phase 5) の前に approve しない。** 未裁定の指摘を残したまま終端に進まない
 2. **理解していない PR を approve しない**（Gate B'）
 3. モデルの指摘をそのまま PR に転記しない。必ず `model-consensus` を通す
-4. Gemini が使えない場合は「Codex 単独」と明示する。合意していないものを合意と書かない
+4. agy-review が `completed` でない場合は「Codex 単独」と明示する。合意していないものを合意と書かない
 5. 投稿（approve / comment / change request）は必ずユーザーが行う
 6. 応答は日本語（`.claude/rules/language.md`）

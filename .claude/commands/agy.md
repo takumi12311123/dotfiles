@@ -1,30 +1,37 @@
 ---
-allowed-tools: Bash(gemini:*)
-description: Perform web search using Google Gemini CLI
+allowed-tools: Bash(~/.claude/skills/agy-review/scripts/agy-exec.sh:*)
+description: Perform web search using Antigravity CLI (agy)
 argument-hint: <search-query> - what you want to search for
 ---
 
-## Web Search with Gemini
+## Web Search with agy
 
-Use Google Gemini CLI to search the web for information.
+Use Antigravity CLI (`agy`) in non-interactive mode to search the web for information.
 
 ### Usage
 
 ```bash
-gemini -p "WebSearch: {your search query here}"
+~/.claude/skills/agy-review/scripts/agy-exec.sh --timeout 180s \
+  --prompt "Use web search. {your search query here}. Cite the source URLs you relied on."
 ```
+
+The script runs agy in an empty temp directory (it has no local files to read) and prints one
+line of JSON: `{"status": ..., "detail": ..., "result": ...}`.
+
+- `status: "completed"` → `result` is the answer
+- anything else (`timeout` / `quota` / `error`) → the search did not run to completion.
+  Report the status and `detail` instead of answering from memory
 
 ### Examples
 
 ```bash
 # Search for technical documentation
-gemini -p "WebSearch: React hooks best practices 2024"
+~/.claude/skills/agy-review/scripts/agy-exec.sh --timeout 180s \
+  --prompt "Use web search. React hooks best practices. Cite the source URLs you relied on."
 
 # Search for error solutions
-gemini -p "WebSearch: TypeError cannot read property of undefined JavaScript"
-
-# Search for library information
-gemini -p "WebSearch: Next.js 14 new features"
+~/.claude/skills/agy-review/scripts/agy-exec.sh --timeout 180s \
+  --prompt "Use web search. TypeError cannot read property of undefined JavaScript. Cite the source URLs you relied on."
 ```
 
 ### Your Task

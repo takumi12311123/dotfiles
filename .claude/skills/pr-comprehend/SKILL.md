@@ -16,7 +16,7 @@ metadata:
 
 **「AI が書いた PR を、人間はどこまで読むべきか」問題への回答。**
 
-品質チェック (codex-review / gemini-review) は「何を直すべきか」に答えるが、
+品質チェック (codex-review / agy-review) は「何を直すべきか」に答えるが、
 それだけでは「この PR が何をやろうとしているのか」「どこに影響するのか」
 「AI が変な方向に走っていないか」は把握できない。
 
@@ -89,8 +89,8 @@ mkdir -p .claude/pr-review
 └────────────────────────────────────────────┘
                     ↓
 ┌────────────────────────────────────────────┐
-│  Step 3: Delegate summarization to Gemini  │
-│    Large diff (>500 lines) → Gemini        │
+│  Step 3: Delegate summarization to agy     │
+│    Large diff (>500 lines) → agy           │
 │    Small diff              → Claude inline │
 └────────────────────────────────────────────┘
                     ↓
@@ -103,7 +103,7 @@ mkdir -p .claude/pr-review
                     ↓
 ┌────────────────────────────────────────────┐
 │  Step 5: Synthesize & save report          │
-│    → Merge Gemini summary + Codex risks    │
+│    → Merge agy summary + Codex risks       │
 │    → Write .claude/pr-review/<name>.md     │
 └────────────────────────────────────────────┘
                     ↓
@@ -123,7 +123,7 @@ mkdir -p .claude/pr-review
 BASE=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main)
 # 変更ファイル一覧 + 統計
 git diff --stat "$BASE"..HEAD
-# 差分本体 (context 保護のため full diff は Gemini に投げる用)
+# 差分本体 (context 保護のため full diff は agy に投げる用)
 git diff "$BASE"..HEAD > /tmp/pr-comprehend-diff.$$.patch
 # ブランチ名 (ファイル名 slug 用)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -142,13 +142,13 @@ gh pr diff "$PR_NUM" > /tmp/pr-comprehend-diff.$$.patch
 
 呼び出し元 (`--trigger` フラグ) で digest の重さを決める:
 
-| `--trigger` | 挙動 | Codex/Gemini 呼び出し |
+| `--trigger` | 挙動 | Codex/agy 呼び出し |
 |---|---|---|
 | `commit` | **light digest** — Claude 内部で diff 要約のみ | なし |
-| `pr` | **full digest** — Gemini 要約 + Codex リスク検出 | あり |
+| `pr` | **full digest** — agy 要約 + Codex リスク検出 | あり |
 | `manual` (default) | **full digest** | あり |
 
-理由: commit ごとに Codex/Gemini を叩くとトークン消費が大きすぎる。
+理由: commit ごとに Codex/agy を叩くとトークン消費が大きすぎる。
 commit 時は「今何が変わったか」の軽い記録として保存し、PR 作成時にフル分析する。
 
 ### Light digest の内容
@@ -160,26 +160,36 @@ commit 時は「今何が変わったか」の軽い記録として保存し、P
 ### Full digest の内容
 
 - 全 6 セクション
-- Gemini に summarization を委譲、Codex に AI-specific risk 検出を委譲
+- agy に summarization を委譲、Codex に AI-specific risk 検出を委譲
 
-## Step 3: Delegate Summarization to Gemini
+## Step 3: Delegate Summarization to agy
 
-**Context 保護のため、生 diff は Claude が読まない** (`.claude/rules/gemini-delegation.md` 準拠)。
+**Context 保護のため、生 diff は Claude が読まない** (`.claude/rules/agy-delegation.md` 準拠)。
 
-diff サイズが 500 行超なら Gemini に投げる:
+diff サイズが 500 行超なら agy に投げる。diff はプロンプトに連結せず、スクリプトがファイルとして
+agy に読ませる（長い引数は末尾が黙って切り捨てられる。秘匿パスのパッチは除かれる）:
 
 ```bash
 DIFF_LINES=$(wc -l < /tmp/pr-comprehend-diff.$$.patch)
-if [ "$DIFF_LINES" -gt 500 ]; then
-  gemini -p "$(cat prompts/gemini-summary.md) $(cat /tmp/pr-comprehend-diff.$$.patch)" \
-    > /tmp/pr-comprehend-gemini.$$.md
-else
-  # 小さければ Claude が直接要約
-  cat /tmp/pr-comprehend-diff.$$.patch  # → 内部で要約
-fi
 ```
 
-Gemini prompt (`prompts/gemini-summary.md`):
+500 行超のとき（1 コマンド）:
+
+```bash
+~/.claude/skills/agy-review/scripts/agy-review.sh --no-schema --diff-name pr.diff \
+  --diff-file /tmp/pr-comprehend-diff.$$.patch \
+  --prompt-file ~/.claude/skills/pr-comprehend/prompts/agy-summary.md
+```
+
+出力は封筒 1 行 `{"status": ..., "detail": ..., "result": ...}`。
+
+- `status: "completed"` → `result` が要約の Markdown。Step 5 でそのまま使う
+- それ以外（`skipped` / `timeout` / `quota` / `error`）→「agy 要約なし（<status>: <detail>）」と報告し、
+  Claude が diff を直接読んで要約する
+
+500 行以下なら Claude が直接要約する。
+
+agy prompt (`prompts/agy-summary.md`):
 
 ```
 以下の git diff を読んで、日本語で以下を出力してください:
@@ -252,7 +262,7 @@ Codex prompt (`prompts/codex-ai-risk.md`) は AI 特有パターンに特化:
 
 ## Step 5: Synthesize & Save Report
 
-Gemini の仕様サマリ + Codex の AI-risk 結果を統合し、レポートを保存:
+agy の仕様サマリ + Codex の AI-risk 結果を統合し、レポートを保存:
 
 ```bash
 # ファイル名決定
@@ -282,7 +292,7 @@ esac
 
 ## 1. 仕様サマリ (What changed)
 
-<Gemini or Claude が生成した振る舞いレベルの要約>
+<agy or Claude が生成した振る舞いレベルの要約>
 
 ### API / UI / DB / 設定 の変更
 - [API] `POST /foo` を追加 (認証必須)
@@ -413,20 +423,20 @@ Light digest の場合は Section 3-6 を **「full digest 時に生成」** の
 `quality-gate` の Step 4.7 で自動発火。詳細は `quality-gate/SKILL.md` を参照。
 
 - Trigger `commit`: light digest (Claude 内部要約のみ)
-- Trigger `pr`: full digest (Gemini + Codex 使用)
+- Trigger `pr`: full digest (agy + Codex 使用)
 
 ## Error Handling
 
 | エラー | 対応 |
 |---|---|
 | `gh` CLI 未インストール (reviewer mode) | エラー表示、reviewer mode は使用不可 |
-| Gemini 未インストール | Claude で summarization にフォールバック |
+| agy が使えない（未導入・未サインイン・タイムアウト等） | Claude で summarization にフォールバック |
 | Codex 失敗 | Section 4 (AI特有リスク) を「スキャン失敗」として記録し継続 |
 | diff が空 | 何もせず終了 |
 
 ## Important
 
-- **Context 保護**: 大 diff の生読みは Claude ではなく Gemini に委譲する
+- **Context 保護**: 大 diff の生読みは Claude ではなく agy に委譲する
 - **コミット防止**: 初回実行時に `.git/info/exclude` へ登録
 - **light/full の使い分け**: commit ごとに full digest を回さない (トークン浪費)
 - **--comment は必ず確認**: 自動投稿禁止

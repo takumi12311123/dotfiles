@@ -48,7 +48,7 @@ Author mode では、Codex ai-risk scan に以下を追加で問う:
 
 ## Weight rules
 
-- `--trigger=commit` → light digest (Claude 内部要約のみ、Codex/Gemini 不使用)
+- `--trigger=commit` → light digest (Claude 内部要約のみ、Codex/agy 不使用)
   - 目的: commit ごとの軽い記録。トークン消費を抑える
 - `--trigger=pr` → full digest
   - 目的: PR 作成前の網羅的振り返り。時間もトークンも使う
