@@ -1,0 +1,1 @@
+{"conversation_id": "00000000-0000-0000-0000-000000000000", "status": "SUCCESS", "response": "", "duration_seconds": 22.424778, "num_turns": 1, "usage": {"input_tokens": 98991, "output_tokens": 2643, "thinking_tokens": 2403, "cache_read_tokens": 8180, "total_tokens": 101634}, "denied_actions": [{"action": "command", "display_name": "RunCommand"}]}
