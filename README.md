@@ -136,7 +136,7 @@ chmod 600 ~/.zsh/secrets.zsh
 | [RTK](https://github.com/rtk-ai/rtk) | Claude Codeトークン最適化プロキシ |
 | [difit](https://github.com/nicolo-ribaudo/difit) | Web UIのGit diffビューア（AIプロンプト生成） |
 | [agent-browser](https://github.com/anthropics/agent-browser) | ヘッドレスブラウザ自動化 |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Google Gemini CLI |
+| [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | Gemini モデルを使う Google の CLI（`agy`） |
 
 ## 開発ワークフロー
 
