@@ -433,7 +433,7 @@ done | sort -u
 | `mergeStateStatus: BEHIND` | ⚠️ 記録して続行可。ベース更新後に再確認が要ることを伝える |
 | `mergeable: UNKNOWN` | GitHub が計算中。数秒おいて再取得。取れなければ **未実施** と明記 |
 
-`codex-review` / `gemini-review` の結果は Gate C ではなく **Phase 5 の裁定材料**。
+`codex-review` / `agy-review` の結果は Gate C ではなく **Phase 5 の裁定材料**。
 モデルの指摘だけで Gate C を満たしたことにしない。
 
 ## Gate D: 裁定完了（approve / change request の条件）
@@ -487,5 +487,5 @@ done | sort -u
 | レビュー 2 | `pr-comprehend <PR番号>` |
 | レビュー 3 | `gh pr checks` / ローカル実行 |
 | レビュー 4 | `explain-impl <PR番号>`（`eli5` / `user-scenario` / `grill-me` を随時） |
-| レビュー 5 | `codex-review` + `gemini-review` → `model-consensus`（Gate D） |
+| レビュー 5 | `codex-review` + `agy-review` → `model-consensus`（Gate D） |
 | レビュー 6 | `prr`（approve / comment / change request、投稿はユーザー） |

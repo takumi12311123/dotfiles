@@ -94,14 +94,13 @@ else
     tmux split-window -h -t "$SESSION_NAME:0" "echo 'Cursor Agent not found. You can install it or use another AI tool.'; exec zsh"
 fi
 
-# Split the second pane vertically and run gemini in the third pane (if available)
-if command -v gemini &> /dev/null; then
-    GEMINI_PATH=$(command -v gemini)
-    # Escape prompt for gemini (double quotes with escaped inner quotes)
-    GEMINI_PROMPT=$(echo "$FULL_PROMPT" | sed 's/"/\\"/g')
-    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini AI Review:'; echo ''; env -u ASDF_DIR -u ASDF_DATA_DIR ${GEMINI_PATH} --sandbox --approval-mode yolo -p \"${GEMINI_PROMPT}\"; exec zsh"
+# Split the second pane vertically and run agy in the third pane (if available).
+# Headless agy cannot run gh, so the helper fetches the PR and hands agy the files.
+# (qq) quotes each value for the shell tmux starts: REPO comes from a user-supplied URL.
+if command -v agy &> /dev/null; then
+    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'agy Review:'; echo ''; ${(qq)HOME}/.script/review-pr-agy.sh ${(qq)PR_NUMBER} ${(qq)REPO} ${(qq)PROMPT_FILE}; exec zsh"
 else
-    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'Gemini not found. You can install it or use another AI tool.'; exec zsh"
+    tmux split-window -v -t "$SESSION_NAME:0.1" "echo 'agy not found. You can install it or use another AI tool.'; exec zsh"
 fi
 
 # Select the layout to make panes equal size

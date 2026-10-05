@@ -1,14 +1,14 @@
 ---
 name: model-consensus
 description: |
-  複数モデル (Codex / Gemini / Claude) の指摘を突き合わせ、合意・不一致を判定して
+  複数モデル (Codex / agy / Claude) の指摘を突き合わせ、合意・不一致を判定して
   「PR に出してよい指摘」だけを残す skill。不一致は多数決ではなく、Claude が実コードを読んで
   根拠の強さで裁定する。レビューで change request / comment を出す前に使う。
-  「裏取りして」「codex と gemini で確認して」「この指摘は本物か」のときにも使う。
+  「裏取りして」「codex と agy で確認して」「この指摘は本物か」のときにも使う。
 metadata:
   auto-trigger: false
   invoked-by: [review-flow, user]
-  companions: [codex-review, gemini-review, prr]
+  companions: [codex-review, agy-review, prr]
 ---
 
 # Model Consensus
@@ -28,7 +28,7 @@ metadata:
 ## Process
 
 ```
-Step 1: 収集   → codex-review / gemini-review を並列実行し、指摘を構造化
+Step 1: 収集   → codex-review / agy-review を並列実行し、指摘を構造化
 Step 2: 突合   → file + 行域 + 論点で同一指摘をマッチング
 Step 3: 分類   → AGREED / 不一致
 Step 4: 裁定   → 不一致は Claude が実コードを読んで判定 (多数決にしない)
@@ -38,11 +38,11 @@ Step 5: 出力   → prr 用の下書きに落とす
 ## Step 1: 収集
 
 ```
-Agent/Bash で codex-review と gemini-review を並列実行（quality-gate と同じ要領）
+Agent/Bash で codex-review と agy-review を並列実行（quality-gate と同じ要領）
 ```
 
 - 対象が他人の PR の場合は `gh pr diff <番号>` を渡す
-- Gemini が使えない場合（CLI 未認証等）は **Codex 単独と明示**し、
+- agy-review の封筒が `status: "completed"` でない場合（未サインイン・タイムアウト・利用枠切れ・全ファイル除外など）は **Codex 単独と明示**し、
   合意判定ができないことを報告する（勝手に「合意」にしない）
 
 各指摘を次の形に正規化する:
@@ -97,22 +97,22 @@ Agent/Bash で codex-review と gemini-review を並列実行（quality-gate と
 ```markdown
 ## Model Consensus 結果
 
-対象: PR #123 (codex ✅ / gemini ✅)
+対象: PR #123 (codex ✅ / agy ✅)
 
 ### AGREED (change request 候補) — 2 件
-1. `src/a.go:42` nil 参照 — codex/gemini 一致
+1. `src/a.go:42` nil 参照 — codex/agy 一致
    - 再現: `handler.go:88` が空リストで呼ぶ
    - 提案: `if x == nil { return ErrNotFound }`
 
 ### ADJUDICATED — 3 件
 | 指摘 | 出所 | 裁定 | 根拠 |
 |------|------|------|------|
-| ループ内 N+1 クエリ | gemini のみ | real | `repo.go:120` がループ内で発行、呼び出しは 1 件/行 |
+| ループ内 N+1 クエリ | agy のみ | real | `repo.go:120` がループ内で発行、呼び出しは 1 件/行 |
 | context 未伝播 | codex のみ | false | `client.go:33` で既に伝播済み |
 
 ### UNRESOLVED (ユーザー判断) — 1 件
 - `src/b.go:10` エラー時に握り潰すかログして継続するか
-  - codex: 握り潰しは NG / gemini: 現状の運用なら妥当
+  - codex: 握り潰しは NG / agy: 現状の運用なら妥当
   - **判断材料**: この経路はバッチ実行のみ (`cmd/batch.go:44`)。止めるべきかは運用方針次第
 
 ### prr 下書き
@@ -142,5 +142,5 @@ Agent/Bash で codex-review と gemini-review を並列実行（quality-gate と
 | 根拠なしで「real」と判定する | 幻覚をレビュイーに投げる |
 | UNRESOLVED を無理に結論づける | 仕様判断はユーザーの領分 |
 | UNRESOLVED を未処理のまま終端に進む | approve 禁止条件の迂回 (Gate D) |
-| Gemini 不在時に「合意」と書く | 合意していない |
+| agy 不在時に「合意」と書く | 合意していない |
 | 自動で PR に投稿する | レビューはユーザーが主導する |

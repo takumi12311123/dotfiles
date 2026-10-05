@@ -135,7 +135,7 @@ grep -E '(:[0-9]+:[[:space:]]*|[[:space:]])(//|#|--|/\*|\*/|<!--)' "$OUT"
 ### 1-2. 禁止パターンの機械検出
 
 ```bash
-EPHEMERAL_RE='(as (requested|discussed|mentioned|per)|per (your|the user|review|feedback|codex|gemini)|you (asked|requested|wanted)|we (changed|added|discussed|decided|now)|this (pr|change|commit|fix|diff)|now (returns|uses|handles)|changed (to|from)|updated to|modified to|switched to|replaced with|renamed to|previously|used to|no longer|todo\(claude\)|対応(しました|した)?|反映|指摘|今回|先ほど|さっき|一旦|とりあえず|修正しました|変更しました|追加しました|レビュー(で|の指摘)|要望|依頼)'
+EPHEMERAL_RE='(as (requested|discussed|mentioned|per)|per (your|the user|review|feedback|codex|gemini|agy)|you (asked|requested|wanted)|we (changed|added|discussed|decided|now)|this (pr|change|commit|fix|diff)|now (returns|uses|handles)|changed (to|from)|updated to|modified to|switched to|replaced with|renamed to|previously|used to|no longer|todo\(claude\)|対応(しました|した)?|反映|指摘|今回|先ほど|さっき|一旦|とりあえず|修正しました|変更しました|追加しました|レビュー(で|の指摘)|要望|依頼)'
 
 grep -iE "$EPHEMERAL_RE" <収集したコメント行>
 ```

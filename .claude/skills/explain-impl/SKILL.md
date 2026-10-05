@@ -48,8 +48,8 @@ BASE=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main)
 git diff "$BASE"..HEAD
 ```
 
-対象が 500 行を超える diff の場合は Gemini に要約を委譲してから読む
-(`.claude/rules/gemini-delegation.md`)。
+対象が 500 行を超える diff の場合は agy に要約を委譲してから読む
+(`.claude/rules/agy-delegation.md`)。
 
 ## Execution Flow
 

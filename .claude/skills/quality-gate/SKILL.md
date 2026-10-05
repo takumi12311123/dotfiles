@@ -51,7 +51,7 @@ Ensure code quality through automated checks before any user-facing action.
 └─────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────┐
-│  3. Run codex-review + gemini-review IN PARALLEL    │
+│  3. Run codex-review + agy-review IN PARALLEL       │
 │     → Launch both as background tasks               │
 │     → Inject necessity-audit prompts                │
 │     → Wait for both to complete                     │
@@ -62,14 +62,14 @@ Ensure code quality through automated checks before any user-facing action.
 │  4. Merge & Evaluate Review Results                 │
 │     → Both agree ok: proceed                        │
 │     → Codex blocking: must fix                      │
-│     → Gemini-only blocking: present as advisory+    │
+│     → agy-only blocking: present as advisory+       │
 │     → Contradictions: flag to user                  │
 └─────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────┐
 │  4.7. PR Spec Digest (via pr-comprehend)            │
 │     → commit trigger: light digest (Claude only)    │
-│     → PR trigger:     full digest (Gemini + Codex)  │
+│     → PR trigger:     full digest (agy + Codex)     │
 │     → Report → .claude/pr-review/ (git-excluded)    │
 └─────────────────────────────────────────────────────┘
                         ↓
@@ -313,7 +313,7 @@ No spec on this branch → skip this comparison; the reuse scan above still runs
 
 ### What to inject into the review prompt
 
-When dispatching to `codex-review` / `gemini-review` in Step 3, the prompt MUST include:
+When dispatching to `codex-review` / `agy-review` in Step 3, the prompt MUST include:
 
 ```
 ## Necessity audit (mandatory)
@@ -392,7 +392,7 @@ S4 PR title — the skill's Scope table is authoritative):
 - A surface the skill could not audit (e.g. `gh` unreachable) is reported as 未実施 — **not** a pass.
 - Skip only when there are no added comment lines and no PR surfaces in play.
 
-## Step 3: Run codex-review + gemini-review IN PARALLEL
+## Step 3: Run codex-review + agy-review IN PARALLEL
 
 **When triggered from ExitPlanMode (plan review):**
 - Step 1 already ran Plan Review via codex-review
@@ -401,21 +401,18 @@ S4 PR title — the skill's Scope table is authoritative):
 
 **When triggered from commit/PR/user confirmation (code review):**
 
-### Security: Gemini Review is Opt-In
+### Security: what agy-review sends
 
-Gemini review sends diffs to Google's API. It is only active when:
-1. `gemini` CLI is installed and authenticated
-2. `gemini` CLI command is available in PATH
+agy-review sends the diff and a copy of the working tree to Google through Antigravity CLI (`agy`).
+It is only active when `agy` is installed and signed in.
 
-Gemini review is **automatically available** when the CLI is installed.
-To **disable** Gemini review, uninstall or remove `gemini` from PATH.
+**Sensitive content protection**: agy-review leaves out paths by name
+(`.env`, `*.key`, `*.pem`, `*credentials*`, `*secret*`, `*.tfvars`, `*.tfstate`), plus symlinks and submodules.
+Secrets embedded in regular source files are NOT filtered.
+For repositories with embedded secrets, do not install `agy` (or sign out of it).
 
-**Sensitive content protection**: gemini-review applies filename-based filtering
-(`.env`, `*.key`, `*.pem`, `*credentials*`, `*secret*`, `*.tfvars`, `*.tfstate`).
-However, secrets embedded in regular source files are NOT filtered.
-For repositories with embedded secrets, ensure Gemini CLI is not installed.
-
-If `gemini` CLI is not available, quality-gate proceeds with Codex-only review.
+If agy-review does not return `status: "completed"`, quality-gate proceeds with Codex-only review
+and says so explicitly.
 
 ### Parallel Execution
 
@@ -424,7 +421,7 @@ Launch both reviews simultaneously using background Subagents:
 ```
 ┌──────────────────┐     ┌──────────────────┐
 │  Subagent 1:     │     │  Subagent 2:     │
-│  codex-review    │     │  gemini-review   │
+│  codex-review    │     │  agy-review      │
 │  (primary)       │     │  (secondary)     │
 └──────────────────┘     └──────────────────┘
          │                        │
@@ -437,74 +434,79 @@ Launch both reviews simultaneously using background Subagents:
 
 **Implementation:**
 - Launch `codex-review` as background Agent task
-- Launch `gemini-review` as background Agent task
-- Wait for both to complete (Gemini timeout: 5min, Codex timeout: 20min)
-- If Gemini times out, proceed with Codex result only
+- Launch `agy-review` as background Agent task
+- Wait for both to complete (agy timeout: 5min, Codex timeout: 20min)
+- agy-review prints an envelope `{"status", "detail", "result"}`. Pass `status` as `agy_status` and
+  `result` as `agy_result` to the merge below
+- Only `agy_status == "completed"` carries a review. `skipped` means every changed file was excluded
+  as sensitive; `timeout` / `quota` / `error` mean agy did not review. In all three non-completed
+  cases proceed with the Codex result only and state the status and `detail` in the output —
+  never report them as "agy found no issues"
 
 ### Step 4: Merge & Evaluate Results
 
-Codex and Gemini results are **kept independently** — do not modify the existing review-schema.json.
+Codex and agy results are **kept independently** — do not modify the existing review-schema.json.
 Merge metadata is returned as a **separate object** (does not pollute review-schema.json).
 
 ```python
-def merge_reviews(codex_result, gemini_result, gemini_status):
+def merge_reviews(codex_result, agy_result, agy_status):
     """
     Codex = primary reviewer (blocking authority)
-    Gemini = secondary reviewer (additional perspective)
+    agy = secondary reviewer (additional perspective)
 
     Args:
         codex_result: dict - codex-review result (review-schema.json)
-        gemini_result: dict or None - gemini-review result
-        gemini_status: str - "completed" | "timeout" | "error"
+        agy_result: dict or None - envelope result of agy-review (None unless completed)
+        agy_status: str - envelope status: "completed" | "skipped" | "timeout" | "quota" | "error"
 
     Returns:
         dict with keys:
           - "codex": codex_result (untouched, schema-valid)
-          - "gemini": gemini_result or None (untouched)
+          - "agy": agy_result or None (untouched)
           - "merge_meta": cross-check metadata (separate structure)
     """
 
     merge_meta = {
-        "gemini_status": gemini_status,
+        "agy_status": agy_status,
         "cross_verified_files": [],
-        "gemini_only_issues": [],
+        "agy_only_issues": [],
     }
 
-    if gemini_status == "completed" and gemini_result and isinstance(gemini_result, dict):
-        gemini_issues = gemini_result.get("issues", [])
-        if isinstance(gemini_issues, list):
-            for g_issue in gemini_issues:
-                if not isinstance(g_issue, dict):
+    if agy_status == "completed" and agy_result and isinstance(agy_result, dict):
+        agy_issues = agy_result.get("issues", [])
+        if isinstance(agy_issues, list):
+            for a_issue in agy_issues:
+                if not isinstance(a_issue, dict):
                     continue
                 # Match on file + lines + category for stronger identity
                 matched_codex = None
                 for c in codex_result.get("issues", []):
-                    if (c.get("file") == g_issue.get("file") and
-                        c.get("lines") == g_issue.get("lines") and
-                        c.get("category") == g_issue.get("category")):
+                    if (c.get("file") == a_issue.get("file") and
+                        c.get("lines") == a_issue.get("lines") and
+                        c.get("category") == a_issue.get("category")):
                         matched_codex = c
                         break
 
                 if matched_codex:
                     merge_meta["cross_verified_files"].append({
-                        "file": g_issue.get("file"),
-                        "lines": g_issue.get("lines"),
-                        "category": g_issue.get("category"),
+                        "file": a_issue.get("file"),
+                        "lines": a_issue.get("lines"),
+                        "category": a_issue.get("category"),
                     })
                 else:
-                    merge_meta["gemini_only_issues"].append({
-                        "severity": g_issue.get("severity", "advisory"),
-                        "category": g_issue.get("category", ""),
-                        "file": g_issue.get("file", ""),
-                        "lines": g_issue.get("lines", ""),
-                        "problem": g_issue.get("problem", ""),
-                        "recommendation": g_issue.get("recommendation", ""),
+                    merge_meta["agy_only_issues"].append({
+                        "severity": a_issue.get("severity", "advisory"),
+                        "category": a_issue.get("category", ""),
+                        "file": a_issue.get("file", ""),
+                        "lines": a_issue.get("lines", ""),
+                        "problem": a_issue.get("problem", ""),
+                        "recommendation": a_issue.get("recommendation", ""),
                     })
 
     # Return as separate objects — codex_result is never modified
     return {
         "codex": codex_result,
-        "gemini": gemini_result,
+        "agy": agy_result,
         "merge_meta": merge_meta,
     }
 ```
@@ -521,21 +523,21 @@ def merge_reviews(codex_result, gemini_result, gemini_status):
 - **Iterations**: N/5
 - **Issues**: blocking: N, advisory: M
 
-### Gemini Review
-- **Status**: ok / issues found / timeout
+### agy Review
+- **Status**: ok / issues found / skipped / timeout / quota / error (with the envelope `detail`)
 - **Issues**: blocking: N, advisory: M
 
 ### Cross-check
 - **Agreed issues** (high confidence):
   - `file.py:42` - [Problem] (category/severity) cross-verified
-- **Gemini-only issues** (reference):
-  - `file.py:88` - [Problem] (category/advisory) gemini-only
+- **agy-only issues** (reference):
+  - `file.py:88` - [Problem] (category/advisory) agy-only
 ```
 
 ### Iteration Behavior
 
 - **Codex blocking issues**: Claude Code fixes → re-run both reviews
-- **Gemini-only blocking**: Presented as elevated advisory, does NOT trigger fix iteration
+- **agy-only blocking**: Presented as elevated advisory, does NOT trigger fix iteration
 - **Both agree blocking**: Highest priority fix
 - Max 5 iterations (same as before)
 
@@ -556,11 +558,11 @@ quality-gate は呼び出しコンテキストに応じて digest の重さを�
 | quality-gate の起点 | pr-comprehend trigger | digest weight |
 |---|---|---|
 | commit 直前 | `commit` | light (Claude 内部要約のみ) |
-| PR 作成/更新 直前 | `pr` | full (Gemini 要約 + Codex AI-risk scan) |
+| PR 作成/更新 直前 | `pr` | full (agy 要約 + Codex AI-risk scan) |
 | ExitPlanMode | — | 実行しない (まだコードが無い) |
 | user confirmation | 通常 skip | full を明示要求された場合のみ |
 
-**Rationale**: commit ごとに Gemini/Codex を叩くとトークン浪費が大きい。commit 時は軽い記録のみ、
+**Rationale**: commit ごとに agy/Codex を叩くとトークン浪費が大きい。commit 時は軽い記録のみ、
 PR 時にフル分析する。ただし「commit も PR も自動発火」というユーザー要求は満たす。
 
 ### 実行手順
@@ -667,7 +669,7 @@ surfaces is exactly the class that lint/type/unit cannot catch.
   This is BLOCKING. Judgment rules live in `.claude/rules/comment-policy.md`, not here
 - ALWAYS launch both reviews in parallel
 - ALWAYS wait for at least Codex to complete
-- Gemini failure is non-blocking (proceed with Codex only)
+- agy failure is non-blocking (proceed with Codex only)
 - Fix ALL Codex blocking issues before proceeding
 - ALWAYS run Step 4.7 (PR spec digest) — light for commit, full for PR. Non-blocking on failure
 - ALWAYS run Step 5 (behavior verification) before declaring done — and if you cannot,

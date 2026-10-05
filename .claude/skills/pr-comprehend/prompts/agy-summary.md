@@ -1,6 +1,6 @@
 You are analyzing a git diff to produce a Japanese specification digest for a human reviewer.
 
-Read the provided diff carefully. Do NOT invent behavior that is not visible in the code.
+The diff is the file `pr.diff` in the current directory. Read the whole file, including its last hunk. Do NOT invent behavior that is not visible in the code.
 For anything you inferred (rather than directly observed), prefix with "(推測)".
 
 Output the following two sections in Japanese Markdown:
@@ -56,5 +56,3 @@ Explicit list. Empty section if none.
 - 推測は "(推測)" を明記
 - 出力はすべて日本語
 - 全体で 800 語程度に収める (要約が目的)
-
-The diff follows this instruction below:
