@@ -16,7 +16,7 @@ PROMPT_FILE=""
 PROMPT_TEXT=""
 SCHEMA=""
 TIMEOUT="300s"
-MODEL="gemini-3.1-pro-high"
+MODEL="gemini-3.8-flash-high"
 
 fail() { python3 "$SCRIPT_DIR/agy-parse.py" --emit error --detail "$1"; exit 0; }
 
