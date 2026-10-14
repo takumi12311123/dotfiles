@@ -1,0 +1,4 @@
+[
+  {"id": 5001, "user": {"login": "chatgpt-codex-connector[bot]"}, "body": "Codex Review: Here are some automated review suggestions for this pull request.", "state": "COMMENTED", "submitted_at": "2026-10-14T01:00:00Z", "html_url": "https://github.com/acme/widgets/pull/42#pullrequestreview-5001"},
+  {"id": 5002, "user": {"login": "bob"}, "body": "", "state": "APPROVED", "submitted_at": "2026-10-14T04:00:00Z", "html_url": "https://github.com/acme/widgets/pull/42#pullrequestreview-5002"}
+]

@@ -1,0 +1,8 @@
+{
+  "number": 42,
+  "state": "MERGED",
+  "url": "https://github.com/acme/widgets/pull/42",
+  "headRefOid": "abc123abc123abc123abc123abc123abc123abc1",
+  "reviewDecision": "APPROVED",
+  "statusCheckRollup": []
+}

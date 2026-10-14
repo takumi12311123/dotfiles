@@ -1,0 +1,11 @@
+{
+  "number": 42,
+  "state": "OPEN",
+  "url": "https://github.com/acme/widgets/pull/42",
+  "headRefOid": "abc123abc123abc123abc123abc123abc123abc1",
+  "reviewDecision": "APPROVED",
+  "statusCheckRollup": [
+    {"__typename": "CheckRun", "name": "ShellCheck", "status": "COMPLETED", "conclusion": "SUCCESS", "detailsUrl": "https://ci/1", "workflowName": "ShellCheck"},
+    {"__typename": "CheckRun", "name": "docs", "status": "COMPLETED", "conclusion": "SKIPPED", "detailsUrl": "https://ci/4", "workflowName": "Docs"}
+  ]
+}

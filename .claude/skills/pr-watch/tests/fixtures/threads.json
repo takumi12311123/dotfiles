@@ -1,0 +1,44 @@
+{
+  "data": {
+    "viewer": {"login": "takumi"},
+    "repository": {
+      "pullRequest": {
+        "reviewThreads": {
+          "pageInfo": {"hasNextPage": false, "endCursor": null},
+          "nodes": [
+            {
+              "id": "PRRT_bot1",
+              "isResolved": false,
+              "comments": {"nodes": [
+                {"databaseId": 101, "author": {"login": "chatgpt-codex-connector"}, "body": "P1 Badge: nil deref when list is empty", "path": "a.py", "line": 3, "createdAt": "2026-10-14T01:00:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r101"}
+              ]}
+            },
+            {
+              "id": "PRRT_bot2",
+              "isResolved": false,
+              "comments": {"nodes": [
+                {"databaseId": 102, "author": {"login": "chatgpt-codex-connector"}, "body": "P2: missing timeout", "path": "b.py", "line": 10, "createdAt": "2026-10-14T01:05:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r102"},
+                {"databaseId": 103, "author": {"login": "takumi"}, "body": "Fixed in deadbeef", "path": "b.py", "line": 10, "createdAt": "2026-10-14T02:00:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r103"},
+                {"databaseId": 104, "author": {"login": "chatgpt-codex-connector"}, "body": "Still fails when timeout is 0", "path": "b.py", "line": 10, "createdAt": "2026-10-14T02:30:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r104"}
+              ]}
+            },
+            {
+              "id": "PRRT_resolved",
+              "isResolved": true,
+              "comments": {"nodes": [
+                {"databaseId": 105, "author": {"login": "chatgpt-codex-connector"}, "body": "P3: nit", "path": "c.py", "line": 1, "createdAt": "2026-10-13T01:00:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r105"}
+              ]}
+            },
+            {
+              "id": "PRRT_human",
+              "isResolved": false,
+              "comments": {"nodes": [
+                {"databaseId": 106, "author": {"login": "alice"}, "body": "Why not reuse WithRetry here?", "path": "a.py", "line": 20, "createdAt": "2026-10-14T03:00:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r106"}
+              ]}
+            }
+          ]
+        }
+      }
+    }
+  }
+}
