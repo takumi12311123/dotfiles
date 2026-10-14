@@ -154,6 +154,12 @@ title も永続面。`git log` のマージコミットと PR 一覧に残り、
 **ユーザーの確認を取ってから** 投稿してよい。ただし内容は実況禁止のルールに従う
 （NG:「レビュー指摘を反映しました」/ OK:「listAll() の null を扱うよう修正。影響: 認証経路のみ」）。
 
+例外（`/pr-watch` の自動返信）: **AI レビューボット**（著者ログインで判定）のコメントへの返信は、
+`model-consensus` の裁定が `AGREED` / `ADJUDICATED` のときに限り、ユーザー確認なしで投稿してよい。
+`UNRESOLVED` は投稿せずユーザーに渡す。人間のコメントには自動返信しない。
+文面は投稿前に `context-hygiene`（`--trigger=reply`）を通し、実況禁止・内容で書くルールに従う
+（NG:「指摘のとおり修正しました」/ OK:「`listAll()` は該当なしで `null` を返すため呼び出し側で判定を追加。修正: abc1234」）。
+
 ## 適用
 
 すべて `context-hygiene` skill が実行する（`quality-gate` / `/commit` / `/pr` / `/push` から発火、BLOCKING）。
@@ -164,6 +170,7 @@ title も永続面。`git log` のマージコミットと PR 一覧に残り、
 | commit message（草案） | commit 前 |
 | PR description / PR title（投稿前の下書き） | PR 作成・更新前 |
 | 移送先の `prr` 下書き生成 | 上記で `MOVE` 判定が出たとき |
+| 自動返信コメント（`/pr-watch` の下書き） | 投稿前 |
 
 **この policy が拾わない範囲**: 既に merge 済みの履歴、diff に現れない既存コメント、
 散文ドキュメント（Markdown / CHANGELOG）。これらは人間のレビューに委ねる。
