@@ -1,0 +1,4 @@
+{"data": {"viewer": {"login": "takumi"}, "repository": {"pullRequest": {"reviewThreads": {"pageInfo": {"hasNextPage": true, "endCursor": "CUR1"}, "nodes": [
+  {"id": "PRRT_p1", "isResolved": false, "comments": {"nodes": [
+    {"databaseId": 201, "author": {"login": "chatgpt-codex-connector"}, "body": "page one", "path": "a.py", "line": 1, "createdAt": "2026-10-14T01:00:00Z", "url": "https://github.com/acme/widgets/pull/42#discussion_r201"}]}}
+]}}}}}

@@ -1,0 +1,3 @@
+[
+  {"id": 103, "user": {"login": "takumi"}, "body": "Fixed in deadbeef.\n\n<!-- pr-watch:reply-to:102 -->", "in_reply_to_id": 102, "path": "b.py", "html_url": "https://github.com/acme/widgets/pull/42#discussion_r103"}
+]

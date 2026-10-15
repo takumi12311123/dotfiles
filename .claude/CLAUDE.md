@@ -66,6 +66,7 @@
 | 4 | 仕様・シナリオ・実装の理解 | `user-scenario` → `explain-impl` →（既定で）`grill-me` | **Gate B**: 各項目に **ユーザー自身の説明** が残っていること |
 | 5 | PR 作成 | `/pr` | context-hygiene (BLOCKING) |
 | 6 | レビュワー向け補足 | `prr`（下書きは context-hygiene が生成） | 投稿はユーザー |
+| 7 | CI・レビュー監視 | `/pr-watch`（`error-diagnosis` / `model-consensus` / `quality-gate`） | `UNRESOLVED`・仮説止まりの CI 失敗・人間のコメントはユーザー判断 |
 
 ### レビューフロー — `/review-flow <PR番号>`
 

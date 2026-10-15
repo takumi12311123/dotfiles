@@ -1,0 +1,13 @@
+{
+  "number": 42,
+  "state": "OPEN",
+  "url": "https://github.com/acme/widgets/pull/42",
+  "headRefOid": "abc123abc123abc123abc123abc123abc123abc1",
+  "reviewDecision": "REVIEW_REQUIRED",
+  "statusCheckRollup": [
+    {"__typename": "CheckRun", "name": "ShellCheck", "status": "COMPLETED", "conclusion": "SUCCESS", "detailsUrl": "https://ci/1", "workflowName": "ShellCheck"},
+    {"__typename": "CheckRun", "name": "unit", "status": "COMPLETED", "conclusion": "FAILURE", "detailsUrl": "https://ci/2", "workflowName": "Test"},
+    {"__typename": "CheckRun", "name": "e2e", "status": "IN_PROGRESS", "conclusion": null, "detailsUrl": "https://ci/3", "workflowName": "Test"},
+    {"__typename": "StatusContext", "context": "codecov/patch", "state": "SUCCESS", "targetUrl": "https://codecov/1"}
+  ]
+}

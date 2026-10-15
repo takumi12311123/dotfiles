@@ -2,14 +2,15 @@
 name: context-hygiene
 description: |
   セッション文脈依存のテキストを検出して排除する BLOCKING gate。
-  対象は 4 面: (1) コードのインラインコメント (2) commit message (3) PR description (4) PR title。
+  対象は 5 面: (1) コードのインラインコメント (2) commit message (3) PR description (4) PR title
+  (5) /pr-watch が自動投稿する返信コメントの下書き。
   「この会話も PR も見ていない人が 1 年後に読んで通じるか」で判定し、
   永続すべきものはコードに残し、レビュー向け説明は prr の PR コメント下書きに移送する。
-  quality-gate (commit/PR 前) から自動発火。`/commit` `/pr` `/push` からも発火。
+  quality-gate (commit/PR 前) から自動発火。`/commit` `/pr` `/push` `/pr-watch` からも発火。
   判定基準の実体は .claude/rules/comment-policy.md（単一の情報源）。
 metadata:
   auto-trigger: true
-  invoked-by: [quality-gate, commit, pr, push, user]
+  invoked-by: [quality-gate, commit, pr, push, pr-watch, user]
   blocking: true
   policy: .claude/rules/comment-policy.md
 ---
@@ -38,6 +39,7 @@ AI と対話しながら書くと、会話の痕跡がコードと PR に漏れ�
 | S2 | commit message（**これから作るものを含む**） | commit 前は BLOCKING / 既存 commit は警告 |
 | S3 | PR description（**投稿前の下書きを含む**） | BLOCKING（投稿前に直す） |
 | S4 | PR title（`fix: レビュー対応` 等） | BLOCKING（投稿前に直す） |
+| S5 | `/pr-watch` が投稿する返信コメントの下書き | BLOCKING（投稿前に直す） |
 
 ### trigger 別の対象
 
@@ -47,6 +49,7 @@ AI と対話しながら書くと、会話の痕跡がコードと PR に漏れ�
 | `--trigger=pr` | ✅ 未コミット + `BASE..HEAD` | ✅ `BASE..HEAD`（警告） | ✅ **投稿前の下書き** | ✅ 下書き |
 | `--trigger=push` | ✅ 未コミット + `BASE..HEAD` | ✅（警告） | ✅ 既存 PR body | ✅ 既存 PR title |
 | `--trigger=manual` / 引数なし | ✅ | ✅（警告） | PR があれば ✅ | PR があれば ✅ |
+| `--trigger=reply --draft=<file>` | — | — | — | — （S5 の下書きだけを見る） |
 
 ### 対象外（この gate では拾わない）
 
@@ -242,6 +245,17 @@ S4（title）も同様: `fix: address review feedback` のような**会話参�
   （create 前なら下書きを書き換える。既存 PR なら `gh pr edit --title/--body`）
 - 自動投稿・自動編集はしない
 - プロジェクトの PR テンプレートがある場合は **節構成を維持したまま** 中身だけ直す
+
+## S5: 自動返信コメントの下書き（`--trigger=reply`）
+
+`/pr-watch` が AI レビューボットへ投稿する返信を、**投稿前に** 見る。対象は `--draft=<file>` の 1 ファイルだけ。
+
+- 判定は S1 と同じ `EPHEMERAL_RE`（会話参照 / レビュー参照 / セッション時制）に加え、
+  「指摘のとおり」「ご指摘」「codex が」「agy が」「先ほど」のような **裁定過程への言及** を拒否する
+- 通る文面は「何をどう変えたか + 修正 commit」または「変えない理由 + 根拠 `path:line`」で完結しているもの
+  （テンプレートは `.claude/commands/pr-watch.md`）
+- 違反があれば **下書きを書き換えて** 返す。ここでは投稿しない（投稿は `/pr-watch` の `reply` サブコマンド）
+- `MOVE` は無い。返信コメント自体がレビュー期間中の面なので、落とすか書き直すかの二択
 
 ## Output: prr 移送下書き
 

@@ -1,6 +1,6 @@
 ---
 allowed-tools: Bash(git:*), Bash(gh:*), Bash(mkdir:*), Bash(cat:*), Bash(rm:*), Bash(touch:*), Bash(printf:*), Bash(echo:*), Bash(grep:*), Bash(awk:*), Bash(sed:*), Bash(jq:*), Bash(dirname:*), Bash(ls:*), Read, Write, Edit, Skill, AskUserQuestion, Task
-description: 依頼 → 仕様合意 → TDD 実装 → 理解確認 → PR までフェーズ順に伴走する
+description: 依頼 → 仕様合意 → TDD 実装 → 理解確認 → PR → CI・レビュー監視までフェーズ順に伴走する
 argument-hint: "<チケット番号 / URL / やりたいことの説明>"
 ---
 
@@ -26,6 +26,7 @@ argument-hint: "<チケット番号 / URL / やりたいことの説明>"
 4.   理解確認     user-scenario → explain-impl → grill-me  ── Gate B で停止
 5.   PR           /pr (context-hygiene が BLOCKING)
 6.   レビュー補足  prr 下書きの提示
+7.   監視・対応    /pr-watch (CI 失敗と AI レビュー指摘に対応。UNRESOLVED / 仮説止まりで停止)
 ```
 
 **再入可能**: 既に成果物がある場合はそのフェーズを飛ばして続きから始める。
@@ -105,6 +106,19 @@ PR description の背景・スコープは **spec ファイルから引く**（�
 - 代替案と却下理由（spec の「設計判断」から引ける）
 - 次の PR で消える一時的な処置
 - AI が書いた箇所で注意して見てほしいところ
+
+## Phase 7: CI・レビュー監視
+
+```
+/pr-watch
+```
+
+PR が merge されるまでセッション内で見張る。CI red は `error-diagnosis` で原因を **確定** できたときだけ
+修正 → `quality-gate` → push。AI レビューボットの指摘は `model-consensus` で裁定し、
+本物は修正して返信、誤りは根拠つきで返信する（自動投稿の例外は `.claude/rules/comment-policy.md`）。
+
+ユーザーに戻る条件（`/pr-watch` の「停止条件」）: `UNRESOLVED` の指摘、原因が仮説止まりの CI 失敗、
+修正後の再失敗、同一スレッドで 2 往復超。人間のコメントは報告のみで、返信はユーザーが決める。
 
 ## Output (各フェーズ終了時)
 

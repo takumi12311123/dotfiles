@@ -1,0 +1,4 @@
+[
+  {"id": 7001, "user": {"login": "alice"}, "body": "Can we land this before Friday?", "created_at": "2026-10-14T03:10:00Z", "html_url": "https://github.com/acme/widgets/pull/42#issuecomment-7001"},
+  {"id": 7002, "user": {"login": "takumi"}, "body": "追加した変更: ...", "created_at": "2026-10-14T03:20:00Z", "html_url": "https://github.com/acme/widgets/pull/42#issuecomment-7002"}
+]
